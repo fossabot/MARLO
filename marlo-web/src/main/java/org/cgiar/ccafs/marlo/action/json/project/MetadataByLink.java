@@ -20,10 +20,9 @@ import org.cgiar.ccafs.marlo.config.APConstants;
 import org.cgiar.ccafs.marlo.utils.APConfig;
 import org.cgiar.ccafs.marlo.utils.ClientRepository;
 
-import java.util.Map;
-
 import com.google.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.struts2.dispatcher.HttpParameters;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -107,7 +106,7 @@ public class MetadataByLink extends BaseAction {
 
   @Override
   public void prepare() throws Exception {
-    Map<String, Object> parameters = this.getParameters();
+    HttpParameters parameters = this.getParameters();
     // If there is a parameter take its values
     try {
       id = StringUtils.trim(((String[]) parameters.get(APConstants.METADATA_REQUEST_ID))[0]);

@@ -35,6 +35,7 @@ import com.google.inject.Inject;
 import com.opensymphony.xwork2.ActionContext;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.struts2.dispatcher.HttpParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -185,7 +186,7 @@ public class ManageUsersAction extends BaseAction {
 
   @Override
   public void prepare() throws Exception {
-    Map<String, Object> parameters = this.getParameters();
+    HttpParameters parameters = this.getParameters();
     // if searching a user, we need to get the queried String.
     if (ActionContext.getContext().getName().equals("searchUsers")) {
 

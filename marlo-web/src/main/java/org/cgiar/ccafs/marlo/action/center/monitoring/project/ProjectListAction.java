@@ -39,11 +39,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.struts2.dispatcher.HttpParameters;
 
 /**
  * @author Hermes Jiménez - CIAT/CCAFS
@@ -138,7 +138,7 @@ public class ProjectListAction extends BaseAction {
 
   @Override
   public String delete() {
-    Map<String, Object> parameters = this.getParameters();
+    HttpParameters parameters = this.getParameters();
     projectID = Long.parseLong(StringUtils.trim(((String[]) parameters.get(APConstants.PROJECT_ID))[0]));
 
     CenterProject project = projectService.getCenterProjectById(projectID);

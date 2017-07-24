@@ -91,6 +91,7 @@ import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.struts2.dispatcher.HttpParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -613,7 +614,7 @@ public class ValidateProjectSectionAction extends BaseAction {
 
   @Override
   public void prepare() throws Exception {
-    Map<String, Object> parameters = this.getParameters();
+    HttpParameters parameters = this.getParameters();
     loggedCrp = (Crp) this.getSession().get(APConstants.SESSION_CRP);
     loggedCrp = crpManager.getCrpById(loggedCrp.getId());
     sectionName = StringUtils.trim(((String[]) parameters.get(APConstants.SECTION_NAME))[0]);

@@ -39,6 +39,7 @@ import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.struts2.dispatcher.HttpParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -116,7 +117,7 @@ public class ValidateSectionStatusImpactPathway extends BaseAction {
 
   @Override
   public void prepare() throws Exception {
-    Map<String, Object> parameters = this.getParameters();
+    HttpParameters parameters = this.getParameters();
     // Validating parameters.
     sectionName = StringUtils.trim(((String[]) parameters.get(APConstants.SECTION_NAME))[0]);
 

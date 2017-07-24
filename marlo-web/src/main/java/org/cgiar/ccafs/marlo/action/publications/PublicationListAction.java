@@ -35,11 +35,11 @@ import org.cgiar.ccafs.marlo.utils.APConfig;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.struts2.dispatcher.HttpParameters;
 
 public class PublicationListAction extends BaseAction {
 
@@ -133,7 +133,7 @@ public class PublicationListAction extends BaseAction {
   public String delete() {
 
 
-    Map<String, Object> parameters = this.getParameters();
+    HttpParameters parameters = this.getParameters();
     deliverableID =
       Long.parseLong(StringUtils.trim(((String[]) parameters.get(APConstants.PROJECT_DELIVERABLE_REQUEST_ID))[0]));
 

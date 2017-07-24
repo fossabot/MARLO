@@ -23,10 +23,10 @@ import org.cgiar.ccafs.marlo.utils.APConfig;
 import org.cgiar.ccafs.marlo.utils.FileManager;
 
 import java.io.File;
-import java.util.Map;
 
 import com.google.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.struts2.dispatcher.HttpParameters;
 
 /**
  * @author Hermes Jiménez - CIAT/CCAFS
@@ -120,7 +120,7 @@ public class DeliverableUploadFileAction extends BaseAction {
 
   @Override
   public void prepare() throws Exception {
-    Map<String, Object> parameters = this.getParameters();
+    HttpParameters parameters = this.getParameters();
     deliverableID =
       Long.parseLong(StringUtils.trim(((String[]) parameters.get(APConstants.PROJECT_DELIVERABLE_REQUEST_ID))[0]));
     fileType = StringUtils.trim(((String[]) parameters.get(APConstants.FILE_TYPE_REQUEST))[0]);

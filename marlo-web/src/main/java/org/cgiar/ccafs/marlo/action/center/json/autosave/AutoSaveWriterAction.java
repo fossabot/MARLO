@@ -185,7 +185,7 @@ public class AutoSaveWriterAction extends BaseAction {
   @Override
   public void prepare() throws Exception {
 
-    Map<String, Object> parameters = this.getParameters();
+    HttpParameters = this.getParameters();
     autoSave = (String[]) parameters.get(APConstants.AUTOSAVE_REQUEST);
   }
 

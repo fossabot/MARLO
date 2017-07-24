@@ -49,7 +49,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -57,6 +56,7 @@ import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.struts2.dispatcher.HttpParameters;
 import org.pentaho.reporting.engine.classic.core.Band;
 import org.pentaho.reporting.engine.classic.core.ClassicEngineBoot;
 import org.pentaho.reporting.engine.classic.core.CompoundDataFactory;
@@ -850,8 +850,8 @@ public class SearchTermsSummaryAction extends BaseAction implements Summary {
     // Get parameters from URL
     // Get year
     try {
-      Map<String, Object> parameters = this.getParameters();
-      year = Integer.parseInt((StringUtils.trim(((String[]) parameters.get(APConstants.YEAR_REQUEST))[0])));
+      HttpParameters parameters = this.getParameters();
+      year = Integer.parseInt((StringUtils.trim((parameters.get(APConstants.YEAR_REQUEST).getValue()))));
     } catch (Exception e) {
       LOG.warn("Failed to get " + APConstants.YEAR_REQUEST
         + " parameter. Parameter will be set as CurrentCycleYear. Exception: " + e.getMessage());
@@ -859,8 +859,8 @@ public class SearchTermsSummaryAction extends BaseAction implements Summary {
     }
     // Get cycle
     try {
-      Map<String, Object> parameters = this.getParameters();
-      cycle = (StringUtils.trim(((String[]) parameters.get(APConstants.CYCLE))[0]));
+      HttpParameters parameters = this.getParameters();
+      cycle = (StringUtils.trim((parameters.get(APConstants.CYCLE).getValue())));
     } catch (Exception e) {
       LOG.warn("Failed to get " + APConstants.CYCLE + " parameter. Parameter will be set as CurrentCycle. Exception: "
         + e.getMessage());

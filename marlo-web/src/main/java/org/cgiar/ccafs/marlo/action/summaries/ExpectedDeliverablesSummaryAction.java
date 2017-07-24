@@ -29,10 +29,10 @@ import java.text.SimpleDateFormat;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
-import java.util.Map;
 
 import com.google.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.struts2.dispatcher.HttpParameters;
 import org.pentaho.reporting.engine.classic.core.ClassicEngineBoot;
 import org.pentaho.reporting.engine.classic.core.MasterReport;
 import org.pentaho.reporting.engine.classic.core.modules.output.table.xls.ExcelReportUtil;
@@ -216,7 +216,7 @@ public class ExpectedDeliverablesSummaryAction extends BaseAction implements Sum
     // Get parameters from URL
     // Get year
     try {
-      Map<String, Object> parameters = this.getParameters();
+      HttpParameters parameters = this.getParameters();
       year = Integer.parseInt((StringUtils.trim(((String[]) parameters.get(APConstants.YEAR_REQUEST))[0])));
     } catch (Exception e) {
       LOG.warn("Failed to get " + APConstants.YEAR_REQUEST

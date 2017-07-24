@@ -35,11 +35,11 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.struts2.dispatcher.HttpParameters;
 import org.pentaho.reporting.engine.classic.core.Band;
 import org.pentaho.reporting.engine.classic.core.ClassicEngineBoot;
 import org.pentaho.reporting.engine.classic.core.CompoundDataFactory;
@@ -448,7 +448,7 @@ public class ProjectHighlightsExcelSummaryAction extends BaseAction implements S
     // Get parameters from URL
     // Get year
     try {
-      Map<String, Object> parameters = this.getParameters();
+      HttpParameters parameters = this.getParameters();
       year = Integer.parseInt((StringUtils.trim(((String[]) parameters.get(APConstants.YEAR_REQUEST))[0])));
     } catch (Exception e) {
       LOG.warn("Failed to get " + APConstants.YEAR_REQUEST

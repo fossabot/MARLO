@@ -139,6 +139,7 @@ import com.opensymphony.xwork2.Preparable;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.struts2.ServletActionContext;
+import org.apache.struts2.dispatcher.HttpParameters;
 import org.apache.struts2.interceptor.ServletRequestAware;
 import org.apache.struts2.interceptor.SessionAware;
 import org.slf4j.Logger;
@@ -255,7 +256,7 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
   private LiaisonUserManager liaisonUserManager;
 
   protected boolean next;
-  private Map<String, Object> parameters;
+  private HttpParameters parameters;
 
 
   private boolean planningActive;
@@ -1423,7 +1424,7 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
 
   }
 
-  public Map<String, Object> getParameters() {
+  public HttpParameters getParameters() {
     parameters = ActionContext.getContext().getParameters();
     return parameters;
   }

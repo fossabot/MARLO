@@ -33,6 +33,7 @@ import java.util.Map;
 
 import com.google.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.struts2.dispatcher.HttpParameters;
 
 public class ProjectListAction extends BaseAction {
 
@@ -91,7 +92,7 @@ public class ProjectListAction extends BaseAction {
 
   @Override
   public void prepare() throws Exception {
-    Map<String, Object> parameters = this.getParameters();
+    HttpParameters parameters = this.getParameters();
     cycle = (StringUtils.trim(((String[]) parameters.get(APConstants.CYCLE))[0]));
     year = Integer.parseInt((StringUtils.trim(((String[]) parameters.get(APConstants.YEAR_REQUEST))[0])));
   }

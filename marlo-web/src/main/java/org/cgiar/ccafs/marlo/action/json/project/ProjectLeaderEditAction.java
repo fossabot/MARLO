@@ -31,6 +31,7 @@ import java.util.Map;
 import com.google.inject.Inject;
 import com.opensymphony.xwork2.Action;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.struts2.dispatcher.HttpParameters;
 
 /**
  * @author Hermes Jiménez - CIAT/CCAFS
@@ -119,7 +120,7 @@ public class ProjectLeaderEditAction extends BaseAction {
 
   @Override
   public void prepare() throws Exception {
-    Map<String, Object> parameters = this.getParameters();
+    HttpParameters parameters = this.getParameters();
     projectId = Long.parseLong(StringUtils.trim(((String[]) parameters.get(APConstants.PROJECT_REQUEST_ID))[0]));
     projectStatus = Boolean.parseBoolean(StringUtils.trim(((String[]) parameters.get("projectStatus"))[0]));
   }

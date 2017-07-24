@@ -30,6 +30,7 @@ import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.struts2.dispatcher.HttpParameters;
 
 /**
  * @author Hermes Jiménez - CIAT/CCAFS
@@ -101,7 +102,7 @@ public class BeneficiaryListAction extends BaseAction {
 
   @Override
   public void prepare() throws Exception {
-    Map<String, Object> parameters = this.getParameters();
+    HttpParameters parameters = this.getParameters();
     beneficiaryTypeID =
       Long.parseLong(StringUtils.trim(((String[]) parameters.get(APConstants.BENEFICIARY_TYPE_ID))[0]));
   }

@@ -35,11 +35,11 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.struts2.dispatcher.HttpParameters;
 
 /**
  * @author Hermes Jiménez - CIAT/CCAFS
@@ -124,7 +124,7 @@ public class DeliverableListAction extends BaseAction {
   @Override
   public String delete() {
 
-    Map<String, Object> parameters = this.getParameters();
+    HttpParameters parameters = this.getParameters();
     deliverableID =
       Long.parseLong(StringUtils.trim(((String[]) parameters.get(APConstants.PROJECT_DELIVERABLE_REQUEST_ID))[0]));
 
@@ -147,6 +147,7 @@ public class DeliverableListAction extends BaseAction {
     return SUCCESS;
   }
 
+  @Override
   public List<Integer> getAllYears() {
     return allYears;
   }
@@ -172,7 +173,7 @@ public class DeliverableListAction extends BaseAction {
                     || a.getStatus() == Integer.parseInt(ProjectStatusEnum.Ongoing.getStatusId())
                     || (a.getStatus() == Integer.parseInt(ProjectStatusEnum.Extended.getStatusId())
                       || a.getStatus().intValue() == 0 || a.getStatus().intValue() == -1))))
-            .collect(Collectors.toList());
+              .collect(Collectors.toList());
           return openA;
         } else {
 
@@ -212,7 +213,7 @@ public class DeliverableListAction extends BaseAction {
               .filter(a -> a.isActive() && ((a.getStatus() != null
                 && (a.getStatus() == Integer.parseInt(ProjectStatusEnum.Complete.getStatusId())
                   || (a.getStatus() == Integer.parseInt(ProjectStatusEnum.Cancelled.getStatusId()))))))
-            .collect(Collectors.toList());
+              .collect(Collectors.toList());
 
           return openA;
         } else {
@@ -221,7 +222,7 @@ public class DeliverableListAction extends BaseAction {
               .filter(a -> a.isActive() && ((a.getStatus() != null
                 && (a.getStatus() == Integer.parseInt(ProjectStatusEnum.Complete.getStatusId())
                   || (a.getStatus() == Integer.parseInt(ProjectStatusEnum.Cancelled.getStatusId()))))))
-            .collect(Collectors.toList());
+              .collect(Collectors.toList());
           openA.removeAll(deliverables.stream()
             .filter(d -> d.isActive() && d.getYear() == this.getCurrentCycleYear() && d.getStatus() != null
               && d.getStatus().intValue() == Integer.parseInt(ProjectStatusEnum.Complete.getStatusId()))
