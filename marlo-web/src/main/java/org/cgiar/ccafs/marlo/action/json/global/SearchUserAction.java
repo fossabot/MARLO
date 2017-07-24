@@ -251,7 +251,7 @@ public class SearchUserAction extends BaseAction {
   @Override
   public void prepare() throws Exception {
     HttpParameters parameters = this.getParameters();
-    userEmail = StringUtils.trim(((String[]) parameters.get(APConstants.USER_EMAIL))[0]);
+    userEmail = StringUtils.trim((parameters.get(APConstants.USER_EMAIL).getValue()));
   }
 
 

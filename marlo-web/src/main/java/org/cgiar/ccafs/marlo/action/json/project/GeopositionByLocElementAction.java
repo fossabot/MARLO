@@ -81,7 +81,7 @@ public class GeopositionByLocElementAction extends BaseAction {
   @Override
   public void prepare() throws Exception {
     HttpParameters parameters = this.getParameters();
-    locElementID = Long.parseLong(StringUtils.trim(((String[]) parameters.get(APConstants.LOC_ELEMENT_ID))[0]));
+    locElementID = Long.parseLong(StringUtils.trim((parameters.get(APConstants.LOC_ELEMENT_ID).getValue())));
 
   }
 

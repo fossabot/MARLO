@@ -91,7 +91,7 @@ public class ProjectLocationCountryListAction extends BaseAction {
   @Override
   public void prepare() throws Exception {
     HttpParameters parameters = this.getParameters();
-    parentId = Long.parseLong(StringUtils.trim(((String[]) parameters.get(APConstants.ELEMENT_TYPE_ID))[0]));
+    parentId = Long.parseLong(StringUtils.trim((parameters.get(APConstants.ELEMENT_TYPE_ID).getValue())));
   }
 
   public void setLocElements(List<Map<String, Object>> locElements) {

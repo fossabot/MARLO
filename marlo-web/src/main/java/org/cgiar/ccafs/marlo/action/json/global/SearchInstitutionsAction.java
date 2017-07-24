@@ -73,9 +73,9 @@ public class SearchInstitutionsAction extends BaseAction {
   @Override
   public void prepare() throws Exception {
     HttpParameters parameters = this.getParameters();
-    queryParameter = StringUtils.trim(((String[]) parameters.get(APConstants.QUERY_PARAMETER))[0]);
-    withPPA = Integer.parseInt(StringUtils.trim(((String[]) parameters.get(APConstants.WITH_PPA_PARAMETER))[0]));
-    onlyPPA = Integer.parseInt(StringUtils.trim(((String[]) parameters.get(APConstants.ONLY_PPA_PARAMETER))[0]));
+    queryParameter = StringUtils.trim((parameters.get(APConstants.QUERY_PARAMETER).getValue()));
+    withPPA = Integer.parseInt(StringUtils.trim((parameters.get(APConstants.WITH_PPA_PARAMETER).getValue())));
+    onlyPPA = Integer.parseInt(StringUtils.trim((parameters.get(APConstants.ONLY_PPA_PARAMETER).getValue())));
 
   }
 

@@ -695,30 +695,30 @@ public class ImpactRelationAction extends BaseAction {
     id = "";
 
     try {
-      id = (StringUtils.trim(((String[]) parameters.get(APConstants.ID))[0]));
+      id = (StringUtils.trim((parameters.get(APConstants.ID).getValue())));
     } catch (Exception e) {
       LOG.error("There was an exception trying to parse the   id = {} ",
-        StringUtils.trim(((String[]) parameters.get(APConstants.ID))[0]));
+        StringUtils.trim((parameters.get(APConstants.ID).getValue())));
 
     }
 
     try {
-      type = (StringUtils.trim(((String[]) parameters.get(APConstants.TYPE))[0]));
+      type = (StringUtils.trim((parameters.get(APConstants.TYPE).getValue())));
     } catch (Exception e) {
       LOG.error("There was an exception trying to parse the   type = {} ",
-        StringUtils.trim(((String[]) parameters.get(APConstants.TYPE))[0]));
+        StringUtils.trim((parameters.get(APConstants.TYPE).getValue())));
 
     }
 
 
     try {
-      flagshipId = (StringUtils.trim(((String[]) parameters.get(APConstants.FLAGSHIP_ID))[0]));
+      flagshipId = (StringUtils.trim((parameters.get(APConstants.FLAGSHIP_ID).getValue())));
       if (flagshipId.isEmpty()) {
         flagshipId = null;
       }
     } catch (Exception e) {
       LOG.error("There was an exception trying to parse the   FLAGSHIP_ID = {} ",
-        StringUtils.trim(((String[]) parameters.get(APConstants.FLAGSHIP_ID))[0]));
+        StringUtils.trim((parameters.get(APConstants.FLAGSHIP_ID).getValue())));
       flagshipId = null;
     }
   }

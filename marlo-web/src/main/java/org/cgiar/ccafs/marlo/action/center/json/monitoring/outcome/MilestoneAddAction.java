@@ -37,8 +37,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
-import com.opensymphony.xwork2.ActionContext;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.struts2.dispatcher.HttpParameters;
 
 /**
  * @author Hermes Jiménez - CIAT/CCAFS
@@ -76,9 +76,9 @@ public class MilestoneAddAction extends BaseAction {
   @Override
   public String execute() throws Exception {
 
-    Map<String, Object> parameters = ActionContext.getContext().getParameters();
+    HttpParameters parameters = this.getParameters();
 
-    outcomeID = Long.parseLong(StringUtils.trim(((String[]) parameters.get(OUTCOME_ID))[0]));
+    outcomeID = Long.parseLong(StringUtils.trim((parameters.get(OUTCOME_ID).getValue())));
 
     CenterOutcome outcome = outcomeService.getResearchOutcomeById(outcomeID);
 
@@ -91,21 +91,20 @@ public class MilestoneAddAction extends BaseAction {
     milestone.setModifiedBy(this.getCurrentUser());
     milestone.setImpactPathway(false);
 
-    CenterTargetUnit targetUnit = targetUnitService
-      .getTargetUnitById(Long.parseLong(StringUtils.trim(((String[]) parameters.get(TARGET_UNIT))[0])));
+    CenterTargetUnit targetUnit =
+      targetUnitService.getTargetUnitById(Long.parseLong(StringUtils.trim((parameters.get(TARGET_UNIT).getValue()))));
     milestone.setTargetUnit(targetUnit);
     milestoneData.put("targetUnitId", targetUnit.getId());
     if (targetUnit.getId() != -1) {
-      milestone
-        .setValue(BigDecimal.valueOf(Double.parseDouble(StringUtils.trim(((String[]) parameters.get(VALUE))[0]))));
+      milestone.setValue(BigDecimal.valueOf(Double.parseDouble(StringUtils.trim((parameters.get(VALUE).getValue())))));
       milestoneData.put("value", milestone.getValue());
     } else {
       milestone.setValue(null);
     }
 
-    milestone.setTargetYear(Integer.parseInt(StringUtils.trim(((String[]) parameters.get(YEAR))[0])));
+    milestone.setTargetYear(Integer.parseInt(StringUtils.trim((parameters.get(YEAR).getValue()))));
     milestoneData.put("targetYear", milestone.getTargetYear());
-    milestone.setTitle(StringUtils.trim(((String[]) parameters.get(TITLE))[0]));
+    milestone.setTitle(StringUtils.trim((parameters.get(TITLE).getValue())));
     milestoneData.put("title", milestone.getTitle());
 
     long milestoneID = milestoneService.saveCenterMilestone(milestone);

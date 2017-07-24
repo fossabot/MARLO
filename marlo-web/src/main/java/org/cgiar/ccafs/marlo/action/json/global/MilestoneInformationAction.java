@@ -75,7 +75,7 @@ public class MilestoneInformationAction extends BaseAction {
   @Override
   public void prepare() throws Exception {
     HttpParameters parameters = this.getParameters();
-    milestoneID = Long.parseLong(StringUtils.trim(((String[]) parameters.get(APConstants.MILESTONE_REQUEST_ID))[0]));
+    milestoneID = Long.parseLong(StringUtils.trim((parameters.get(APConstants.MILESTONE_REQUEST_ID).getValue())));
 
   }
 

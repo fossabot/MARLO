@@ -83,7 +83,7 @@ public class PersonsbyPartnerAction extends BaseAction {
   @Override
   public void prepare() throws Exception {
     HttpParameters parameters = this.getParameters();
-    partnerID = Long.parseLong(StringUtils.trim(((String[]) parameters.get(APConstants.PARTNER_ID))[0]));
+    partnerID = Long.parseLong(StringUtils.trim((parameters.get(APConstants.PARTNER_ID).getValue())));
   }
 
 

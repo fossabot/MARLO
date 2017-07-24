@@ -283,10 +283,10 @@ public class GraphByProgramAction extends BaseAction {
     HttpParameters parameters = this.getParameters();
 
     try {
-      programID = Long.parseLong(StringUtils.trim(((String[]) parameters.get(APConstants.CENTER_PROGRAM_ID))[0]));
+      programID = Long.parseLong(StringUtils.trim((parameters.get(APConstants.CENTER_PROGRAM_ID).getValue())));
     } catch (Exception e) {
       LOG.error("There was an exception trying to parse the crp program id = {} ",
-        StringUtils.trim(((String[]) parameters.get(APConstants.CENTER_PROGRAM_ID))[0]));
+        StringUtils.trim((parameters.get(APConstants.CENTER_PROGRAM_ID).getValue())));
     }
   }
 

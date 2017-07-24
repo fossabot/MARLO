@@ -102,7 +102,7 @@ public class CrpClusterLeadersListAction extends BaseAction {
 
 
     // If there is a parameter take its values
-    clusterId = StringUtils.trim(((String[]) parameters.get(APConstants.CRP_CLUSTER_ACTIVITY_ID))[0]);
+    clusterId = StringUtils.trim((parameters.get(APConstants.CRP_CLUSTER_ACTIVITY_ID).getValue()));
   }
 
   public void setLeaders(List<Map<String, Object>> subIdos) {

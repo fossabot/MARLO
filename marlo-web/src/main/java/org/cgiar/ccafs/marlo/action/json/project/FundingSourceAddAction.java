@@ -40,8 +40,8 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.inject.Inject;
-import com.opensymphony.xwork2.ActionContext;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.struts2.dispatcher.HttpParameters;
 
 /**
  * @author Hermes Jiménez - CIAT/CCAFS
@@ -106,8 +106,8 @@ public class FundingSourceAddAction extends BaseAction {
   @Override
   public String execute() throws Exception {
 
-    Map<String, Object> parameters = ActionContext.getContext().getParameters();
-    String budgets = StringUtils.trim(((String[]) parameters.get(BUDGETS))[0]);
+    HttpParameters parameters = this.getParameters();
+    String budgets = StringUtils.trim((parameters.get(BUDGETS).getValue()));
     budgets = budgets.replace("\"", "");
     budgets = budgets.replace("[", "");
     budgets = budgets.replace("{", "");
@@ -117,43 +117,43 @@ public class FundingSourceAddAction extends BaseAction {
     loggedCrp = (Crp) this.getSession().get(APConstants.SESSION_CRP);
     loggedCrp = crpManager.getCrpById(loggedCrp.getId());
 
-    int selectedYear = Integer.parseInt(((String[]) parameters.get(SELECTED_YEAR))[0]);
+    int selectedYear = Integer.parseInt((parameters.get(SELECTED_YEAR).getValue()));
     SimpleDateFormat dateFormat = new SimpleDateFormat(APConstants.DATE_FORMAT);
 
     FundingSource fundingSource = new FundingSource();
 
     fundingSource.setCrp(loggedCrp);
 
-    fundingSource.setStartDate(dateFormat.parse(StringUtils.trim(((String[]) parameters.get(START_DATE))[0])));
-    fundingSource.setEndDate(dateFormat.parse(StringUtils.trim(((String[]) parameters.get(END_DATE))[0])));
-    fundingSource.setTitle(StringUtils.trim(((String[]) parameters.get(TITLE))[0]));
-    fundingSource.setDescription(StringUtils.trim(((String[]) parameters.get(DESCRIPTION))[0]));
-    fundingSource.setFinanceCode(StringUtils.trim(((String[]) parameters.get(FINANCE_CODE))[0]));
-    fundingSource.setContactPersonEmail(StringUtils.trim(((String[]) parameters.get(CONTACT_EMAIL))[0]));
-    fundingSource.setContactPersonName(StringUtils.trim(((String[]) parameters.get(CONTACT_NAME))[0]));
+    fundingSource.setStartDate(dateFormat.parse(StringUtils.trim((parameters.get(START_DATE).getValue()))));
+    fundingSource.setEndDate(dateFormat.parse(StringUtils.trim((parameters.get(END_DATE).getValue()))));
+    fundingSource.setTitle(StringUtils.trim((parameters.get(TITLE).getValue())));
+    fundingSource.setDescription(StringUtils.trim((parameters.get(DESCRIPTION).getValue())));
+    fundingSource.setFinanceCode(StringUtils.trim((parameters.get(FINANCE_CODE).getValue())));
+    fundingSource.setContactPersonEmail(StringUtils.trim((parameters.get(CONTACT_EMAIL).getValue())));
+    fundingSource.setContactPersonName(StringUtils.trim((parameters.get(CONTACT_NAME).getValue())));
 
 
     try {
-      fundingSource.setW1w2(Boolean.parseBoolean(StringUtils.trim(((String[]) parameters.get(W1W2))[0])));
+      fundingSource.setW1w2(Boolean.parseBoolean(StringUtils.trim((parameters.get(W1W2).getValue()))));
     } catch (Exception e2) {
       fundingSource.setW1w2(null);
     }
 
 
-    fundingSource.setStatus(Integer.parseInt(StringUtils.trim(((String[]) parameters.get(STATUS))[0])));
+    fundingSource.setStatus(Integer.parseInt(StringUtils.trim((parameters.get(STATUS).getValue()))));
     try {
       fundingSource
-        .setFile(fileDBManager.getFileDBById(Long.parseLong(StringUtils.trim(((String[]) parameters.get(FILE))[0]))));
+        .setFile(fileDBManager.getFileDBById(Long.parseLong(StringUtils.trim((parameters.get(FILE).getValue())))));
     } catch (Exception e1) {
       fundingSource.setFile(null);
     }
 
     Institution institutionDonor =
-      institutionManager.getInstitutionById(Long.parseLong(StringUtils.trim(((String[]) parameters.get(DONOR))[0])));
+      institutionManager.getInstitutionById(Long.parseLong(StringUtils.trim((parameters.get(DONOR).getValue()))));
     fundingSource.setInstitution(institutionDonor);
 
     BudgetType budgetType =
-      budgetTypeManager.getBudgetTypeById(Long.parseLong(StringUtils.trim(((String[]) parameters.get(TYPE))[0])));
+      budgetTypeManager.getBudgetTypeById(Long.parseLong(StringUtils.trim((parameters.get(TYPE).getValue()))));
     fundingSource.setBudgetType(budgetType);
 
 
@@ -185,7 +185,7 @@ public class FundingSourceAddAction extends BaseAction {
 
 
     Institution institution =
-      institutionManager.getInstitutionById(Long.parseLong(StringUtils.trim(((String[]) parameters.get(LEADER))[0])));
+      institutionManager.getInstitutionById(Long.parseLong(StringUtils.trim((parameters.get(LEADER).getValue()))));
 
     FundingSourceInstitution fundingSourceInstitution = new FundingSourceInstitution();
     fundingSourceInstitution.setFundingSource(fundingSource);

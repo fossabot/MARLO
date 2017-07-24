@@ -223,14 +223,14 @@ public class ValidateImpactPathwaySectionAction extends BaseAction {
   @Override
   public void prepare() throws Exception {
     HttpParameters parameters = this.getParameters();
-    sectionName = StringUtils.trim(((String[]) parameters.get(APConstants.SECTION_NAME))[0]);
+    sectionName = StringUtils.trim((parameters.get(APConstants.SECTION_NAME).getValue()));
     programID = -1;
 
     try {
-      programID = Long.parseLong(StringUtils.trim(((String[]) parameters.get(APConstants.CENTER_PROGRAM_ID))[0]));
+      programID = Long.parseLong(StringUtils.trim((parameters.get(APConstants.CENTER_PROGRAM_ID).getValue())));
     } catch (Exception e) {
       LOG.error("There was an exception trying to parse the crp program id = {} ",
-        StringUtils.trim(((String[]) parameters.get(APConstants.CENTER_PROGRAM_ID))[0]));
+        StringUtils.trim((parameters.get(APConstants.CENTER_PROGRAM_ID).getValue())));
     }
 
     existProgram = programServcie.existProgram(programID);

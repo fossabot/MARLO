@@ -81,7 +81,7 @@ public class FlaghshipsByCrpAction extends BaseAction {
   @Override
   public void prepare() throws Exception {
     HttpParameters parameters = this.getParameters();
-    crpID = Long.parseLong(StringUtils.trim(((String[]) parameters.get(APConstants.CRP_ID))[0]));
+    crpID = Long.parseLong(StringUtils.trim((parameters.get(APConstants.CRP_ID).getValue())));
   }
 
 

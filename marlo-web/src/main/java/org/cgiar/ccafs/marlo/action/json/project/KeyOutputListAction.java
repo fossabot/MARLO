@@ -85,7 +85,7 @@ public class KeyOutputListAction extends BaseAction {
   public void prepare() throws Exception {
     HttpParameters parameters = this.getParameters();
     clusterOfActivityId =
-      Long.parseLong(StringUtils.trim(((String[]) parameters.get(APConstants.CRP_CLUSTER_ACTIVITY_ID))[0]));
+      Long.parseLong(StringUtils.trim((parameters.get(APConstants.CRP_CLUSTER_ACTIVITY_ID).getValue())));
   }
 
 

@@ -279,10 +279,10 @@ public class ImpactPathwayFullGraph extends BaseAction {
     crpID = -1;
 
     try {
-      crpID = Long.parseLong(StringUtils.trim(((String[]) parameters.get(APConstants.CRP_ID))[0]));
+      crpID = Long.parseLong(StringUtils.trim((parameters.get(APConstants.CRP_ID).getValue())));
     } catch (Exception e) {
       LOG.error("There was an exception trying to parse the crp  id = {} ",
-        StringUtils.trim(((String[]) parameters.get(APConstants.CRP_ID))[0]));
+        StringUtils.trim((parameters.get(APConstants.CRP_ID).getValue())));
 
     }
   }

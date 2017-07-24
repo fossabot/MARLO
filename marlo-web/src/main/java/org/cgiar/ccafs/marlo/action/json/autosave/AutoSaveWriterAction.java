@@ -236,7 +236,7 @@ public class AutoSaveWriterAction extends BaseAction {
   public void prepare() throws Exception {
 
     HttpParameters parameters = this.getParameters();
-    autoSave = (String[]) parameters.get(APConstants.AUTOSAVE_REQUEST);
+    autoSave = parameters.get(APConstants.AUTOSAVE_REQUEST).getMultipleValues();
   }
 
   public void setStatus(Map<String, Object> status) {

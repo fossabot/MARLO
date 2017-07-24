@@ -134,10 +134,9 @@ public class RequestCountryOfficeAction extends BaseAction {
   @Override
   public void prepare() throws Exception {
     HttpParameters parameters = this.getParameters();
-    projectID = Long.parseLong((StringUtils.trim(((String[]) parameters.get(APConstants.PROJECT_REQUEST_ID))[0])));
-    institutionID =
-      Long.parseLong((StringUtils.trim(((String[]) parameters.get(APConstants.INSTITUTION_REQUEST_ID))[0])));
-    countries = ((String[]) parameters.get(APConstants.COUNTRIES_REQUEST_ID));
+    projectID = Long.parseLong((StringUtils.trim((parameters.get(APConstants.PROJECT_REQUEST_ID).getValue()))));
+    institutionID = Long.parseLong((StringUtils.trim((parameters.get(APConstants.INSTITUTION_REQUEST_ID).getValue()))));
+    countries = ((parameters.get(APConstants.COUNTRIES_REQUEST_ID).getMultipleValues()));
 
   }
 

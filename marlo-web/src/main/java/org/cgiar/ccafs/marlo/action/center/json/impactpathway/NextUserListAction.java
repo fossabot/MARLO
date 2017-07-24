@@ -93,7 +93,7 @@ public class NextUserListAction extends BaseAction {
   @Override
   public void prepare() throws Exception {
     HttpParameters parameters = this.getParameters();
-    nextUserID = Long.parseLong(StringUtils.trim(((String[]) parameters.get(APConstants.NEXT_USER_ID))[0]));
+    nextUserID = Long.parseLong(StringUtils.trim((parameters.get(APConstants.NEXT_USER_ID).getValue())));
   }
 
   public void setMessage(String message) {

@@ -121,8 +121,8 @@ public class ProjectLeaderEditAction extends BaseAction {
   @Override
   public void prepare() throws Exception {
     HttpParameters parameters = this.getParameters();
-    projectId = Long.parseLong(StringUtils.trim(((String[]) parameters.get(APConstants.PROJECT_REQUEST_ID))[0]));
-    projectStatus = Boolean.parseBoolean(StringUtils.trim(((String[]) parameters.get("projectStatus"))[0]));
+    projectId = Long.parseLong(StringUtils.trim((parameters.get(APConstants.PROJECT_REQUEST_ID).getValue())));
+    projectStatus = Boolean.parseBoolean(StringUtils.trim((parameters.get("projectStatus").getValue())));
   }
 
   private void saveMissingFields(Project project, String cycle, int year, String sectionName) {

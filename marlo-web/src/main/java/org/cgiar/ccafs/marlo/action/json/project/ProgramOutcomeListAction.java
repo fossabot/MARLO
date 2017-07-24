@@ -108,7 +108,7 @@ public class ProgramOutcomeListAction extends BaseAction {
   @Override
   public void prepare() throws Exception {
     HttpParameters parameters = this.getParameters();
-    crpProgramId = Long.parseLong(StringUtils.trim(((String[]) parameters.get(APConstants.CRP_PROGRAM_ID))[0]));
+    crpProgramId = Long.parseLong(StringUtils.trim((parameters.get(APConstants.CRP_PROGRAM_ID).getValue())));
   }
 
   public void setClusterOfActivities(List<Map<String, Object>> clusterOfActivities) {

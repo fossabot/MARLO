@@ -82,8 +82,7 @@ public class DeliverableSubTypeAction extends BaseAction {
   @Override
   public void prepare() throws Exception {
     HttpParameters parameters = this.getParameters();
-    deliverableTypeId =
-      Long.parseLong(StringUtils.trim(((String[]) parameters.get(APConstants.DELIVERABLE_TYPE_ID))[0]));
+    deliverableTypeId = Long.parseLong(StringUtils.trim((parameters.get(APConstants.DELIVERABLE_TYPE_ID).getValue())));
   }
 
   public void setDeliverableSubTypes(List<Map<String, Object>> deliverableSubTypes) {

@@ -101,7 +101,7 @@ public class TargetUnitAction extends BaseAction {
   @Override
   public void prepare() throws Exception {
     HttpParameters parameters = this.getParameters();
-    queryParameter = StringUtils.trim(((String[]) parameters.get(APConstants.TARGET_UNIT_NAME))[0]);
+    queryParameter = StringUtils.trim((parameters.get(APConstants.TARGET_UNIT_NAME).getValue()));
   }
 
   public void setMessage(String message) {

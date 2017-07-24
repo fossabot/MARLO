@@ -103,8 +103,7 @@ public class BeneficiaryListAction extends BaseAction {
   @Override
   public void prepare() throws Exception {
     HttpParameters parameters = this.getParameters();
-    beneficiaryTypeID =
-      Long.parseLong(StringUtils.trim(((String[]) parameters.get(APConstants.BENEFICIARY_TYPE_ID))[0]));
+    beneficiaryTypeID = Long.parseLong(StringUtils.trim((parameters.get(APConstants.BENEFICIARY_TYPE_ID).getValue())));
   }
 
   public void setBeneficiaries(List<Map<String, Object>> beneficiaries) {

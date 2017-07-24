@@ -617,9 +617,9 @@ public class ValidateProjectSectionAction extends BaseAction {
     HttpParameters parameters = this.getParameters();
     loggedCrp = (Crp) this.getSession().get(APConstants.SESSION_CRP);
     loggedCrp = crpManager.getCrpById(loggedCrp.getId());
-    sectionName = StringUtils.trim(((String[]) parameters.get(APConstants.SECTION_NAME))[0]);
+    sectionName = StringUtils.trim((parameters.get(APConstants.SECTION_NAME).getValue()));
 
-    projectID = Long.parseLong(StringUtils.trim(((String[]) parameters.get(APConstants.PROJECT_REQUEST_ID))[0]));
+    projectID = Long.parseLong(StringUtils.trim((parameters.get(APConstants.PROJECT_REQUEST_ID).getValue())));
     // Validate if project exists.
     existProject = projectManager.existProject(projectID);
 

@@ -77,7 +77,7 @@ public class OcsServiceAction extends BaseAction {
    */
   public void prepare() throws Exception {
     HttpParameters parameters = this.getParameters();
-    ocsCode = (StringUtils.trim(((String[]) parameters.get(APConstants.OCS_CODE_REQUEST_ID))[0]));
+    ocsCode = (StringUtils.trim((parameters.get(APConstants.OCS_CODE_REQUEST_ID).getValue())));
   }
 
 

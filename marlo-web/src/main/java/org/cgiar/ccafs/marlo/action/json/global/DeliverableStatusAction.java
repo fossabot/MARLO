@@ -99,8 +99,8 @@ public class DeliverableStatusAction extends BaseAction {
   @Override
   public void prepare() throws Exception {
     HttpParameters parameters = this.getParameters();
-    deliverableID = Long.parseLong(StringUtils.trim(((String[]) parameters.get(APConstants.DELIVERABLE_ID))[0]));
-    year = Integer.parseInt(StringUtils.trim(((String[]) parameters.get(APConstants.YEAR_REQUEST))[0]));
+    deliverableID = Long.parseLong(StringUtils.trim((parameters.get(APConstants.DELIVERABLE_ID).getValue())));
+    year = Integer.parseInt(StringUtils.trim((parameters.get(APConstants.YEAR_REQUEST).getValue())));
   }
 
 

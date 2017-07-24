@@ -100,7 +100,7 @@ public class SubIDOListAction extends BaseAction {
 
 
     // If there is a parameter take its values
-    idoID = StringUtils.trim(((String[]) parameters.get(APConstants.IDO_ID))[0]);
+    idoID = StringUtils.trim((parameters.get(APConstants.IDO_ID).getValue()));
   }
 
   public void setSubIdos(List<Map<String, Object>> subIdos) {

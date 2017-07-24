@@ -124,9 +124,9 @@ public class InstitutionsByTypeAndCountryAction extends BaseAction {
   public void prepare() throws Exception {
     HttpParameters parameters = this.getParameters();
     institutionTypeID =
-      Long.parseLong(StringUtils.trim(((String[]) parameters.get(APConstants.INSTITUTION_TYPE_REQUEST_ID))[0]));
+      Long.parseLong(StringUtils.trim((parameters.get(APConstants.INSTITUTION_TYPE_REQUEST_ID).getValue())));
     if (parameters.get(APConstants.COUNTRY_REQUEST_ID) != null) {
-      countryID = Long.parseLong(StringUtils.trim(((String[]) parameters.get(APConstants.COUNTRY_REQUEST_ID))[0]));
+      countryID = Long.parseLong(StringUtils.trim((parameters.get(APConstants.COUNTRY_REQUEST_ID).getValue())));
     }
   }
 

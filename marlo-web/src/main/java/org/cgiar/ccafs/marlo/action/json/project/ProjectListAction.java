@@ -93,8 +93,8 @@ public class ProjectListAction extends BaseAction {
   @Override
   public void prepare() throws Exception {
     HttpParameters parameters = this.getParameters();
-    cycle = (StringUtils.trim(((String[]) parameters.get(APConstants.CYCLE))[0]));
-    year = Integer.parseInt((StringUtils.trim(((String[]) parameters.get(APConstants.YEAR_REQUEST))[0])));
+    cycle = (StringUtils.trim((parameters.get(APConstants.CYCLE).getValue())));
+    year = Integer.parseInt((StringUtils.trim((parameters.get(APConstants.YEAR_REQUEST).getValue()))));
   }
 
 

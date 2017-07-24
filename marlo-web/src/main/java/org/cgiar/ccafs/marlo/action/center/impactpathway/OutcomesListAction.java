@@ -135,7 +135,7 @@ public class OutcomesListAction extends BaseAction {
   @Override
   public String delete() {
     HttpParameters parameters = this.getParameters();
-    outcomeID = Long.parseLong(StringUtils.trim(((String[]) parameters.get(APConstants.OUTCOME_ID))[0]));
+    outcomeID = Long.parseLong(StringUtils.trim((parameters.get(APConstants.OUTCOME_ID).getValue())));
 
     CenterOutcome outcome = outcomeService.getResearchOutcomeById(outcomeID);
 

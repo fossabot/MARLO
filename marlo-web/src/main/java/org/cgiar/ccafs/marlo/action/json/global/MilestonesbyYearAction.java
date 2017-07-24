@@ -77,8 +77,8 @@ public class MilestonesbyYearAction extends BaseAction {
   @Override
   public void prepare() throws Exception {
     HttpParameters parameters = this.getParameters();
-    crpProgamID = Long.parseLong(StringUtils.trim(((String[]) parameters.get(APConstants.OUTCOME_REQUEST_ID))[0]));
-    year = Integer.parseInt(StringUtils.trim(((String[]) parameters.get(APConstants.YEAR_REQUEST))[0]));
+    crpProgamID = Long.parseLong(StringUtils.trim((parameters.get(APConstants.OUTCOME_REQUEST_ID).getValue())));
+    year = Integer.parseInt(StringUtils.trim((parameters.get(APConstants.YEAR_REQUEST).getValue())));
 
   }
 

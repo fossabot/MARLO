@@ -171,14 +171,14 @@ public class ValidateProjectSectionAction extends BaseAction {
   @Override
   public void prepare() throws Exception {
     HttpParameters parameters = this.getParameters();
-    sectionName = StringUtils.trim(((String[]) parameters.get(APConstants.SECTION_NAME))[0]);
+    sectionName = StringUtils.trim((parameters.get(APConstants.SECTION_NAME).getValue()));
     projectID = -1;
 
     try {
-      projectID = Long.parseLong(StringUtils.trim(((String[]) parameters.get(APConstants.PROJECT_ID))[0]));
+      projectID = Long.parseLong(StringUtils.trim((parameters.get(APConstants.PROJECT_ID).getValue())));
     } catch (Exception e) {
       LOG.error("There was an exception trying to parse the crp program id = {} ",
-        StringUtils.trim(((String[]) parameters.get(APConstants.PROJECT_ID))[0]));
+        StringUtils.trim((parameters.get(APConstants.PROJECT_ID).getValue())));
     }
 
     existProject = projectService.existCenterProject(projectID);

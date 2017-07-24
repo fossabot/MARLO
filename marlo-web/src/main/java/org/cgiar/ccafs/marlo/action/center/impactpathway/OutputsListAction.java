@@ -147,7 +147,7 @@ public class OutputsListAction extends BaseAction {
   @Override
   public String delete() {
     HttpParameters parameters = this.getParameters();
-    outputID = Long.parseLong(StringUtils.trim(((String[]) parameters.get(APConstants.OUTPUT_ID))[0]));
+    outputID = Long.parseLong(StringUtils.trim((parameters.get(APConstants.OUTPUT_ID).getValue())));
 
     CenterOutput output = outputService.getResearchOutputById(outputID);
 

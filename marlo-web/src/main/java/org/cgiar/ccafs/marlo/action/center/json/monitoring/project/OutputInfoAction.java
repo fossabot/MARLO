@@ -72,7 +72,7 @@ public class OutputInfoAction extends BaseAction {
   @Override
   public void prepare() throws Exception {
     HttpParameters parameters = this.getParameters();
-    outputID = Long.parseLong(StringUtils.trim(((String[]) parameters.get(APConstants.OUTPUT_ID))[0]));
+    outputID = Long.parseLong(StringUtils.trim((parameters.get(APConstants.OUTPUT_ID).getValue())));
   }
 
 

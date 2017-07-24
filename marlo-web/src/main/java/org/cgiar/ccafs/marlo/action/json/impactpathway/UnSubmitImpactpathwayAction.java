@@ -121,8 +121,8 @@ public class UnSubmitImpactpathwayAction extends BaseAction {
   @Override
   public void prepare() throws Exception {
     HttpParameters parameters = this.getParameters();
-    programID = Long.parseLong(StringUtils.trim(((String[]) parameters.get(APConstants.CRP_PROGRAM_ID))[0]));
-    justification = StringUtils.trim(((String[]) parameters.get(APConstants.JUSTIFICATION_REQUEST))[0]);
+    programID = Long.parseLong(StringUtils.trim((parameters.get(APConstants.CRP_PROGRAM_ID).getValue())));
+    justification = StringUtils.trim((parameters.get(APConstants.JUSTIFICATION_REQUEST).getValue()));
   }
 
   private void sendNotficationEmail(CrpProgram program) {

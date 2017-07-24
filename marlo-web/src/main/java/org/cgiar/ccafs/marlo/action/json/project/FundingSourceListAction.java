@@ -158,11 +158,10 @@ public class FundingSourceListAction extends BaseAction {
   public void prepare() throws Exception {
     HttpParameters parameters = this.getParameters();
     if (parameters.get(APConstants.INSTITUTION_REQUEST_ID) != null) {
-      institutionID =
-        Long.parseLong(StringUtils.trim(((String[]) parameters.get(APConstants.INSTITUTION_REQUEST_ID))[0]));
+      institutionID = Long.parseLong(StringUtils.trim((parameters.get(APConstants.INSTITUTION_REQUEST_ID).getValue())));
     }
-    queryParameter = StringUtils.trim(((String[]) parameters.get(APConstants.QUERY_PARAMETER))[0]);
-    year = Integer.parseInt(StringUtils.trim(((String[]) parameters.get(APConstants.YEAR_REQUEST))[0]));
+    queryParameter = StringUtils.trim((parameters.get(APConstants.QUERY_PARAMETER).getValue()));
+    year = Integer.parseInt(StringUtils.trim((parameters.get(APConstants.YEAR_REQUEST).getValue())));
   }
 
   public void setSources(List<Map<String, Object>> sources) {

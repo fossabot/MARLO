@@ -85,7 +85,7 @@ public class RequestTargetUnitAction extends BaseAction {
   @Override
   public void prepare() throws Exception {
     HttpParameters parameters = this.getParameters();
-    targetUnitName = StringUtils.trim(((String[]) parameters.get(APConstants.TARGET_UNIT_NAME))[0]);
+    targetUnitName = StringUtils.trim((parameters.get(APConstants.TARGET_UNIT_NAME).getValue()));
   }
 
 

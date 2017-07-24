@@ -122,8 +122,8 @@ public class DeliverableUploadFileAction extends BaseAction {
   public void prepare() throws Exception {
     HttpParameters parameters = this.getParameters();
     deliverableID =
-      Long.parseLong(StringUtils.trim(((String[]) parameters.get(APConstants.PROJECT_DELIVERABLE_REQUEST_ID))[0]));
-    fileType = StringUtils.trim(((String[]) parameters.get(APConstants.FILE_TYPE_REQUEST))[0]);
+      Long.parseLong(StringUtils.trim((parameters.get(APConstants.PROJECT_DELIVERABLE_REQUEST_ID).getValue())));
+    fileType = StringUtils.trim((parameters.get(APConstants.FILE_TYPE_REQUEST).getValue()));
   }
 
   public void setFile(File file) {

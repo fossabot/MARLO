@@ -93,7 +93,7 @@ public class ClusterByFPsAction extends BaseAction {
   @Override
   public void prepare() throws Exception {
     HttpParameters parameters = this.getParameters();
-    flagshipID = (StringUtils.trim(((String[]) parameters.get(APConstants.FLAGSHIP_ID))[0]));
+    flagshipID = (StringUtils.trim((parameters.get(APConstants.FLAGSHIP_ID).getValue())));
   }
 
 

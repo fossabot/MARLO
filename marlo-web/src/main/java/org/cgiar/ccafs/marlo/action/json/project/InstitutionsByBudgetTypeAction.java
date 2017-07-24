@@ -111,7 +111,7 @@ public class InstitutionsByBudgetTypeAction extends BaseAction {
   @Override
   public void prepare() throws Exception {
     HttpParameters parameters = this.getParameters();
-    budgetTypeID = Long.parseLong(StringUtils.trim(((String[]) parameters.get(APConstants.BUDGET_TYPE_REQUEST_ID))[0]));
+    budgetTypeID = Long.parseLong(StringUtils.trim((parameters.get(APConstants.BUDGET_TYPE_REQUEST_ID).getValue())));
 
   }
 

@@ -76,7 +76,7 @@ public class LiasonUsersByInstitutionsAction extends BaseAction {
   public void prepare() throws Exception {
     HttpParameters parameters = this.getParameters();
     liasonIntitutionId =
-      Long.parseLong(StringUtils.trim(((String[]) parameters.get(APConstants.LIASON_INSTITUTION_ID))[0]));
+      Long.parseLong(StringUtils.trim((parameters.get(APConstants.LIASON_INSTITUTION_ID).getValue())));
   }
 
   public void setLiasonsUsers(List<Map<String, Object>> liasonsUsers) {

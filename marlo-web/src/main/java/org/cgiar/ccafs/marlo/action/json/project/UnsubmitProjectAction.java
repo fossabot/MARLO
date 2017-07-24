@@ -126,8 +126,8 @@ public class UnsubmitProjectAction extends BaseAction {
   @Override
   public void prepare() throws Exception {
     HttpParameters parameters = this.getParameters();
-    projectID = Long.parseLong(StringUtils.trim(((String[]) parameters.get(APConstants.PROJECT_REQUEST_ID))[0]));
-    justification = StringUtils.trim(((String[]) parameters.get(APConstants.JUSTIFICATION_REQUEST))[0]);
+    projectID = Long.parseLong(StringUtils.trim((parameters.get(APConstants.PROJECT_REQUEST_ID).getValue())));
+    justification = StringUtils.trim((parameters.get(APConstants.JUSTIFICATION_REQUEST).getValue()));
   }
 
   private void sendNotficationEmail(Project project) {

@@ -145,7 +145,7 @@ public class OutcomeTreeAction extends BaseAction {
   @Override
   public void prepare() throws Exception {
     HttpParameters parameters = this.getParameters();
-    outcomeID = Long.parseLong(StringUtils.trim(((String[]) parameters.get(APConstants.OUTCOME_ID))[0]));
+    outcomeID = Long.parseLong(StringUtils.trim((parameters.get(APConstants.OUTCOME_ID).getValue())));
   }
 
   public void setDataProjects(List<Map<String, Object>> dataProjects) {
