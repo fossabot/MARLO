@@ -3540,10 +3540,10 @@ public class ReportingSummaryAction extends BaseAction implements Summary {
       LOG.error("Failed to get project. Exception: " + e.getMessage());
     }
     // Get parameters from URL
+    HttpParameters parameters = this.getParameters();
     // Get year
     try {
-      HttpParameters parameters = this.getParameters();
-      year = Integer.parseInt((StringUtils.trim(((String[]) parameters.get(APConstants.YEAR_REQUEST))[0])));
+      year = Integer.parseInt((StringUtils.trim((parameters.get(APConstants.YEAR_REQUEST).getValue()))));
     } catch (Exception e) {
       LOG.warn("Failed to get " + APConstants.YEAR_REQUEST
         + " parameter. Parameter will be set as CurrentCycleYear. Exception: " + e.getMessage());
@@ -3551,8 +3551,7 @@ public class ReportingSummaryAction extends BaseAction implements Summary {
     }
     // Get cycle
     try {
-      Map<String, Object> parameters = this.getParameters();
-      cycle = (StringUtils.trim(((String[]) parameters.get(APConstants.CYCLE))[0]));
+      cycle = (StringUtils.trim((parameters.get(APConstants.CYCLE).getValue())));
     } catch (Exception e) {
       LOG.warn("Failed to get " + APConstants.CYCLE + " parameter. Parameter will be set as CurrentCycle. Exception: "
         + e.getMessage());

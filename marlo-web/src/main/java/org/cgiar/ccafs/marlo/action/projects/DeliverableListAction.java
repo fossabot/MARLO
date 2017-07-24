@@ -126,7 +126,7 @@ public class DeliverableListAction extends BaseAction {
 
     HttpParameters parameters = this.getParameters();
     deliverableID =
-      Long.parseLong(StringUtils.trim(((String[]) parameters.get(APConstants.PROJECT_DELIVERABLE_REQUEST_ID))[0]));
+      Long.parseLong(StringUtils.trim((parameters.get(APConstants.PROJECT_DELIVERABLE_REQUEST_ID).getValue())));
 
 
     Deliverable deliverable = deliverableManager.getDeliverableById(deliverableID);

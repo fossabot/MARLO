@@ -139,7 +139,7 @@ public class ProjectListAction extends BaseAction {
   @Override
   public String delete() {
     HttpParameters parameters = this.getParameters();
-    projectID = Long.parseLong(StringUtils.trim(((String[]) parameters.get(APConstants.PROJECT_ID))[0]));
+    projectID = Long.parseLong(StringUtils.trim((parameters.get(APConstants.PROJECT_ID).getValue())));
 
     CenterProject project = projectService.getCenterProjectById(projectID);
 

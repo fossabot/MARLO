@@ -890,7 +890,7 @@ public class BudgetPerPartnersSummaryAction extends BaseAction implements Summar
     // Get year
     try {
       HttpParameters parameters = this.getParameters();
-      year = Integer.parseInt((StringUtils.trim(((String[]) parameters.get(APConstants.YEAR_REQUEST))[0])));
+      year = Integer.parseInt((StringUtils.trim((parameters.get(APConstants.YEAR_REQUEST).getValue()))));
     } catch (Exception e) {
       LOG.warn("Failed to get " + APConstants.YEAR_REQUEST
         + " parameter. Parameter will be set as CurrentCycleYear. Exception: " + e.getMessage());
@@ -899,7 +899,7 @@ public class BudgetPerPartnersSummaryAction extends BaseAction implements Summar
     // Get cycle
     try {
       HttpParameters parameters = this.getParameters();
-      cycle = (StringUtils.trim(((String[]) parameters.get(APConstants.CYCLE))[0]));
+      cycle = (StringUtils.trim((parameters.get(APConstants.CYCLE).getValue())));
     } catch (Exception e) {
       LOG.warn("Failed to get " + APConstants.CYCLE + " parameter. Parameter will be set as CurrentCycle. Exception: "
         + e.getMessage());
