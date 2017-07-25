@@ -32,6 +32,7 @@ import java.util.Map;
 import com.google.inject.Inject;
 import com.opensymphony.xwork2.ActionInvocation;
 import com.opensymphony.xwork2.interceptor.AbstractInterceptor;
+import org.apache.struts2.dispatcher.HttpParameters;
 
 /**
  * @author Hermes Jiménez - CIAT/CCAFS
@@ -41,7 +42,7 @@ public class EditProjectOutcomeInterceptor extends AbstractInterceptor implement
   private static final long serialVersionUID = 1423197153747668108L;
 
 
-  private Map<String, Object> parameters;
+  private HttpParameters parameters;
   private Map<String, Object> session;
   private Crp crp;
   private long projectOutcomeId = 0;
@@ -81,7 +82,7 @@ public class EditProjectOutcomeInterceptor extends AbstractInterceptor implement
     boolean editParameter = false;
     boolean canSwitchProject = false;
 
-    String projectParameter = ((String[]) parameters.get(APConstants.PROJECT_OUTCOME_REQUEST_ID))[0];
+    String projectParameter = (parameters.get(APConstants.PROJECT_OUTCOME_REQUEST_ID).getValue());
 
     projectOutcomeId = Long.parseLong(projectParameter);
     baseAction.setSession(session);
@@ -123,7 +124,7 @@ public class EditProjectOutcomeInterceptor extends AbstractInterceptor implement
 
       // TODO Validate is the project is new
       if (parameters.get(APConstants.EDITABLE_REQUEST) != null) {
-        String stringEditable = ((String[]) parameters.get(APConstants.EDITABLE_REQUEST))[0];
+        String stringEditable = (parameters.get(APConstants.EDITABLE_REQUEST).getValue());
         editParameter = stringEditable.equals("true");
         if (!editParameter) {
           baseAction.setEditableParameter(hasPermissionToEdit);

@@ -30,6 +30,7 @@ import java.util.Map;
 import com.google.inject.Inject;
 import com.opensymphony.xwork2.ActionInvocation;
 import com.opensymphony.xwork2.interceptor.AbstractInterceptor;
+import org.apache.struts2.dispatcher.HttpParameters;
 
 /**
  * @author Hermes Jiménez - CIAT/CCAFS
@@ -43,7 +44,7 @@ public class EditOutcomeInterceptor extends AbstractInterceptor implements Seria
   private ICenterOutcomeManager outcomeService;
 
   private ICenterProgramManager programService;
-  private Map<String, Object> parameters;
+  private HttpParameters parameters;
 
   private Map<String, Object> session;
   private Center researchCenter;
@@ -69,7 +70,7 @@ public class EditOutcomeInterceptor extends AbstractInterceptor implements Seria
     researchCenter = (Center) session.get(APConstants.SESSION_CENTER);
 
     try {
-      outcomeID = Long.parseLong(((String[]) parameters.get(APConstants.OUTCOME_ID))[0]);
+      outcomeID = Long.parseLong((parameters.get(APConstants.OUTCOME_ID).getValue()));
     } catch (Exception e) {
       return BaseAction.NOT_FOUND;
     }
@@ -112,7 +113,7 @@ public class EditOutcomeInterceptor extends AbstractInterceptor implements Seria
         }
 
         if (parameters.get(APConstants.EDITABLE_REQUEST) != null) {
-          String stringEditable = ((String[]) parameters.get(APConstants.EDITABLE_REQUEST))[0];
+          String stringEditable = (parameters.get(APConstants.EDITABLE_REQUEST).getValue());
           editParameter = stringEditable.equals("true");
           // If the user is not asking for edition privileges we don't need to validate them.
           if (!editParameter) {

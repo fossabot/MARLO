@@ -31,12 +31,13 @@ import java.util.Map;
 import com.google.inject.Inject;
 import com.opensymphony.xwork2.ActionInvocation;
 import com.opensymphony.xwork2.interceptor.AbstractInterceptor;
+import org.apache.struts2.dispatcher.HttpParameters;
 
 public class PublicationInterceptor extends AbstractInterceptor implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
-  private Map<String, Object> parameters;
+  private HttpParameters parameters;
   private Map<String, Object> session;
   private Crp crp;
   private long deliverableID = 0;

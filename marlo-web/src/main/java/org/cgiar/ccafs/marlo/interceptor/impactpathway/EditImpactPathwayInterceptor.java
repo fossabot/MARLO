@@ -35,6 +35,7 @@ import java.util.stream.Collectors;
 import com.google.inject.Inject;
 import com.opensymphony.xwork2.ActionInvocation;
 import com.opensymphony.xwork2.interceptor.AbstractInterceptor;
+import org.apache.struts2.dispatcher.HttpParameters;
 
 /**
  * @author Hermes Jiménez - CIAT/CCAFS
@@ -47,7 +48,7 @@ public class EditImpactPathwayInterceptor extends AbstractInterceptor implements
   private CrpProgramManager crpProgramManager;
 
 
-  private Map<String, Object> parameters;
+  private HttpParameters parameters;
   private Map<String, Object> session;
   private Crp crp;
   private long crpProgramID = 0;
@@ -62,7 +63,7 @@ public class EditImpactPathwayInterceptor extends AbstractInterceptor implements
 
   long getCrpProgramId() {
     try {
-      return Long.parseLong(((String[]) parameters.get(APConstants.CRP_PROGRAM_ID))[0]);
+      return Long.parseLong((parameters.get(APConstants.CRP_PROGRAM_ID).getValue()));
     } catch (Exception e) {
       Crp loggedCrp = (Crp) session.get(APConstants.SESSION_CRP);
 
@@ -144,7 +145,7 @@ public class EditImpactPathwayInterceptor extends AbstractInterceptor implements
         }
 
         if (parameters.get(APConstants.EDITABLE_REQUEST) != null) {
-          String stringEditable = ((String[]) parameters.get(APConstants.EDITABLE_REQUEST))[0];
+          String stringEditable = (parameters.get(APConstants.EDITABLE_REQUEST).getValue());
           editParameter = stringEditable.equals("true");
           // If the user is not asking for edition privileges we don't need to validate them.
           if (!editParameter) {
