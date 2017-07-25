@@ -63,12 +63,12 @@ public class LoginAction extends BaseAction {
   private User user;
 
 
-  private String url;
+  private String url = "";
 
-  private String crp;
+  private String crp = "";
 
 
-  private String type;
+  private String type = "";
 
   // Managers
   private UserManager userManager;

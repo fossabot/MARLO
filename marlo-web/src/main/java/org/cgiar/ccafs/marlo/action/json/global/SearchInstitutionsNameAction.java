@@ -30,6 +30,7 @@ import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.struts2.dispatcher.HttpParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,8 +73,8 @@ public class SearchInstitutionsNameAction extends BaseAction {
 
   @Override
   public void prepare() throws Exception {
-    Map<String, Object> parameters = this.getParameters();
-    name = StringUtils.trim(((String[]) parameters.get(APConstants.INSTITUTION_NAME))[0]);
+    HttpParameters parameters = this.getParameters();
+    name = StringUtils.trim((parameters.get(APConstants.INSTITUTION_NAME).getValue()));
 
 
   }
