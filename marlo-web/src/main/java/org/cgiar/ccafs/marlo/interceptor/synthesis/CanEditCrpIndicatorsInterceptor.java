@@ -34,6 +34,7 @@ import java.util.Map;
 import com.google.inject.Inject;
 import com.opensymphony.xwork2.ActionInvocation;
 import com.opensymphony.xwork2.interceptor.AbstractInterceptor;
+import org.apache.struts2.dispatcher.HttpParameters;
 
 /**
  * @author Christian Garciaa - CIAT/CCAFS
@@ -45,7 +46,7 @@ public class CanEditCrpIndicatorsInterceptor extends AbstractInterceptor impleme
    * 
    */
   private static final long serialVersionUID = -2220001958027276963L;
-  Map<String, Object> parameters;
+  HttpParameters parameters;
   Map<String, Object> session;
   Crp crp;
 
@@ -87,7 +88,7 @@ public class CanEditCrpIndicatorsInterceptor extends AbstractInterceptor impleme
     long liaisonInstitutionID;
 
     try {
-      liaisonInstitutionID = Long.parseLong(((String[]) parameters.get(APConstants.LIAISON_INSTITUTION_REQUEST_ID))[0]);
+      liaisonInstitutionID = Long.parseLong((parameters.get(APConstants.LIAISON_INSTITUTION_REQUEST_ID).getValue()));
     } catch (Exception e) {
       if (user.getIpLiaisonUsers() != null || !user.getIpLiaisonUsers().isEmpty()) {
 
@@ -129,7 +130,7 @@ public class CanEditCrpIndicatorsInterceptor extends AbstractInterceptor impleme
 
     // TODO Validate is the project is new
     if (parameters.get(APConstants.EDITABLE_REQUEST) != null) {
-      String stringEditable = ((String[]) parameters.get(APConstants.EDITABLE_REQUEST))[0];
+      String stringEditable = (parameters.get(APConstants.EDITABLE_REQUEST).getValue());
       editParameter = stringEditable.equals("true");
       if (!editParameter) {
         baseAction.setEditableParameter(hasPermissionToEdit);

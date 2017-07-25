@@ -35,6 +35,7 @@ import java.util.Map;
 import com.google.inject.Inject;
 import com.opensymphony.xwork2.ActionInvocation;
 import com.opensymphony.xwork2.interceptor.AbstractInterceptor;
+import org.apache.struts2.dispatcher.HttpParameters;
 
 /**
  * @author Hermes Jiménez - CIAT/CCAFS
@@ -44,7 +45,7 @@ public class CanEditSynthesisInterceptor extends AbstractInterceptor implements 
   private static final long serialVersionUID = -1238999468476665730L;
 
 
-  Map<String, Object> parameters;
+  HttpParameters parameters;
   Map<String, Object> session;
   Crp crp;
 
@@ -86,7 +87,7 @@ public class CanEditSynthesisInterceptor extends AbstractInterceptor implements 
     long liaisonInstitutionID;
     user = userManager.getUser(baseAction.getCurrentUser().getId());
     try {
-      liaisonInstitutionID = Long.parseLong(((String[]) parameters.get(APConstants.LIAISON_INSTITUTION_REQUEST_ID))[0]);
+      liaisonInstitutionID = Long.parseLong(parameters.get(APConstants.LIAISON_INSTITUTION_REQUEST_ID).getValue());
     } catch (Exception e) {
       if (user.getIpLiaisonUsers() != null || !user.getIpLiaisonUsers().isEmpty()) {
 
@@ -139,7 +140,7 @@ public class CanEditSynthesisInterceptor extends AbstractInterceptor implements 
 
     // TODO Validate is the project is new
     if (parameters.get(APConstants.EDITABLE_REQUEST) != null) {
-      String stringEditable = ((String[]) parameters.get(APConstants.EDITABLE_REQUEST))[0];
+      String stringEditable = (parameters.get(APConstants.EDITABLE_REQUEST).getValue());
       editParameter = stringEditable.equals("true");
       if (!editParameter) {
         baseAction.setEditableParameter(hasPermissionToEdit);

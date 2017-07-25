@@ -76,7 +76,7 @@ public class PublicationInterceptor extends AbstractInterceptor implements Seria
     boolean hasPermissionToEdit = false;
     boolean editParameter = false;
 
-    String projectParameter = ((String[]) parameters.get(APConstants.PROJECT_DELIVERABLE_REQUEST_ID))[0];
+    String projectParameter = (parameters.get(APConstants.PROJECT_DELIVERABLE_REQUEST_ID).getValue());
 
     deliverableID = Long.parseLong(projectParameter);
 
@@ -104,7 +104,7 @@ public class PublicationInterceptor extends AbstractInterceptor implements Seria
 
 
       if (parameters.get(APConstants.EDITABLE_REQUEST) != null) {
-        String stringEditable = ((String[]) parameters.get(APConstants.EDITABLE_REQUEST))[0];
+        String stringEditable = (parameters.get(APConstants.EDITABLE_REQUEST).getValue());
         editParameter = stringEditable.equals("true");
         if (!editParameter) {
           baseAction.setEditableParameter(hasPermissionToEdit);
@@ -120,7 +120,7 @@ public class PublicationInterceptor extends AbstractInterceptor implements Seria
       }
 
       if (parameters.get(APConstants.EDITABLE_REQUEST) != null) {
-        String stringEditable = ((String[]) parameters.get(APConstants.EDITABLE_REQUEST))[0];
+        String stringEditable = (parameters.get(APConstants.EDITABLE_REQUEST).getValue());
         editParameter = stringEditable.equals("true");
         if (!editParameter) {
           baseAction.setEditableParameter(hasPermissionToEdit);
