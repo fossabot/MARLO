@@ -160,20 +160,23 @@
       <groupId>com.google.inject.extensions</groupId>
       <artifactId>guice-struts2</artifactId>
       <version>${guice.version}</version>
-      <scope>compile</scope>
-      <exclusions>
-        <!-- clashes with newer version included in struts2.1.6 -->
-        <exclusion>
-          <groupId>opensymphony</groupId>
-          <artifactId>xwork</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>ognl</groupId>
-          <artifactId>ognl</artifactId>
-        </exclusion>
-      </exclusions>
+      <scope>compile</scope>      
     </dependency>
-    <dependency>
+
+    
+    
+      <dependency> 
+  <groupId>ognl</groupId> 
+  <artifactId>ognl</artifactId> 
+  <version>3.1.10</version> 
+  </dependency> 
+  
+    <dependency> 
+    <groupId>com.opensymphony</groupId> 
+    <artifactId>xwork</artifactId> 
+    <version>2.1.2</version> 
+  </dependency> 
+        <dependency>
       <groupId>com.google.inject.extensions</groupId>
       <artifactId>guice-assistedinject</artifactId>
       <version>${guice.version}</version>
@@ -485,6 +488,17 @@
     <artifactId>wsdl4j</artifactId>
     <version>1.6.2</version>
 </dependency>
+
+ <dependency>
+    <groupId>org.apache.logging.log4j</groupId>
+    <artifactId>log4j-api</artifactId>
+    <version>2.8.2</version>
+  </dependency>
+  <dependency>
+    <groupId>org.apache.logging.log4j</groupId>
+    <artifactId>log4j-core</artifactId>
+    <version>2.8.2</version>
+  </dependency>
 
   </dependencies>
 
