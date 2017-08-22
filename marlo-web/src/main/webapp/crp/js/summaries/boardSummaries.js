@@ -243,8 +243,7 @@ function generateReport(e) {
     $select.append("<option value='" + $(".planningYear").text() + "' selected>" + $(".planningYear").text()
         + "</option>");
     $("#optionsPopUp").find("#planning").attr("checked", true).trigger("click");
-    $("#optionsPopUp").find("#reporting").removeAttr("checked");
-    $("#optionsPopUp").find("#reporting").removeAttr("disabled");
+    $("#optionsPopUp").find("#reporting").removeAttr("checked disabled");
   } else if($($selected).find(".forCycle").hasClass("forPlanningCycle")) {
     // Planning
     $select.append("<option value='" + $(".planningYear").text() + "' selected>" + $(".planningYear").text()

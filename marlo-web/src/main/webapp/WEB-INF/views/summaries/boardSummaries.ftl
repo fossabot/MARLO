@@ -167,6 +167,25 @@
             </div>
           </div>
             [/#if]
+            
+             [#-- OUTGOING/ACTIVE Projects --]
+            <div class="summariesFiles borderBox col-md-12" >
+            <div class="col-md-12 title-file">
+           
+              <input class="hidden" type="radio" name="formOptions" id="OutgoingActiveProjectsSummaryAction" value="OutgoingActiveProjectsSummaryAction"/>
+              <label for="">[@s.text name="summaries.board.report.projectbasic" /]</label>
+            
+            </div>
+            <span class="description col-md-12">[@s.text name="summaries.board.report.projectbasic.description" /]</span>
+              <div class="extraOptions" style="display:none">
+              <span class="hidden fileTypes excelType">OutgoingActiveProjectsSummary-OutgoingActiveProjectsSummary</span>
+              <span class="hidden forReportingCycle forCycle"></span>
+              <span class="hidden specificYears">2015-2016-2017</span>
+                <div class="pull-right">
+                  <a style="display:none;" target="_blank" class="generateReport addButton pull-right" style="" href="#">[@s.text name="form.buttons.generate" /]</a>
+                </div>
+            </div>
+          </div>
           [#-- Synthesis by Outcome 
           <div class="summariesFiles borderBox col-md-12" >
             <div class="col-md-12 title-file">
