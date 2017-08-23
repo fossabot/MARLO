@@ -3,10 +3,6 @@ $(document).ready(init);
 
 function init() {
   
-  if($(".checkEmail").val() != "") {
-    searchUserByEmail($(".checkEmail").val());
-  }
-
   /* Declaring Events */
   attachEvents();
   $('form select').select2({
@@ -69,9 +65,7 @@ function init() {
   $marloUsersTable.on('draw.dt', function() {
     $marloUsersTable.find('tbody tr').on("click", function() {
       var userSelectedEmail = $(this).find('span.email').text();
-      var $inputEmail = $('input.checkEmail');
-      $inputEmail.val(userSelectedEmail);
-      
+
       // Find user details
       searchUserByEmail(userSelectedEmail);
       

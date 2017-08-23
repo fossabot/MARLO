@@ -65,19 +65,7 @@
                 <input type="hidden" class="isNewUser" name="isNewUser" value=""/>
                 <input type="hidden" class="userId" name="user.id" />
                 
-                [#-- User Email --]
-                <div class="row hide">
-                  <div class="col-md-7 form-group">
-                    [@customForm.input name="" i18nkey="Search by user email"  className="checkEmail" type="text"  required=true editable=true /]
-                  </div>
-                  <div class="col-md-5">
-                    <br />
-                    <span class="infoService"></span>
-                  </div>
-                </div>
-                
                 <div class="form-group row">
-                  
                   [#-- User Information --]
                   <div class="col-md-9">
                     <h4 class="sectionTitle">User Information</h4>
@@ -116,7 +104,7 @@
                 <div class="crpList">
                 </div>
                 <div class="form-group">
-                  [@customForm.select name="user.crps" label=""  i18nkey="Select to add a crp" listName="crps" keyFieldName="id"  displayFieldName="name"  multiple=false required=true  className="crpSelect" editable=true disabled=true/]
+                  [@customForm.select name="user.crps" label=""  i18nkey="Select to add a crp" listName="crps" keyFieldName="id"  displayFieldName="acronym"  multiple=false required=true  className="crpSelect" editable=true disabled=true/]
                 </div>
                 
               </div>
