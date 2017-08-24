@@ -1,24 +1,15 @@
-$(document).ready(init);
 var crpList = [];
+$(document).ready(init);
+
 function init() {
-
-  if($(".checkEmail").val() != "") {
-    ajaxService($(".checkEmail").val());
-  }
-
+  
   /* Declaring Events */
   attachEvents();
   $('form select').select2({
     width: "100%"
   });
   
-  // Add options
-  $(".cgiarUser").addOption("false", "No");
-  $(".cgiarUser").addOption("true", "Yes");
-  $(".isActive").addOption("false", "No");
-  $(".isActive").addOption("true", "Yes");
-  $(".autosave").addOption("false", "No");
-  $(".autosave").addOption("true", "Yes");
+
   $(".crpSelect").find("option").each(function(i,e) {
     var option = {
         "id": $(e).val(),
@@ -56,12 +47,12 @@ function init() {
           }, {
               data: "isActive",
               render: function(data,type,full,meta) {
-                return '<div class="text-center"><img src="' + baseURL + '/images/global/checked-' + data + '.png" /></div>';
+                return '<div class="text-center"><img src="' + baseUrlMedia + '/images/global/checked-' + data + '.png" /></div>';
               }
           }, {
               data: "autoSaveActive",
               render: function(data,type,full,meta) {
-                return '<div class="text-center"><img src="' + baseURL + '/images/global/checked-' + data + '.png" /></div>';
+                return '<div class="text-center"><img src="' + baseUrlMedia + '/images/global/checked-' + data + '.png" /></div>';
               }
           }, {
               data: "lastLogin",
@@ -74,18 +65,13 @@ function init() {
   $marloUsersTable.on('draw.dt', function() {
     $marloUsersTable.find('tbody tr').on("click", function() {
       var userSelectedEmail = $(this).find('span.email').text();
-      var $inputEmail = $('input.checkEmail');
-      $inputEmail.val(userSelectedEmail);
-      // Go to field
-      /*
-       * $('html, body').animate({ scrollTop: $inputEmail.offset().top - 110 }, 1500);
-       */
+
       // Find user details
-      ajaxService(userSelectedEmail);
+      searchUserByEmail(userSelectedEmail);
       
       // Modal
       $('#myModal').on('shown.bs.modal', function () {
-        console.log('Modla open');
+        // Model open
       })
       $('#myModal').modal();
     })
@@ -140,7 +126,7 @@ function attachEvents() {
 
 }
 
-function ajaxService(email) {
+function searchUserByEmail(email) {
   if(!validateEmail(email)) {
     return
   } 
@@ -154,7 +140,9 @@ function ajaxService(email) {
         console.log(m);
         // Existing user
         enableFields(true);
+        // Update User Info
         updateData(m.userFound);
+        // Update CRPs
         updateCrps(m.crpUserFound);
         $(".crpSelect").attr("disabled", false);
          
@@ -174,26 +162,18 @@ function updateData(user) {
   $(".userUsername").val(user.username);
   $(".userPassword").val("");
   // Configuration
-  $(".cgiarUser").val(user.cgiar.toString()).trigger("change");
-  $(".isActive").val(user.active.toString()).trigger("change");
-  $(".autosave").val(user.autosave.toString()).trigger("change");
-
+  $('#is_CGIAR_user input[type="radio"][value="'+user.cgiar+'"]').prop('checked',true);
+  $('#is_active_User input[type="radio"][value="'+user.active+'"]').prop('checked',true);
+  $('#is_autosave_active input[type="radio"][value="'+user.autosave+'"]').prop('checked',true);
 
 }
 
 function enableFields(state) {
   // User data
-  // $(".userFirstName").attr("readonly", state);
-  // $(".userLastName").attr("readonly", state);
   $(".userEmail").attr("readonly", state);
-  // $(".userUsername").attr("readonly", state);
-  // $(".userPassword").attr("readonly", state);
-  
+
   // Configuration
   $(".cgiarUser").attr("disabled", state);
-  // $(".isActive").attr("disabled", state);
-  // $(".autosave").attr("disabled", state);
-
   $(".crpSelect").attr("disabled", state);
 
 }
