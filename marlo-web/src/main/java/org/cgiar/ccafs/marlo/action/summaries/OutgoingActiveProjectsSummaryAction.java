@@ -17,20 +17,13 @@
 package org.cgiar.ccafs.marlo.action.summaries;
 
 import org.cgiar.ccafs.marlo.action.BaseAction;
-import org.cgiar.ccafs.marlo.config.APConstants;
-import org.cgiar.ccafs.marlo.data.manager.CrpManager;
 import org.cgiar.ccafs.marlo.data.model.Crp;
 import org.cgiar.ccafs.marlo.utils.APConfig;
 
-import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 import com.google.inject.Inject;
-import org.pentaho.reporting.engine.classic.core.ClassicEngineBoot;
 import org.pentaho.reporting.engine.classic.core.MasterReport;
-import org.pentaho.reporting.libraries.resourceloader.ResourceManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,8 +42,6 @@ public class OutgoingActiveProjectsSummaryAction extends BaseAction implements S
   private byte[] bytesXLSX;
   // Streams
   InputStream inputStream;
-  // Managers
-  private CrpManager crpManager;
 
 
   @Inject
@@ -93,31 +84,10 @@ public class OutgoingActiveProjectsSummaryAction extends BaseAction implements S
   @Override
   public String execute() throws Exception {
 
-    ClassicEngineBoot.getInstance().start();
-    ByteArrayOutputStream os = new ByteArrayOutputStream();
-    ResourceManager manager = new ResourceManager();
-    manager.registerDefaults();
-
-    try {
-
-
-    } catch (Exception e) {
-      LOG.error("Error generating Outgoing Active Projects Summary " + e.getMessage());
-      throw e;
-    }
-
-    long stopTime = System.currentTimeMillis();
-    stopTime = stopTime - startTime;
-    LOG.info(
-      "Downloaded successfully: " + this.getFileName() + ". User: " + this.getCurrentUser().getComposedCompleteName()
-        + ". CRP: " + this.loggedCrp.getAcronym() + ". Time to generate: " + stopTime + "ms.");
 
     return SUCCESS;
   }
 
-  /********************************
-   * GETTERS AND SETTERS
-   ********************************/
 
   public byte[] getBytesXLSX() {
     return bytesXLSX;
@@ -132,23 +102,20 @@ public class OutgoingActiveProjectsSummaryAction extends BaseAction implements S
   @Override
   public String getContentType() {
     // TODO Auto-generated method stub
-    return "application/xlsx";
+    return null;
   }
 
   public String getCycle() {
     return cycle;
   }
 
+
   @Override
   public String getFileName() {
-    StringBuffer fileName = new StringBuffer();
-    fileName.append("OutgoingActiveProjectsSummary-");
-    fileName.append(this.year + "_");
-    fileName.append(new SimpleDateFormat("yyyyMMdd-HHmm").format(new Date()));
-    fileName.append(".xlsx");
-    return fileName.toString();
-
+    // TODO Auto-generated method stub
+    return null;
   }
+
 
   @Override
   public InputStream getInputStream() {
@@ -164,18 +131,6 @@ public class OutgoingActiveProjectsSummaryAction extends BaseAction implements S
 
   public int getYear() {
     return year;
-  }
-
-
-  @Override
-  public void prepare() {
-    try {
-      loggedCrp = (Crp) this.getSession().get(APConstants.SESSION_CRP);
-      loggedCrp = crpManager.getCrpById(loggedCrp.getId());
-    } catch (Exception e) {
-      LOG.error("Failed to get " + APConstants.SESSION_CRP + " parameter. Exception: " + e.getMessage());
-    }
-
   }
 
 
