@@ -15,7 +15,6 @@
 
 package org.cgiar.ccafs.marlo.action.json.global;
 
-
 import org.cgiar.ccafs.marlo.action.BaseAction;
 import org.cgiar.ccafs.marlo.config.APConstants;
 import org.cgiar.ccafs.marlo.ocs.model.AgreementOCS;
@@ -28,8 +27,6 @@ import com.google.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 
 /**
- * Service for get the OCS info through of the OCS Web services.
- * 
  * @author Christian Garcia - CIAT/CCAFS
  */
 public class OcsServiceAction extends BaseAction {
@@ -56,13 +53,8 @@ public class OcsServiceAction extends BaseAction {
 
 
   @Override
-  /**
-   * Get the OCS info an send the success result
-   */
   public String execute() throws Exception {
     json = ocsClient.getagreement(ocsCode);
-
-
     return SUCCESS;
   }
 
@@ -73,9 +65,6 @@ public class OcsServiceAction extends BaseAction {
 
 
   @Override
-  /**
-   * Get the OCS code send by http request parameter.
-   */
   public void prepare() throws Exception {
     Map<String, Object> parameters = this.getParameters();
     ocsCode = (StringUtils.trim(((String[]) parameters.get(APConstants.OCS_CODE_REQUEST_ID))[0]));

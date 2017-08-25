@@ -533,17 +533,17 @@ public class FundingSourceAction extends BaseAction {
          */
         if (fundingSource.getFundingSourceLocations() != null) {
 
-          List<FundingSourceLocation> countries =
-            new ArrayList<>(fundingSource.getFundingSourceLocations().stream().filter(fl -> fl.isActive()
-              && fl.getLocElementType() == null && fl.getLocElement().getLocElementType().getId() == 2)
-              .collect(Collectors.toList()));
+          List<FundingSourceLocation> countries = new ArrayList<>(fundingSource
+            .getFundingSourceLocations().stream().filter(fl -> fl.isActive() && fl.getLocElementType() == null
+              && fl.getLocElement() != null && fl.getLocElement().getLocElementType().getId() == 2)
+            .collect(Collectors.toList()));
 
           fundingSource.setFundingCountry(new ArrayList<>(countries));
 
-          List<FundingSourceLocation> regions =
-            new ArrayList<>(fundingSource.getFundingSourceLocations().stream().filter(fl -> fl.isActive()
+          List<FundingSourceLocation> regions = new ArrayList<>(fundingSource
+            .getFundingSourceLocations().stream().filter(fl -> fl.isActive() && fl.getLocElement() != null
               && fl.getLocElementType() == null && fl.getLocElement().getLocElementType().getId() == 1)
-              .collect(Collectors.toList()));
+            .collect(Collectors.toList()));
 
           List<FundingSourceLocation> regionsWScope = new ArrayList<>();
           if (regions.size() > 0) {
@@ -579,8 +579,12 @@ public class FundingSourceAction extends BaseAction {
 
       status = new HashMap<>();
       List<AgreementStatusEnum> list = Arrays.asList(AgreementStatusEnum.values());
-      for (AgreementStatusEnum agreementStatusEnum : list) {
-        status.put(agreementStatusEnum.getStatusId(), agreementStatusEnum.getStatus());
+      if (this.hasSpecificities(APConstants.CRP_STATUS_FUNDING_SOURCES)) {
+        for (AgreementStatusEnum agreementStatusEnum : list) {
+          status.put(agreementStatusEnum.getStatusId(), agreementStatusEnum.getStatus());
+        }
+      } else {
+        status.put(AgreementStatusEnum.ONGOING.getStatusId(), AgreementStatusEnum.ONGOING.getStatus());
       }
 
 
@@ -701,11 +705,24 @@ public class FundingSourceAction extends BaseAction {
       fundingSourceDB.setModificationJustification("");
       fundingSourceDB.setActiveSince(fundingSourceDB.getActiveSince());
 
-      // if donor has a select option, no option put donor null
+      // if Original donor has a select option, no option put donor null
       if (fundingSource.getInstitution().getId().longValue() != -1) {
         fundingSourceDB.setInstitution(fundingSource.getInstitution());
       } else {
         fundingSourceDB.setInstitution(null);
+      }
+
+
+      fundingSourceDB.setExtensionDate(fundingSource.getExtensionDate());
+      fundingSourceDB.setSynced(fundingSource.getSynced());
+      fundingSourceDB.setSyncedDate(fundingSource.getSyncedDate());
+      fundingSourceDB.setGrantAmount(fundingSource.getGrantAmount());
+
+      // if Direct donor has a select option, no option put donor null
+      if (fundingSource.getDirectDonor().getId().longValue() != -1) {
+        fundingSourceDB.setDirectDonor(fundingSource.getDirectDonor());
+      } else {
+        fundingSourceDB.setDirectDonor(null);
       }
 
 
@@ -897,7 +914,7 @@ public class FundingSourceAction extends BaseAction {
           fundingSourceLocationSave.setModifiedBy(this.getCurrentUser());
           fundingSourceLocationSave.setModificationJustification("");
           fundingSourceLocationSave.setFundingSource(fundingSourceDB);
-
+          fundingSourceLocationSave.setPercentage(fundingSourceLocation.getPercentage());
           if (!fundingSourceLocation.isScope()) {
             LocElement locElement = locElementManager.getLocElementById(fundingSourceLocation.getLocElement().getId());
 

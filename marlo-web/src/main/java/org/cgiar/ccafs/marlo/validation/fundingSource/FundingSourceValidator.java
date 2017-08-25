@@ -23,6 +23,7 @@ import org.cgiar.ccafs.marlo.data.manager.FundingSourceManager;
 import org.cgiar.ccafs.marlo.data.manager.InstitutionManager;
 import org.cgiar.ccafs.marlo.data.model.Crp;
 import org.cgiar.ccafs.marlo.data.model.FundingSource;
+import org.cgiar.ccafs.marlo.data.model.FundingSourceBudget;
 import org.cgiar.ccafs.marlo.data.model.FundingSourceInstitution;
 import org.cgiar.ccafs.marlo.data.model.ProjectSectionStatusEnum;
 import org.cgiar.ccafs.marlo.utils.InvalidFieldsMessages;
@@ -31,6 +32,7 @@ import org.cgiar.ccafs.marlo.validation.BaseValidator;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
@@ -112,12 +114,14 @@ public class FundingSourceValidator extends BaseValidator {
       action.getInvalidFields().put("input-fundingSource.endDate", InvalidFieldsMessages.EMPTYFIELD);
     }
 
-    // Validate the donor with id -1, beacause front end send this when there is not one selected
-    if (fundingSource.getInstitution() == null || fundingSource.getInstitution().getId() == null
-      || fundingSource.getInstitution().getId().longValue() == -1) {
-      this.addMessage(action.getText("fundingSource.institution.id"));
-      action.getInvalidFields().put("input-fundingSource.institution.id", InvalidFieldsMessages.EMPTYFIELD);
+    // Validate the direct donor with id -1, beacause front end send this when there is not one selected
+
+    if (fundingSource.getDirectDonor() == null || fundingSource.getDirectDonor().getId() == null
+      || fundingSource.getDirectDonor().getId().longValue() == -1) {
+      this.addMessage(action.getText("fundingSource.directDonor.id"));
+      action.getInvalidFields().put("input-fundingSource.directDonor.id", InvalidFieldsMessages.EMPTYFIELD);
     }
+
     if (!this.isValidString(fundingSource.getContactPersonName())) {
       this.addMessage(action.getText("fundingSource.contactPersonName"));
       action.getInvalidFields().put("input-fundingSource.contactPersonName", InvalidFieldsMessages.EMPTYFIELD);
@@ -143,6 +147,46 @@ public class FundingSourceValidator extends BaseValidator {
 
         }
       }
+    }
+
+
+    /**
+     * Validate Grant Amount only if the Funding source is Synced.
+     * If budgets are larger than the total amount, the funding source is pending for validation.
+     * A message is sent to the user indicating that there is something to modify. *
+     * 
+     * @author JULIANRODRIGUEZ <julian.rodriguez@cgiar.org>
+     * @date 23/08/2017
+     * @update Added null field validation when you calculate de currentBudget
+     * @author JULIANRODRIGUEZ <julian.rodriguez@cgiar.org>
+     * @date 25/08/2017
+     */
+
+    if (fundingSource.getSynced()) {
+
+      Double grantAmount = fundingSource.getGrantAmount();
+      List<FundingSourceBudget> budgets = fundingSource.getBudgets();
+      double currentBudget = 0;
+
+      for (FundingSourceBudget fundingSourceBudget : budgets) {
+        if (fundingSourceBudget.getBudget() != null) {
+          currentBudget += fundingSourceBudget.getBudget();
+        }
+
+      }
+
+      if (currentBudget > grantAmount) {
+
+
+        for (int i = 0; i < budgets.size(); i++) {
+          this.addMessage(action.getText("fundingSource.budgetWrongValue"));
+          action.getInvalidFields().put("input-fundingSource.budgets[" + i + "].budget",
+            InvalidFieldsMessages.WRONGVALUE);
+
+        }
+
+      }
+
     }
 
 
