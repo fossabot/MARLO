@@ -28,10 +28,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-public class OutgoingActiveProjectsSummaryAction extends BaseAction implements Summary {
+public class OngoingActiveProjectsSummaryAction extends BaseAction implements Summary {
 
   private static final long serialVersionUID = 1L;
-  private static Logger LOG = LoggerFactory.getLogger(OutgoingActiveProjectsSummaryAction.class);
+  private static Logger LOG = LoggerFactory.getLogger(OngoingActiveProjectsSummaryAction.class);
 
   // Parameters
   private Crp loggedCrp;
@@ -45,7 +45,7 @@ public class OutgoingActiveProjectsSummaryAction extends BaseAction implements S
 
 
   @Inject
-  public OutgoingActiveProjectsSummaryAction(APConfig config) {
+  public OngoingActiveProjectsSummaryAction(APConfig config) {
     super(config);
   }
 
@@ -69,7 +69,7 @@ public class OutgoingActiveProjectsSummaryAction extends BaseAction implements S
     masterReport.getParameterValues().put("i8nManagementLiaisonCP",
       this.getText("summaries.oaprojects.managementLiasionContPerson"));
     masterReport.getParameterValues().put("i8nFlagship", this.getText("summaries.oaprojects.flagships"));
-    masterReport.getParameterValues().put("i8nFlagship", this.getText("summaries.oaprojects.regionalPrograms"));
+    masterReport.getParameterValues().put("i8nRegionalPrograms", this.getText("summaries.oaprojects.regionalPrograms"));
     masterReport.getParameterValues().put("i8nW1W2", this.getText("summaries.oaprojects.w1w2"));
     masterReport.getParameterValues().put("i8nW3", this.getText("summaries.oaprojects.w3"));
     masterReport.getParameterValues().put("i8nBilateral", this.getText("summaries.oaprojects.bilateral"));
