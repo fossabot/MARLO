@@ -92,9 +92,9 @@
                   [#-- User Settings --]
                   <div class="col-md-3">
                     <h4 class="sectionTitle">User Settings</h4>
-                    <div class="form-group">[@radioFlat id="is_CGIAR_user" label="CGIAR user" name="user.cgiarUser" /]<hr /></div>
-                    <div class="form-group">[@radioFlat id="is_active_User" label="Is active" name="user.active" /]<hr /></div>
-                    <div class="form-group">[@radioFlat id="is_autosave_active" label="Autosave" name="user.autoSave" /]</div>
+                    <div class="form-group">[@radioComponent id="is_CGIAR_user" label="CGIAR user" name="user.cgiarUser" /]<hr /></div>
+                    <div class="form-group">[@radioComponent id="is_active_User" label="Is active" name="user.active" /]<hr /></div>
+                    <div class="form-group">[@radioComponent id="is_autosave_active" label="Autosave" name="user.autoSave" /]</div>
                   </div>
                   
                 </div>
@@ -103,6 +103,7 @@
                 <h4 class="sectionTitle">CRPs</h4>
                 <div class="crpList">
                 </div>
+                [#-- CRP Select --]
                 <div class="form-group">
                   [@customForm.select name="user.crps" label=""  i18nkey="Select to add a crp" listName="crps" keyFieldName="id"  displayFieldName="acronym"  multiple=false required=true  className="crpSelect" editable=true disabled=true/]
                 </div>
@@ -159,7 +160,7 @@
 
 [/#macro]
 
-[#macro radioFlat id label="" name="" value=false]
+[#macro radioComponent id label="" name="" value=false]
 <div id="${id}">
   <label for="">${label}:</label><br />
   <div class="radioFlat radio-inline">
