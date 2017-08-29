@@ -104,9 +104,9 @@
                 <table class="display table table-striped table-bordered  table-hover">
                   <thead>
                     <tr>
-                      <th>CRP</th>
-                      <th>Roles</th>
-                      <th>Remove</th>
+                      <th class="col-md-2">CRP</th>
+                      <th>Roles & responsibilities</th>
+                      <th class="col-md-1">Remove</th>
                     </tr>
                   </thead>
                   <tbody class="crpList">
@@ -143,23 +143,23 @@
 [#macro crpItem element index name  isTemplate=false]
   [#local customName = "${name}[${index}]" /]
   <tr id="crp-${isTemplate?string('template',(element.id)!)}" class="crpItem" >
-    <td>
-      [#-- Hidden inputs --]
+    [#-- CRP Title --]
+    <td> 
       <input type="hidden" class="crpUserId" name="${customName}.id" value=""/>
       <input type="hidden" class="crpUserCrpId" name="${customName}.crp.id" value="" />
-      [#-- Title --]
       <span title="" class="crpTitle">[#if element.crp?has_content][@utils.wordCutter string=(element.crp) maxPos=70 substr=" "/][#else]CCAFS[/#if]</span>
     </td>
+    [#-- Roles --]
     <td>
-      [#-- Roles --]
       <div id="roles" class="roles"> 
-        <div class="rolesList">
-          <span><i>Guest</i></span>
-        </div>
+        <ul class="rolesList">
+          <li><i>Guest</i></li>
+        </ul>
       </div>
     </td>
-    <td>
-      <span class="glyphicon glyphicon-remove pull-right removeCrp" aria-hidden="true" ></span>
+    [#-- Remove --]
+    <td class="text-center ">
+      <span class="glyphicon glyphicon-remove removeCrp" aria-hidden="true" ></span>
     </td>
   </tr>
 [/#macro]

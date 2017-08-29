@@ -110,6 +110,8 @@ function attachEvents() {
     var option = $(this).find("option:selected");
     addCrp(option);
   });
+  
+  $(".removeCrp").on("click", removeCRP);
 
 }
 
@@ -139,7 +141,6 @@ function searchUserByEmail(email) {
 }
 
 function updateData(user) {
-
   // User data
   $(".isNewUser").val(user.newUser);
   $(".userId").val(user.id);
@@ -189,16 +190,18 @@ function updateCrps(crps) {
     rolesList.empty();
     // Roles
     if(jQuery.isEmptyObject(e.role)){
-      rolesList.append("<span><i>Guest</i></span>");
+      rolesList.append("<li><i>Guest</i></li>");
     }else{
+      // Remove Button disabled
+      $item.find(".removeCrp").addClass('disabled').removeClass('active');
       $.each(e.role, function(iRole,eRole) {
         var infoList = "<br><ul>";
         $.each(eRole.roleInfo, function(index,element) {
-          infoList = infoList + "<li>" + element + "</li>";
+          infoList = infoList + "<li> <small>" + element + "</small></li>";
         });
         infoList = infoList + "</ul>";
         // Roles info
-        rolesList.append("<span> <strong>" + eRole.role +"</strong>  "+ infoList + "</span>");
+        rolesList.append("<li> <strong>" + eRole.role +"</strong>  "+ infoList + "</li>");
       });
     }
     $list.append($item);
@@ -217,7 +220,7 @@ function addCrp(option) {
   item.find(".crpUserCrpId").val($(option).val());
   var rolesList = item.find(".rolesList");
   rolesList.empty();
-  var span = "<span><i>Guest</i></span>";
+  var span = "<li><i>Guest</i></li>";
   rolesList.append(span);
   list.append(item);
   item.show("slow");
@@ -225,6 +228,14 @@ function addCrp(option) {
   $crpsSelect.val("-1");
   $crpsSelect.find("option[value='" + $(option).val() + "']").prop('disabled', true); // .remove();
   $crpsSelect.trigger('select2:change');
+  updateCrpIndex();
+}
+
+function removeCRP(){
+  if($(this).hasClass('disabled')){
+    return
+  }
+  $(this).parents('tr').remove();    
   updateCrpIndex();
 }
 
