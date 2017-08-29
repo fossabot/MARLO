@@ -99,6 +99,7 @@ public class SearchUserAction extends BaseAction {
           crp.put("crpUserId", crpUser.getId());
           crp.put("crpId", crpUser.getCrp().getId());
           crp.put("crpName", crpUser.getCrp().getName());
+          crp.put("composedName", crpUser.getCrp().getComposedName());
           crp.put("crpAcronym", crpUser.getCrp().getAcronym().toUpperCase());
 
 

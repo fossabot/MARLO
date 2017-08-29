@@ -100,12 +100,21 @@
                 </div>
                 
                 [#-- CRP List --]
-                <h4 class="sectionTitle">CRPs</h4>
-                <div class="crpList">
-                </div>
+                <h4 class="sectionTitle">CRPs, Centers and Platforms</h4>
+                <table class="display table table-striped table-bordered  table-hover">
+                  <thead>
+                    <tr>
+                      <th>CRP</th>
+                      <th>Roles</th>
+                      <th>Remove</th>
+                    </tr>
+                  </thead>
+                  <tbody class="crpList">
+                  </tbody>
+                </table>
                 [#-- CRP Select --]
                 <div class="form-group">
-                  [@customForm.select name="user.crps" label=""  i18nkey="Select to add a crp" listName="crps" keyFieldName="id"  displayFieldName="acronym"  multiple=false required=true  className="crpSelect" editable=true disabled=true/]
+                  [@customForm.select name="" label="" i18nkey="Select to add a crp" listName="crps" keyFieldName="id" displayFieldName="composedName" className="crpSelect" /]
                 </div>
                 
               </div>
@@ -118,46 +127,41 @@
           </div>
         </div>
         
-        
-        
       </div>
     </div>
   </div>
 </section>
 
 
-[#-- Key output Template --]
-[@crpItem element={} index=-1 name="user.crpUser"  isTemplate=true /]
+[#-- CRP Item Template --]
+<table style="display:none">
+  [@crpItem element={} index=-1 name="user.crpUser"  isTemplate=true /]
+</table>
 
 [#include "/WEB-INF/global/pages/footer.ftl" /]
 
 [#macro crpItem element index name  isTemplate=false]
   [#local customName = "${name}[${index}]" /]
-  <div id="crp-${isTemplate?string('template',(element.id)!)}" class="crpItem expandableBlock borderBox"  style="display:${isTemplate?string('none','block')}">
-    [#if editable] [#--&& (isTemplate) --]
-      <div class="removeLink">
-        <div id="removeCrp" class="removeCrp removeElement removeLink" title="[@s.text name='marloUsers.removeCrp' /]"></div>
-      </div>
-    [/#if]
-    <input type="hidden" class="crpUserId" name="${customName}.id" value=""/>
-    <input type="hidden" class="crpUserCrpId" name="${customName}.crp.id" value="" />
-    [#-- CRP Title --]
-    <div class="blockTitle closed">
+  <tr id="crp-${isTemplate?string('template',(element.id)!)}" class="crpItem" >
+    <td>
+      [#-- Hidden inputs --]
+      <input type="hidden" class="crpUserId" name="${customName}.id" value=""/>
+      <input type="hidden" class="crpUserCrpId" name="${customName}.crp.id" value="" />
+      [#-- Title --]
       <span title="" class="crpTitle">[#if element.crp?has_content][@utils.wordCutter string=(element.crp) maxPos=70 substr=" "/][#else]CCAFS[/#if]</span>
-      <div class="clearfix"></div>
-    </div>
-    
-    <div class="blockContent" style="display:none">
-      <hr />
-      [#-- ROLES --]
-      <div id="roles" class="roles">
-        <h5 class="sectionSubTitle">Roles</h5>
-        <div class="rolesList"></div>
+    </td>
+    <td>
+      [#-- Roles --]
+      <div id="roles" class="roles"> 
+        <div class="rolesList">
+          <span><i>Guest</i></span>
+        </div>
       </div>
-    </div>
-  
-  </div>
-
+    </td>
+    <td>
+      <span class="glyphicon glyphicon-remove pull-right removeCrp" aria-hidden="true" ></span>
+    </td>
+  </tr>
 [/#macro]
 
 [#macro radioComponent id label="" name="" value=false]

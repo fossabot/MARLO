@@ -189,9 +189,13 @@ public class Crp implements java.io.Serializable, IAuditLog {
     return activeSince;
   }
 
-
   public Integer getCategory() {
     return category;
+  }
+
+
+  public String getComposedName() {
+    return this.getAcronym() + ": " + this.getName();
   }
 
   public User getCreatedBy() {
