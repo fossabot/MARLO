@@ -5,9 +5,9 @@ function init() {
   
   /* Declaring Events */
   attachEvents();
-  $('form select').select2({
-    width: "100%"
-  });
+  /*
+   * $('form select').select2({ width: "100%" });
+   */
   
 
   $(".crpSelect").find("option").each(function(i,e) {
@@ -106,23 +106,12 @@ function attachEvents() {
 
   $(".button-save").on("click", checkAllFields);
 
-  $('.blockTitle.closed').on('click', function() {
-    if($(this).hasClass('closed')) {
-      $('.blockContent').slideUp();
-      $('.blockTitle').removeClass('opened').addClass('closed');
-      $(this).removeClass('closed').addClass('opened');
-    } else {
-      $(this).removeClass('opened').addClass('closed');
-    }
-    $(this).next().slideToggle('slow', function() {
-      $(this).find('textarea').autoGrow();
-    });
-  });
-
   $(".crpSelect").on("change", function() {
     var option = $(this).find("option:selected");
     addCrp(option);
   });
+  
+  $(".removeCrp").on("click", removeCRP);
 
 }
 
@@ -152,7 +141,6 @@ function searchUserByEmail(email) {
 }
 
 function updateData(user) {
-
   // User data
   $(".isNewUser").val(user.newUser);
   $(".userId").val(user.id);
@@ -171,7 +159,6 @@ function updateData(user) {
 function enableFields(state) {
   // User data
   $(".userEmail").attr("readonly", state);
-
   // Configuration
   $(".cgiarUser").attr("disabled", state);
   $(".crpSelect").attr("disabled", state);
@@ -179,55 +166,76 @@ function enableFields(state) {
 }
 
 function updateCrpSelect() {
-  var select = $(".crpSelect");
-  select.empty();
+  var $select = $(".crpSelect");
+  $select.empty();
   $.each(crpList, function(i,e) {
     select.addOption(e.id, e.name);
   });
 }
 
 function updateCrps(crps) {
-  var item, list = $(".crpList");
-  list.empty();
+  var $list = $(".crpList");
+  var $crpsSelect = $("select.crpSelect");
+  $crpsSelect.find("option").prop('disabled', false);
+  $list.empty();
   $.each(crps, function(i,e) {
-    item = $("#crp-template").clone(true).removeAttr("id");
-    item.find(".crpTitle").html(e.crpAcronym)
-    item.find(".crpUserId").val(e.crpUserId)
-    item.find(".crpUserCrpId").val(e.crpId);
-    // Remove crps from crpSelect
-    $(".crpSelect").find("option[value='" + e.crpId + "']").remove();
+    var $item = $("#crp-template").clone(true).removeAttr("id");
+    $item.find(".crpTitle").html((e.crpAcronym))
+    $item.find(".crpUserId").val(e.crpUserId)
+    $item.find(".crpUserCrpId").val(e.crpId);
+    // Remove CRPs from the select component
+    $crpsSelect.find("option[value='" + e.crpId + "']").prop('disabled', true);
     // Role list
-    var rolesList = $(item).find(".rolesList");
+    var rolesList = $item.find(".rolesList");
+    rolesList.empty();
     // Roles
-    $.each(e.role, function(iRole,eRole) {
-      var infoList = "<br><ul>";
-      $.each(eRole.roleInfo, function(index,element) {
-        infoList = infoList + "<li>" + element + "</li>";
+    if(jQuery.isEmptyObject(e.role)){
+      rolesList.append("<li><i>Guest</i></li>");
+    }else{
+      // Remove Button disabled
+      $item.find(".removeCrp").addClass('disabled').removeClass('active');
+      $.each(e.role, function(iRole,eRole) {
+        var infoList = "<br><ul>";
+        $.each(eRole.roleInfo, function(index,element) {
+          infoList = infoList + "<li> <small>" + element + "</small></li>";
+        });
+        infoList = infoList + "</ul>";
+        // Roles info
+        rolesList.append("<li> <strong>" + eRole.role +"</strong>  "+ infoList + "</li>");
       });
-      infoList = infoList + "</ul>";
-      var span = "<span class='roleSpan'>" + eRole.role + infoList + "</span>";
-      // Roles info
-
-      rolesList.append(span);
-    });
-    list.append(item);
-    item.show("slow");
+    }
+    $list.append($item);
+    $item.show("slow");
   });
+  $crpsSelect.trigger('select2:change');
   updateCrpIndex();
 }
 
 function addCrp(option) {
   var list = $(".crpList");
   var item = $("#crp-template").clone(true).removeAttr("id");
-  item.find(".crpTitle").html($(option).html());
+  var $crpsSelect = $(".crpSelect");
+  item.find(".crpTitle").html(($(option).html()).split(":")[0]);
   item.find(".crpUserId").val("-1");
   item.find(".crpUserCrpId").val($(option).val());
   var rolesList = item.find(".rolesList");
-  var span = "<span class='roleSpan'>Guest</span>";
+  rolesList.empty();
+  var span = "<li><i>Guest</i></li>";
   rolesList.append(span);
   list.append(item);
   item.show("slow");
-  $(".crpSelect").find("option[value='" + $(option).val() + "']").remove();
+  // Selected option disabled
+  $crpsSelect.val("-1");
+  $crpsSelect.find("option[value='" + $(option).val() + "']").prop('disabled', true); // .remove();
+  $crpsSelect.trigger('select2:change');
+  updateCrpIndex();
+}
+
+function removeCRP(){
+  if($(this).hasClass('disabled')){
+    return
+  }
+  $(this).parents('tr').remove();    
   updateCrpIndex();
 }
 
@@ -239,6 +247,7 @@ function validateEmail(email) {
 
 function checkAllFields(e) {
   var count = 0;
+  // If has at least one CRP selected
   if($(".crpList").find(".crpItem").length > 0) {
     count++;
   }
