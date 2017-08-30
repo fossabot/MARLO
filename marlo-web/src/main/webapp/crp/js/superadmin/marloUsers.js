@@ -81,7 +81,7 @@ function init() {
    * Add New User
    */
   $('#addNewUser').on('click', function(){
-    enableFields(false);
+    
     updateData({
       "lastName":"",
       "autosave":true,
@@ -106,12 +106,19 @@ function attachEvents() {
 
   $(".button-save").on("click", checkAllFields);
 
+  // Add a new CRP to the current user
   $(".crpSelect").on("change", function() {
     var option = $(this).find("option:selected");
     addCrp(option);
   });
   
+  // Remove a CRP from the current user
   $(".removeCrp").on("click", removeCRP);
+  
+  // Change CGIAR state
+  $('#is_CGIAR_user input[type="radio"]').on('change', function(){
+    enableFields(($(this).val() === "true"));
+  });
 
 }
 
@@ -127,8 +134,6 @@ function searchUserByEmail(email) {
       },
       success: function(m) {
         console.log(m);
-        // Existing user
-        enableFields(true);
         // Update User Info
         updateData(m.userFound);
         // Update CRPs
@@ -153,16 +158,17 @@ function updateData(user) {
   $('#is_CGIAR_user input[type="radio"][value="'+user.cgiar+'"]').prop('checked',true);
   $('#is_active_User input[type="radio"][value="'+user.active+'"]').prop('checked',true);
   $('#is_autosave_active input[type="radio"][value="'+user.autosave+'"]').prop('checked',true);
+  // Hide/Enable fields
+  enableFields(user.cgiar);
 
 }
 
 function enableFields(state) {
   // User data
-  $(".userEmail").attr("readonly", state);
-  // Configuration
-  $(".cgiarUser").attr("disabled", state);
-  $(".crpSelect").attr("disabled", state);
-
+  $(".userUsername").attr("readonly", state);
+  $(".userFirstName").attr("readonly", state);
+  $(".userLastName").attr("readonly", state);
+  $(".userPassword").attr("readonly", state);
 }
 
 function updateCrpSelect() {
