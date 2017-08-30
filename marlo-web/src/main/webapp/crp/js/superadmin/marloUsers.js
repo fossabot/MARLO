@@ -117,7 +117,7 @@ function attachEvents() {
   
   // Change CGIAR state
   $('#is_CGIAR_user input[type="radio"]').on('change', function(){
-    enableFields(($(this).val() === "true"));
+    enableCGIARFields(($(this).val() === "true"));
   });
 
 }
@@ -159,12 +159,12 @@ function updateData(user) {
   $('#is_active_User input[type="radio"][value="'+user.active+'"]').prop('checked',true);
   $('#is_autosave_active input[type="radio"][value="'+user.autosave+'"]').prop('checked',true);
   // Hide/Enable fields
-  enableFields(user.cgiar);
+  enableCGIARFields(user.cgiar);
   $(".userEmail").attr("readonly", !user.newUser);
 
 }
 
-function enableFields(state) {
+function enableCGIARFields(state) {
   // User data
   $(".userUsername").attr("readonly", state);
   $(".userFirstName").attr("readonly", state);
