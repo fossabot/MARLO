@@ -104,7 +104,7 @@
                 <table class="display table table-striped table-bordered  table-hover">
                   <thead>
                     <tr>
-                      <th class="col-md-2">CRP</th>
+                      <th class="col-md-1">CRP</th>
                       <th>Roles & responsibilities</th>
                       <th class="col-md-1">Remove</th>
                     </tr>
@@ -114,7 +114,7 @@
                 </table>
                 [#-- CRP Select --]
                 <div class="form-group">
-                  [@customForm.select name="" label="" i18nkey="Select to add a crp" listName="crps" keyFieldName="id" displayFieldName="composedName" className="crpSelect" /]
+                  [@customForm.select name="" label="" i18nkey="Select from the list below and grant access as Guest" listName="crps" keyFieldName="id" displayFieldName="composedName" className="crpSelect" /]
                 </div>
                 
               </div>

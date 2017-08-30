@@ -205,3 +205,8 @@ td {
   color: #009688;
   cursor: auto
 }
+
+ul.rolesList {
+  margin: 0;
+  padding-left: 24px;
+}
