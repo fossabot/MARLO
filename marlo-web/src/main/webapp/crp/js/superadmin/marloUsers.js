@@ -148,10 +148,10 @@ function searchUserByEmail(email) {
 function updateData(user) {
   // User data
   $(".isNewUser").val(user.newUser);
+  $(".userEmail").val(user.email);
   $(".userId").val(user.id);
   $(".userFirstName").val(user.name);
   $(".userLastName").val(user.lastName);
-  $(".userEmail").val(user.email);
   $(".userUsername").val(user.username);
   $(".userPassword").val("");
   // Configuration
@@ -160,6 +160,7 @@ function updateData(user) {
   $('#is_autosave_active input[type="radio"][value="'+user.autosave+'"]').prop('checked',true);
   // Hide/Enable fields
   enableFields(user.cgiar);
+  $(".userEmail").attr("readonly", !user.newUser);
 
 }
 
@@ -193,13 +194,13 @@ function updateCrps(crps) {
     $crpsSelect.find("option[value='" + e.crpId + "']").prop('disabled', true);
     // Role list
     var rolesList = $item.find(".rolesList");
+    var isGuest = false;
     rolesList.empty();
     // Roles
     if(jQuery.isEmptyObject(e.role)){
       rolesList.append("<li><i>Guest</i></li>");
+      isGuest = true;
     }else{
-      // Remove Button disabled
-      $item.find(".removeCrp").addClass('disabled').removeClass('active');
       $.each(e.role, function(iRole,eRole) {
         var infoList = "<br><ul>";
         $.each(eRole.roleInfo, function(index,element) {
@@ -208,7 +209,15 @@ function updateCrps(crps) {
         infoList = infoList + "</ul>";
         // Roles info
         rolesList.append("<li> <strong>" + eRole.role +"</strong>  "+ infoList + "</li>");
+        // Validate Guest
+        isGuest = (eRole.role == "Guest");
       });
+    }
+    // Remove Button disabled
+    if(isGuest){
+      $item.find(".removeCrp").addClass('active').removeClass('disabled');
+    }else{
+      $item.find(".removeCrp").addClass('disabled').removeClass('active');
     }
     $list.append($item);
     $item.show("slow");
