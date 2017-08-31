@@ -81,7 +81,7 @@ function init() {
    * Add New User
    */
   $('#addNewUser').on('click', function(){
-    enableFields(false);
+    
     updateData({
       "lastName":"",
       "autosave":true,
@@ -106,12 +106,19 @@ function attachEvents() {
 
   $(".button-save").on("click", checkAllFields);
 
+  // Add a new CRP to the current user
   $(".crpSelect").on("change", function() {
     var option = $(this).find("option:selected");
     addCrp(option);
   });
   
+  // Remove a CRP from the current user
   $(".removeCrp").on("click", removeCRP);
+  
+  // Change CGIAR state
+  $('#is_CGIAR_user input[type="radio"]').on('change', function(){
+    enableCGIARFields(($(this).val() === "true"));
+  });
 
 }
 
@@ -127,8 +134,6 @@ function searchUserByEmail(email) {
       },
       success: function(m) {
         console.log(m);
-        // Existing user
-        enableFields(true);
         // Update User Info
         updateData(m.userFound);
         // Update CRPs
@@ -143,26 +148,28 @@ function searchUserByEmail(email) {
 function updateData(user) {
   // User data
   $(".isNewUser").val(user.newUser);
+  $(".userEmail").val(user.email);
   $(".userId").val(user.id);
   $(".userFirstName").val(user.name);
   $(".userLastName").val(user.lastName);
-  $(".userEmail").val(user.email);
   $(".userUsername").val(user.username);
   $(".userPassword").val("");
   // Configuration
   $('#is_CGIAR_user input[type="radio"][value="'+user.cgiar+'"]').prop('checked',true);
   $('#is_active_User input[type="radio"][value="'+user.active+'"]').prop('checked',true);
   $('#is_autosave_active input[type="radio"][value="'+user.autosave+'"]').prop('checked',true);
+  // Hide/Enable fields
+  enableCGIARFields(user.cgiar);
+  $(".userEmail").attr("readonly", !user.newUser);
 
 }
 
-function enableFields(state) {
+function enableCGIARFields(state) {
   // User data
-  $(".userEmail").attr("readonly", state);
-  // Configuration
-  $(".cgiarUser").attr("disabled", state);
-  $(".crpSelect").attr("disabled", state);
-
+  $(".userUsername").attr("readonly", state);
+  $(".userFirstName").attr("readonly", state);
+  $(".userLastName").attr("readonly", state);
+  $(".userPassword").attr("readonly", state);
 }
 
 function updateCrpSelect() {
@@ -187,13 +194,13 @@ function updateCrps(crps) {
     $crpsSelect.find("option[value='" + e.crpId + "']").prop('disabled', true);
     // Role list
     var rolesList = $item.find(".rolesList");
+    var isGuest = false;
     rolesList.empty();
     // Roles
     if(jQuery.isEmptyObject(e.role)){
       rolesList.append("<li><i>Guest</i></li>");
+      isGuest = true;
     }else{
-      // Remove Button disabled
-      $item.find(".removeCrp").addClass('disabled').removeClass('active');
       $.each(e.role, function(iRole,eRole) {
         var infoList = "<br><ul>";
         $.each(eRole.roleInfo, function(index,element) {
@@ -202,7 +209,15 @@ function updateCrps(crps) {
         infoList = infoList + "</ul>";
         // Roles info
         rolesList.append("<li> <strong>" + eRole.role +"</strong>  "+ infoList + "</li>");
+        // Validate Guest
+        isGuest = (eRole.role == "Guest");
       });
+    }
+    // Remove Button disabled
+    if(isGuest){
+      $item.find(".removeCrp").addClass('active').removeClass('disabled');
+    }else{
+      $item.find(".removeCrp").addClass('disabled').removeClass('active');
     }
     $list.append($item);
     $item.show("slow");
