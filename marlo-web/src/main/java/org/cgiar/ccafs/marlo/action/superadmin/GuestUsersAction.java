@@ -16,6 +16,7 @@
 package org.cgiar.ccafs.marlo.action.superadmin;
 
 import org.cgiar.ccafs.marlo.action.BaseAction;
+import org.cgiar.ccafs.marlo.action.summaries.OngoingActiveProjectsSummaryAction;
 import org.cgiar.ccafs.marlo.config.APConstants;
 import org.cgiar.ccafs.marlo.data.manager.CrpManager;
 import org.cgiar.ccafs.marlo.data.manager.CrpUserManager;
@@ -30,6 +31,9 @@ import org.cgiar.ccafs.marlo.data.model.UserRole;
 import org.cgiar.ccafs.marlo.utils.APConfig;
 import org.cgiar.ccafs.marlo.utils.SendMailS;
 
+import org.cgiar.ciat.auth.LDAPService;
+import org.cgiar.ciat.auth.LDAPUser;
+
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -43,6 +47,8 @@ import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Hermes Jiménez - CIAT/CCAFS
@@ -51,6 +57,7 @@ public class GuestUsersAction extends BaseAction {
 
 
   private static final long serialVersionUID = 6860177996446505143L;
+  private static Logger LOG = LoggerFactory.getLogger(OngoingActiveProjectsSummaryAction.class);
 
 
   /**
@@ -136,7 +143,7 @@ public class GuestUsersAction extends BaseAction {
       user = userManager.getUser(userID);
       System.out.println("");
     } catch (Exception e) {
-
+      LOG.error("There was an error in GuestUsersAction.prepare method: " + e.getMessage());
     }
 
     crps = new ArrayList<>(
@@ -149,104 +156,215 @@ public class GuestUsersAction extends BaseAction {
   }
 
 
+  /**
+   * update the method save. Optimize code and add new features
+   * new features:
+   * if the user is a cgiar user, search into ldap server by the username
+   * the users can eliminate guest permission to crps in the user interface
+   * 
+   * @author JULIANRODRIGUEZ <julian.rodriguez@cgiar.org>
+   * @since 30/08/2017
+   */
   @Override
   public String save() {
+
     User newUser;
     long newUserID;
+    LDAPUser userLDAP = null;
+    List<CrpUser> crpsForDeleting;
+    List<CrpUser> crpsInDb;
 
-    if (isNewUser) {
+    try {
 
-      newUser = new User();
+      // set the fields, depending if it's a new user or an old one
+      if (isNewUser) {
+        newUser = new User();
+        newUser.setActiveSince(new Date());
+        newUser.setFirstName(user.getFirstName());
+        newUser.setLastName(user.getLastName());
+        newUser.setUsername(user.getUsername());
+        newUser.setActive(user.isActive());
+        newUser.setCgiarUser(user.isCgiarUser());
+        newUser.setAutoSave(user.isAutoSave());
+        newUser.setEmail(user.getEmail());
+        newUser.setModificationJustification(" ");
+        newUser.setModifiedBy(this.getCurrentUser());
 
-      newUser.setActiveSince(new Date());
-      newUser.setFirstName(user.getFirstName());
-      newUser.setLastName(user.getLastName());
-      newUser.setUsername(user.getUsername());
-      newUser.setActive(user.isActive());
-      newUser.setCgiarUser(user.isCgiarUser());
-      newUser.setAutoSave(user.isAutoSave());
-      newUser.setEmail(user.getEmail());
-      newUser.setModificationJustification(" ");
-      newUser.setModifiedBy(this.getCurrentUser());
+      } else {
+        newUser = userManager.getUser(user.getId());
 
+        newUser.setActive(user.isActive());
+        newUser.setAutoSave(user.isAutoSave());
+        newUser.setModificationJustification(" ");
+        newUser.setModifiedBy(this.getCurrentUser());
 
-      if (!user.isCgiarUser()) {
-        newUser.setPassword(user.getPassword());
       }
+
+      // check if it's a cgiar user
+      if (!user.isCgiarUser()) {
+        if (!user.getPassword().isEmpty()) {
+          newUser.setPassword(user.getPassword());
+        }
+      } else {
+        userLDAP = new LDAPService(true).searchUserByEmail(user.getEmail());
+
+        if (userLDAP != null) {
+          newUser.setFirstName(userLDAP.getFirstName());
+          newUser.setLastName(userLDAP.getLastName());
+          newUser.setUsername(userLDAP.getLogin());
+        } else {
+          LOG.info("Can't find in the LDAP Server user: " + user.getEmail());
+        }
+      }
+
+      // saving or update the user
       newUserID = userManager.saveUser(newUser, this.getCurrentUser());
 
+      // if the user saved without errors
+      if (newUserID != -1) {
+        userID = newUserID;
+        newUser = userManager.getUser(newUserID);
 
-    } else {
+        // validate the crps that user has in bd and compare them with the crps in the interface
+        // if any of the crps don't exits in the crps from interface. Delete that crps from database
+        crpsInDb = crpUserManager.getCrpUserByUserId(newUserID);
 
-      newUser = userManager.getUser(user.getId());
+        if (crpsInDb != null) {
+          crpsForDeleting = new ArrayList<>();
 
-      newUser.setActive(user.isActive());
-      newUser.setAutoSave(user.isAutoSave());
-      newUser.setModificationJustification(" ");
-      newUser.setModifiedBy(this.getCurrentUser());
-
-      if (!user.isCgiarUser()) {
-        newUser.setPassword(user.getPassword());
-      }
-      newUserID = userManager.saveUser(newUser, this.getCurrentUser());
-    }
-
-
-    if (newUserID != -1) {
-      userID = newUserID;
-      newUser = userManager.getUser(newUserID);
-
-      if (user.getCrpUser() != null) {
-        for (CrpUser crpUser : user.getCrpUser()) {
-          if (crpUser.getId() == -1) {
-
-            Crp crp = crpManager.getCrpById(crpUser.getCrp().getId());
-
-            CrpUser newCrpUser = new CrpUser();
-            newCrpUser.setCrp(crp);
-            newCrpUser.setUser(newUser);
-            newCrpUser.setActiveSince(new Date());
-            newCrpUser.setCreatedBy(this.getCurrentUser());
-            newCrpUser.setModifiedBy(this.getCurrentUser());
-            newCrpUser.setModificationJustification(" ");
-            newCrpUser.setActive(true);
-
-            long newCrpUserID = crpUserManager.saveCrpUser(newCrpUser);
-
-            if (newCrpUserID != -1) {
-
-              newCrpUser = crpUserManager.getCrpUserById(newCrpUserID);
-
-              UserRole userRole = new UserRole();
-
-              List<Role> roles = new ArrayList<>(crp.getRoles());
-
-              Role guestRole =
-                roles.stream().filter(r -> r.getAcronym().equals("G")).collect(Collectors.toList()).get(0);
-
-              userRole.setRole(guestRole);
-              userRole.setUser(newUser);
-
-              long userRoleID = userRoleManager.saveUserRole(userRole);
-
-              if (isNewUser && userRoleID != -1) {
-                try {
-                  this.sendMailNewUser(newUser, crp);
-                } catch (NoSuchAlgorithmException e) {
-                  e.printStackTrace();
+          // compare the crps assigned in db
+          for (CrpUser crpUserBD : crpsInDb) {
+            int cont = 0;
+            if (user.getCrpUser() != null) {
+              for (CrpUser crpUser : user.getCrpUser()) {
+                if (crpUserBD.getId().equals(crpUser.getId())) {
+                  cont++;
                 }
+              }
+
+              if (cont == 0) {
+                crpsForDeleting.add(crpUserBD);
               }
             }
           }
+
+          for (CrpUser crpUserDelete : crpsForDeleting) {
+            Crp crp = crpManager.getCrpById(crpUserDelete.getCrp().getId());
+            UserRole userRole = new UserRole();
+
+            List<Role> roles = new ArrayList<>(crp.getRoles());
+
+            Role guestRole = roles.stream().filter(r -> r.getAcronym().equals("G")).collect(Collectors.toList()).get(0);
+
+            userRole.setRole(guestRole);
+            userRole.setUser(newUser);
+
+            List<UserRole> rolesInDb = userRoleManager.getUserRolesByUserId(crpUserDelete.getUser().getId());
+
+            if (rolesInDb != null) {
+              for (UserRole rol : rolesInDb) {
+                if (rol.getRole().getId().equals(guestRole.getId())) {
+                  userRoleManager.deleteUserRole(rol.getId());
+                }
+              }
+            }
+
+            crpUserManager.deleteCrpUser(crpUserDelete.getId());
+          }
+
+
         }
+
+
+        // check if the user has crp's associated
+        if (user.getCrpUser() != null) {
+
+          for (CrpUser crpUser : user.getCrpUser()) {
+
+            if (crpUser.getId() == -1) {
+
+              // search the crp with it's id
+              Crp crp = crpManager.getCrpById(crpUser.getCrp().getId());
+
+              CrpUser newCrpUser = new CrpUser();
+              newCrpUser.setCrp(crp);
+              newCrpUser.setUser(newUser);
+              newCrpUser.setActiveSince(new Date());
+              newCrpUser.setCreatedBy(this.getCurrentUser());
+              newCrpUser.setModifiedBy(this.getCurrentUser());
+              newCrpUser.setModificationJustification(" ");
+              newCrpUser.setActive(true);
+
+              // assign the user in the crp
+              long newCrpUserID = crpUserManager.saveCrpUser(newCrpUser);
+
+              // if the crp-user association saved without errors
+              if (newCrpUserID != -1) {
+
+                newCrpUser = crpUserManager.getCrpUserById(newCrpUserID);
+
+                UserRole userRole = new UserRole();
+
+                List<Role> roles = new ArrayList<>(crp.getRoles());
+
+                Role guestRole =
+                  roles.stream().filter(r -> r.getAcronym().equals("G")).collect(Collectors.toList()).get(0);
+
+                userRole.setRole(guestRole);
+                userRole.setUser(newUser);
+
+                long userRoleID = userRoleManager.saveUserRole(userRole);
+
+
+                // if the user is new and has a rol, send a email with welcome message and instructions.
+                if (isNewUser && userRoleID != -1) {
+                  try {
+                    this.sendMailNewUser(newUser, crp);
+                  } catch (NoSuchAlgorithmException e) {
+                    LOG.error(
+                      "GuestUsersAction.save(). There was an error sending the mail to the user: " + e.getMessage());
+                    throw e;
+                  }
+                }
+
+              }
+
+
+            }
+
+          }
+        }
+
+
       }
+
+      this.addActionMessage("message:" + this.getText("saving.saved"));
+
+
+    } catch (Exception e) {
+      LOG.error("GuestUsersAction.save(). There was an error saving/updating the User: " + e.getMessage());
+      this.setInvalidFields(new HashMap<>());
+      this.addActionMessage(this.getText("guestusers.email.invalid"));
+      e.printStackTrace();
+      return INPUT;
+
     }
 
-    this.setInvalidFields(new HashMap<>());
-    this.addActionMessage(this.getText("saving.saved"));
     return SUCCESS;
+
+
   }
 
+  /**
+   * Send a mail to a new user.
+   * update: change the e.printStackTrace() method by LOG.error() method
+   * 
+   * @author JULIANRODRIGUEZ <julian.rodriguez@cgiar.org>
+   * @since 30/08/2017
+   * @param user - the user who recives the mail
+   * @param crp - the crp who the user has permissions
+   * @throws NoSuchAlgorithmException
+   */
   public void sendMailNewUser(User user, Crp crp) throws NoSuchAlgorithmException {
     String toEmail = user.getEmail();
     String ccEmail = null;
@@ -294,17 +412,18 @@ public class GuestUsersAction extends BaseAction {
       buffer = readFully(inputStream);
     } catch (FileNotFoundException e) {
       // TODO Auto-generated catch block
-      e.printStackTrace();
+      LOG.error("There was an error including the atachment: " + e.getMessage());
+
     } catch (IOException e) {
       // TODO Auto-generated catch block
-      e.printStackTrace();
+      LOG.error("There was an error including the atachment: " + e.getMessage());
     } finally {
       if (inputStream != null) {
         try {
           inputStream.close();
         } catch (IOException e) {
           // TODO Auto-generated catch block
-          e.printStackTrace();
+          LOG.error("There was an error including the atachment: " + e.getMessage());
         }
       }
     }

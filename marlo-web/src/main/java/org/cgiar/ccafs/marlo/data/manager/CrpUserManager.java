@@ -1,6 +1,6 @@
 /*****************************************************************
- * This file is part of Managing Agricultural Research for Learning & 
- * Outcomes Platform (MARLO). 
+ * This file is part of Managing Agricultural Research for Learning &
+ * Outcomes Platform (MARLO).
  * MARLO is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -69,6 +69,17 @@ public interface CrpUserManager {
    * @return a CrpUser object.
    */
   public CrpUser getCrpUserById(long crpUserID);
+
+
+  /**
+   * Return the list of crps that an user has assigned
+   * 
+   * @author JULIANRODRIGUEZ <julian.rodriguez@cgiar.org>
+   * @since 31/08/2017
+   * @param userId - the id of the user
+   * @return a list with CrpUser
+   */
+  public List<CrpUser> getCrpUserByUserId(long userId);
 
   /**
    * This method saves the information of the given crpUser

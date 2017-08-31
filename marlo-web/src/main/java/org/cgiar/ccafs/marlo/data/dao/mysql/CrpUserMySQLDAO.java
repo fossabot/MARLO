@@ -1,6 +1,6 @@
 /*****************************************************************
- * This file is part of Managing Agricultural Research for Learning & 
- * Outcomes Platform (MARLO). 
+ * This file is part of Managing Agricultural Research for Learning &
+ * Outcomes Platform (MARLO).
  * MARLO is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -51,7 +51,8 @@ public class CrpUserMySQLDAO implements CrpUserDAO {
 
   @Override
   public boolean existCrpUser(long userId, long crpId) {
-    String query = "from " + CrpUser.class.getName() + " where user_id=" + userId + " and crp_id=" + crpId;
+    String query =
+      "from " + CrpUser.class.getName() + " where user_id=" + userId + " and crp_id=" + crpId + "and is_active=1";
     List<CrpUser> crpUser = dao.findAll(query);
     if (crpUser != null && crpUser.size() > 0) {
       return true;
@@ -74,6 +75,16 @@ public class CrpUserMySQLDAO implements CrpUserDAO {
     }
     return null;
 
+  }
+
+  @Override
+  public List<CrpUser> getCrpUserByUserId(long userId) {
+    String query = "from " + CrpUser.class.getName() + " where is_active=1 and user_id= " + userId;
+    List<CrpUser> list = dao.findAll(query);
+    if (list.size() > 0) {
+      return list;
+    }
+    return null;
   }
 
   @Override
