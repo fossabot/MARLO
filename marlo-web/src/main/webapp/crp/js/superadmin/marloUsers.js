@@ -1,15 +1,15 @@
 var crpList = [];
+var $modal;
 $(document).ready(init);
 
 function init() {
   
+  $modal = $('#updateCreateUser');
+  
   /* Declaring Events */
   attachEvents();
-  /*
-   * $('form select').select2({ width: "100%" });
-   */
-  
 
+ 
   $(".crpSelect").find("option").each(function(i,e) {
     var option = {
         "id": $(e).val(),
@@ -70,10 +70,10 @@ function init() {
       searchUserByEmail(userSelectedEmail);
       
       // Modal
-      $('#myModal').on('shown.bs.modal', function () {
+      $modal.on('shown.bs.modal', function () {
         // Model open
       })
-      $('#myModal').modal();
+      $modal.modal();
     })
   });
   
@@ -97,14 +97,17 @@ function init() {
       
     });
     
-    $('#myModal').modal();
+    $modal.modal();
   });
 
 }
 
 function attachEvents() {
 
-  $(".button-save").on("click", checkAllFields);
+  // Validate form fields are correct
+  $("button.saveUser").on("click", function(e){
+    saveUser(e);
+  });
 
   // Add a new CRP to the current user
   $(".crpSelect").on("change", function() {
@@ -260,38 +263,48 @@ function validateEmail(email) {
   return re.test(email);
 }
 
-function checkAllFields(e) {
-  var count = 0;
-  // If has at least one CRP selected
-  if($(".crpList").find(".crpItem").length > 0) {
-    count++;
+function saveUser(e) {
+  e.preventDefault();
+  var user = $('form').serializeObject();
+  $modal.find('.warning-info').empty().hide();
+  
+  console.log(user);
+  
+  // Validate Email
+  console.log(((user.email).length > 0));
+  var emailReg = /^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/;
+  if( (!((user.email).length > 0)) || (!(emailReg.test(user.email))) ) {
+    showMessage("Invalid Email");
+    return
   }
-  if($(".isNewUser").val() == "true") {
-    if($(".userFirstName").val().length != 0) {
-      count++;
+  
+  // Execute save
+  $.ajax({
+    url: baseURL + '/manageUserWithPrivileges.do',
+    data: user,
+    beforeSend: function() {
+      $modal.find('.loading').fadeIn();
+    },
+    success: function(data) {
+      if(data.message) {
+        showMessage(data.message);
+      } else {
+        location.reload();
+      }
+    },
+    complete: function() {
+      $modal.find('.loading').fadeOut();
     }
-    if($(".userLastName").val().trim() != "") {
-      count++;
-    }
-    if(count < 3) {
-      e.preventDefault();
-      var notyOptions = jQuery.extend({}, notyDefaultOptions);
-      notyOptions.text = 'Please complete the fields to create the user guest';
-      noty(notyOptions);
-    } else {
-      $(".button-save").trigger('submit');
-    }
-  } else {
-    if(count < 1) {
-      e.preventDefault();
-      var notyOptions = jQuery.extend({}, notyDefaultOptions);
-      notyOptions.text = 'Please complete the fields to create the user guest';
-      noty(notyOptions);
-    } else {
-      $(".button-save").trigger('submit');
-    }
-  }
+});
+  
+  /*
+   * var notyOptions = jQuery.extend({}, notyDefaultOptions); notyOptions.text = 'Please complete the fields to create
+   * the user guest'; noty(notyOptions);
+   */
+}
 
+function showMessage(message){
+  $modal.find('.warning-info').text(message).fadeIn('slow');
 }
 
 function updateCrpIndex() {
