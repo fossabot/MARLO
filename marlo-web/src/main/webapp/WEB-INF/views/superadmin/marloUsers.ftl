@@ -75,21 +75,21 @@
                   <div class="col-md-9">
                     <h4 class="sectionTitle">User Information</h4>
                     <div class="form-group">
-                      [@customForm.input name="email" i18nkey="Email" value="" className="userEmail" type="text"  required=true readOnly=true editable=true /]
+                      [@customForm.input name="user.email" i18nkey="Email" value="" className="userEmail" type="text"  required=true readOnly=true editable=true /]
                       <hr />
                     </div>
                     <div class="form-group row">
                       <div class="col-md-6 ">
-                        [@customForm.input name="username" i18nkey="Username" value="" className="userUsername" type="text"   editable=true /]
+                        [@customForm.input name="user.username" i18nkey="Username" value="" className="userUsername" type="text"   editable=true /]
                       </div>
                       <div class="col-md-6">
-                        [@customForm.input name="password" i18nkey="Password" value="" className="userPassword" placeholder="Change password" type="password"  required=true  editable=true /]
+                        [@customForm.input name="user.password" i18nkey="Password" value="" className="userPassword" placeholder="Change password" type="password"  required=true  editable=true /]
                       </div>
                       <div class="col-md-6 ">
-                        [@customForm.input name="firstName" i18nkey="First name" value="" className="userFirstName" type="text"  required=true  editable=true /]
+                        [@customForm.input name="user.firstName" i18nkey="First name" value="" className="userFirstName" type="text"  required=true  editable=true /]
                       </div>
                       <div class="col-md-6">
-                        [@customForm.input name="lastName" i18nkey="Last name" value="" className="userLastName" type="text"  required=true  editable=true /]
+                        [@customForm.input name="user.lastName" i18nkey="Last name" value="" className="userLastName" type="text"  required=true  editable=true /]
                       </div>
                     </div>
                   </div>
@@ -97,9 +97,9 @@
                   [#-- User Settings --]
                   <div class="col-md-3">
                     <h4 class="sectionTitle">User Settings</h4>
-                    <div class="form-group">[@radioComponent id="is_CGIAR_user" label="CGIAR user" name="cgiarUser" /]<hr /></div>
-                    <div class="form-group">[@radioComponent id="is_active_User" label="Is active" name="active" /]<hr /></div>
-                    <div class="form-group">[@radioComponent id="is_autosave_active" label="Autosave" name="autoSave" /]</div>
+                    <div class="form-group">[@radioComponent id="is_CGIAR_user" label="CGIAR user" name="user.cgiarUser" /]<hr /></div>
+                    <div class="form-group">[@radioComponent id="is_active_User" label="Is active" name="user.active" /]<hr /></div>
+                    <div class="form-group">[@radioComponent id="is_autosave_active" label="Autosave" name="user.autoSave" /]</div>
                   </div>
                   
                 </div>

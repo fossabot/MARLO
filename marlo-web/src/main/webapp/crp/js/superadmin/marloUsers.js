@@ -271,9 +271,8 @@ function saveUser(e) {
   console.log(user);
   
   // Validate Email
-  console.log(((user.email).length > 0));
   var emailReg = /^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/;
-  if( (!((user.email).length > 0)) || (!(emailReg.test(user.email))) ) {
+  if( (!((user["user.email"]).length > 0)) || (!(emailReg.test(user["user.email"]))) ) {
     showMessage("Invalid Email");
     return
   }
@@ -289,7 +288,7 @@ function saveUser(e) {
       if(data.message) {
         showMessage(data.message);
       } else {
-        location.reload();
+        // location.reload();
       }
     },
     complete: function() {
