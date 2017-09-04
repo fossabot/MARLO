@@ -173,7 +173,7 @@ public class SearchUserAction extends BaseAction {
                 break;
 
               case "CRP-Admin":
-                crp.put("isAdmin", crpUser.isAdmin());
+                crp.put("isAdmin", true);
                 break;
 
             }
