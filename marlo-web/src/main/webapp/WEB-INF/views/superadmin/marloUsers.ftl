@@ -72,6 +72,7 @@
                 
                 [#-- Messages Display --]
                 <p class="warning-info" style="display:none"></p>
+                <p class="error-info" style="display:none"></p>
                 
                 <div class="form-group row">
                   [#-- User Information --]
@@ -155,7 +156,7 @@
     <td> 
       <input type="hidden" class="crpUserId" name="${customName}.id" value=""/>
       <input type="hidden" class="crpUserCrpId" name="${customName}.crp.id" value="" />
-      <span title="" class="crpTitle">[#if element.crp?has_content][@utils.wordCutter string=(element.crp) maxPos=70 substr=" "/][#else]CCAFS[/#if]</span>
+      <span title="" class="crpTitle"></span>
     </td>
     [#-- Roles --]
     <td>

@@ -267,7 +267,7 @@ function validateEmail(email) {
 function saveUser(e) {
   e.preventDefault();
   var user = $('form').serializeObject();
-  $modal.find('.warning-info').empty().hide();
+  $modal.find('.warning-info, .error-info').empty().hide();
   
   // Validate Email
   if( (!((user["user.email"]).length > 0)) || (!(validateEmail(user["user.email"]))) ) {
@@ -301,7 +301,8 @@ function saveUser(e) {
       $modal.find('.loading').fadeOut();
     },
     error: function(e) {
-      $modal.find('.warning-info').text(e).fadeIn('slow');
+      console.log(e);
+      $modal.find('.error-info').text("Error "+e.status+": "+e.statusText).fadeIn('slow');
     }
 });
   
