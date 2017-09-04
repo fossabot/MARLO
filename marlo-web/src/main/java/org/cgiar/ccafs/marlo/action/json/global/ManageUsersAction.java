@@ -435,6 +435,9 @@ public class ManageUsersAction extends BaseAction {
     if (!user.isCgiarUser()) {
       if (!user.getPassword().isEmpty()) {
         newUser.setPassword(user.getPassword());
+        newUser.setUsername(user.getUsername());
+        newUser.setFirstName(user.getFirstName());
+        newUser.setLastName(user.getLastName());
       }
     } else {
       User usrTmp = this.validateOutlookUser(user.getEmail());

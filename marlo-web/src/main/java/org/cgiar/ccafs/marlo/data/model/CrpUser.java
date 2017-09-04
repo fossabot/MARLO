@@ -55,8 +55,12 @@ public class CrpUser implements java.io.Serializable, IAuditLog {
   @Expose
   private String modificationJustification;
 
+  private boolean isAdmin;
+
+
   public CrpUser() {
   }
+
 
   public CrpUser(Crp crps, User users) {
     this.crp = crps;
@@ -116,6 +120,7 @@ public class CrpUser implements java.io.Serializable, IAuditLog {
     return sb.toString();
   }
 
+  @Override
   public String getModificationJustification() {
     return modificationJustification;
   }
@@ -134,12 +139,20 @@ public class CrpUser implements java.io.Serializable, IAuditLog {
     return active;
   }
 
+  public boolean isAdmin() {
+    return isAdmin;
+  }
+
   public void setActive(boolean active) {
     this.active = active;
   }
 
   public void setActiveSince(Date activeSince) {
     this.activeSince = activeSince;
+  }
+
+  public void setAdmin(boolean isAdmin) {
+    this.isAdmin = isAdmin;
   }
 
   public void setCreatedBy(User createdBy) {
