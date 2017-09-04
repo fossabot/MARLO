@@ -45,6 +45,8 @@
 				<param name="excludeNullProperties">true</param>
 			</result>
 		</action>
+		
+		
 
 		<action name="searchInstitutions"
 			class="org.cgiar.ccafs.marlo.action.json.global.SearchInstitutionsAction"
@@ -191,6 +193,15 @@
 				<param name="excludeNullProperties">true</param>
 			</result>
 		</action>
+		
+		<action name="manageUserWithPrivileges"
+      class="org.cgiar.ccafs.marlo.action.json.global.ManageUsersAction"
+      method="manageUserWithPrivileges">
+      <result type="json">
+        <param name="noCache">true</param>
+        <param name="excludeNullProperties">true</param>
+      </result>
+    </action>
 
 		<action name="searchUserByEmail"
 			class="org.cgiar.ccafs.marlo.action.json.global.SearchUserAction">

@@ -17,19 +17,32 @@ package org.cgiar.ccafs.marlo.action.json.global;
 
 import org.cgiar.ccafs.marlo.action.BaseAction;
 import org.cgiar.ccafs.marlo.config.APConstants;
+import org.cgiar.ccafs.marlo.data.manager.CrpManager;
+import org.cgiar.ccafs.marlo.data.manager.CrpUserManager;
+import org.cgiar.ccafs.marlo.data.manager.RoleManager;
 import org.cgiar.ccafs.marlo.data.manager.UserManager;
+import org.cgiar.ccafs.marlo.data.manager.UserRoleManager;
+import org.cgiar.ccafs.marlo.data.model.Crp;
+import org.cgiar.ccafs.marlo.data.model.CrpUser;
+import org.cgiar.ccafs.marlo.data.model.Role;
 import org.cgiar.ccafs.marlo.data.model.User;
+import org.cgiar.ccafs.marlo.data.model.UserRole;
 import org.cgiar.ccafs.marlo.utils.APConfig;
 import org.cgiar.ccafs.marlo.utils.SendMailS;
 
 import org.cgiar.ciat.auth.LDAPService;
 import org.cgiar.ciat.auth.LDAPUser;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
 import com.opensymphony.xwork2.ActionContext;
@@ -42,6 +55,7 @@ import org.slf4j.LoggerFactory;
  * @author Hermes Jiménez - CIAT/CCAFS
  * @author Hernán David Carvajal
  * @author Héctor F. Tobón R. - CIAT/CCAFS
+ * @author Julián Rodríguez C. - CIAT/CCAFS
  */
 public class ManageUsersAction extends BaseAction {
 
@@ -56,21 +70,63 @@ public class ManageUsersAction extends BaseAction {
 
   private static String PARAM_EMAIL = "email";
   private static String PARAM_IS_ACTIVE = "isActive";
+
+  /**
+   * Helper method to read a stream into memory.
+   * 
+   * @param stream
+   * @return
+   * @throws IOException
+   */
+  public static byte[] readFully(InputStream stream) throws IOException {
+    byte[] buffer = new byte[8192];
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+    int bytesRead;
+    while ((bytesRead = stream.read(buffer)) != -1) {
+      baos.write(buffer, 0, bytesRead);
+    }
+    return baos.toByteArray();
+  }
+
   private UserManager userManager;
-  private SendMailS sendMail;
-  private String actionName;
+  private CrpManager crpManager;
+  private UserRoleManager userRoleManager;
+  private CrpUserManager crpUserManager;
 
-  private String queryParameter;
+  private RoleManager roleManager;
+  private List<Crp> crps;
+
   private List<Map<String, Object>> users;
-
   private User newUser;
+  private User user;
   private String message;
 
+  private String warningMessage;
+
+
+  private String successMessage;
+
+
+  private boolean cigarUser;
+
+  private Boolean isNewUser;
+  private long userID;
+  private SendMailS sendMail;
+
+  private String actionName;
+  private String queryParameter;
+
   @Inject
-  public ManageUsersAction(APConfig config, UserManager userManager, SendMailS sendMail) {
+  public ManageUsersAction(APConfig config, UserManager userManager, CrpManager crpManager,
+    CrpUserManager crpUserManager, UserRoleManager userRoleManager, RoleManager roleManager, SendMailS sendMail) {
     super(config);
     this.userManager = userManager;
     this.sendMail = sendMail;
+    this.crpManager = crpManager;
+    this.crpUserManager = crpUserManager;
+    this.userRoleManager = userRoleManager;
+    this.roleManager = roleManager;
   }
 
   /**
@@ -106,6 +162,133 @@ public class ManageUsersAction extends BaseAction {
     }
   }
 
+  /**
+   * check if the user has CRPs assigned in database.
+   * compare those crps with the crps assigned in the interface
+   * if the method detects that if a crp is delete it from interaface
+   * delete that crp in database abd its permissions
+   * 
+   * @author Julián Rodríguez C. - CIAT/CCAFS
+   * @param userId
+   * @param user
+   */
+  public void checkCRPsInDB(long userId, User user) {
+    List<CrpUser> crpsForDeleting;
+    List<CrpUser> crpsInDb;
+
+    // validate the crps that user has in bd and compare them with the crps in the interface
+    // if any of the crps don't exits in the crps from interface. Delete that crps from database
+    crpsInDb = crpUserManager.getCrpUserByUserId(userId);
+
+    if (crpsInDb != null) {
+      crpsForDeleting = new ArrayList<>();
+
+      // compare the crps assigned in db
+      for (CrpUser crpUserBD : crpsInDb) {
+        int cont = 0;
+        if (user.getCrpUser() != null) {
+          for (CrpUser crpUser : user.getCrpUser()) {
+            if (crpUserBD.getId().equals(crpUser.getId())) {
+              cont++;
+            }
+          }
+
+          if (cont == 0) {
+            crpsForDeleting.add(crpUserBD);
+          }
+        }
+      }
+
+      for (CrpUser crpUserDelete : crpsForDeleting) {
+        Crp crp = crpManager.getCrpById(crpUserDelete.getCrp().getId());
+        UserRole userRole = new UserRole();
+
+        List<Role> roles = new ArrayList<>(crp.getRoles());
+
+        Role guestRole = roles.stream().filter(r -> r.getAcronym().equals("G")).collect(Collectors.toList()).get(0);
+
+        userRole.setRole(guestRole);
+        userRole.setUser(newUser);
+
+        List<UserRole> rolesInDb = userRoleManager.getUserRolesByUserId(crpUserDelete.getUser().getId());
+
+        if (rolesInDb != null) {
+          for (UserRole rol : rolesInDb) {
+            if (rol.getRole().getId().equals(guestRole.getId())) {
+              userRoleManager.deleteUserRole(rol.getId());
+            }
+          }
+        }
+
+        crpUserManager.deleteCrpUser(crpUserDelete.getId());
+      }
+
+
+    }
+
+  }
+
+
+  public void checkNewCRPs(User user, User newUser) {
+    // check if the user has crp's associated
+    if (user.getCrpUser() != null) {
+
+      for (CrpUser crpUser : user.getCrpUser()) {
+
+        if (crpUser.getId() == -1) {
+
+          // search the crp with it's id
+          Crp crp = crpManager.getCrpById(crpUser.getCrp().getId());
+
+          CrpUser newCrpUser = new CrpUser();
+          newCrpUser.setCrp(crp);
+          newCrpUser.setUser(newUser);
+          newCrpUser.setActiveSince(new Date());
+          newCrpUser.setCreatedBy(this.getCurrentUser());
+          newCrpUser.setModifiedBy(this.getCurrentUser());
+          newCrpUser.setModificationJustification(" ");
+          newCrpUser.setActive(true);
+
+          // assign the user in the crp
+          long newCrpUserID = crpUserManager.saveCrpUser(newCrpUser);
+
+          // if the crp-user association saved without errors
+          if (newCrpUserID != -1) {
+
+            newCrpUser = crpUserManager.getCrpUserById(newCrpUserID);
+
+            UserRole userRole = new UserRole();
+
+            List<Role> roles = new ArrayList<>(crp.getRoles());
+
+            // for the future: check what kind of type of rol is selected. Guest or CRP Admin
+            Role guestRole = roles.stream().filter(r -> r.getAcronym().equals("G")).collect(Collectors.toList()).get(0);
+
+            userRole.setRole(guestRole);
+            userRole.setUser(newUser);
+
+            long userRoleID = userRoleManager.saveUserRole(userRole);
+
+
+            // if the user is new and has a rol, send a email with welcome message and instructions.
+            if (isNewUser && userRoleID != -1) {
+              try {
+                this.sendMailNewGuestUser(newUser, crp);
+              } catch (NoSuchAlgorithmException e) {
+                LOG
+                  .error("GuestUsersAction.save(). There was an error sending the mail to the user: " + e.getMessage());
+
+              }
+            }
+
+          }
+
+
+        }
+
+      }
+    }
+  }
 
   /**
    * Create a new user in the system.
@@ -165,11 +348,20 @@ public class ManageUsersAction extends BaseAction {
     return SUCCESS;
   }
 
-
   @Override
   public String execute() throws Exception {
     // Nothing to do here yet.
     return SUCCESS;
+  }
+
+
+  public CrpUserManager getCrpUserManager() {
+    return crpUserManager;
+  }
+
+
+  public Boolean getIsNewUser() {
+    return isNewUser;
   }
 
   /**
@@ -182,8 +374,98 @@ public class ManageUsersAction extends BaseAction {
   }
 
 
+  public String getSuccessMessage() {
+    return successMessage;
+  }
+
+  public User getUser() {
+    return user;
+  }
+
+
   public List<Map<String, Object>> getUsers() {
     return users;
+  }
+
+
+  public String getWarningMessage() {
+    return warningMessage;
+  }
+
+
+  /**
+   * Manage a new user in MARLO.
+   * You can create a new user with GUEST privileges in one or more CRPs
+   * You can edit that privileges
+   * If the user is new you send a personalized GUEST mail
+   * 
+   * @author Julián Rodríguez C. - CIAT/CCAFS
+   * @since 01/09/2017
+   */
+
+  public String manageUserWithPrivileges() throws Exception {
+    User newUser;
+    long newUserID;
+
+
+    // set the fields, depending if it's a new user or an old one
+    if (isNewUser) {
+      newUser = new User();
+      newUser.setActiveSince(new Date());
+      newUser.setFirstName(user.getFirstName());
+      newUser.setLastName(user.getLastName());
+      newUser.setUsername(user.getUsername());
+      newUser.setActive(user.isActive());
+      newUser.setCgiarUser(user.isCgiarUser());
+      newUser.setAutoSave(user.isAutoSave());
+      newUser.setEmail(user.getEmail());
+      newUser.setModificationJustification(" ");
+      newUser.setModifiedBy(this.getCurrentUser());
+
+    } else {
+      newUser = userManager.getUser(user.getId());
+
+      newUser.setActive(user.isActive());
+      newUser.setAutoSave(user.isAutoSave());
+      newUser.setModificationJustification(" ");
+      newUser.setModifiedBy(this.getCurrentUser());
+    }
+
+    // check if it's a cgiar user
+    if (!user.isCgiarUser()) {
+      if (!user.getPassword().isEmpty()) {
+        newUser.setPassword(user.getPassword());
+      }
+    } else {
+      User usrTmp = this.validateOutlookUser(user.getEmail());
+
+      if (usrTmp != null) {
+        newUser.setFirstName(usrTmp.getFirstName());
+        newUser.setLastName(usrTmp.getLastName());
+        newUser.setUsername(usrTmp.getUsername());
+      }
+    }
+
+    // saving or update the user
+    newUserID = userManager.saveUser(newUser, this.getCurrentUser());
+
+    // if the user saved without errors
+    if (newUserID != -1) {
+      userID = newUserID;
+      newUser = userManager.getUser(newUserID);
+
+      // validate crps that the user has in Database
+      this.checkCRPsInDB(newUserID, user);
+
+      // check if the user has new CRPs
+      this.checkNewCRPs(user, newUser);
+
+    }
+
+    successMessage = this.getText("saving.saved");
+
+
+    return SUCCESS;
   }
 
   @Override
@@ -236,6 +518,107 @@ public class ManageUsersAction extends BaseAction {
 
     LOG.info("The search of users by '{}' was made successfully.", queryParameter);
     return SUCCESS;
+  }
+
+
+  /**
+   * Send a mail to a new guest user.
+   * 
+   * @author Julián Rodríguez C. - CIAT/CCAFS
+   * @since 30/08/2017
+   * @param user - the user who recives the mail
+   * @param crp - the crp who the user has permissions
+   * @throws NoSuchAlgorithmException
+   */
+  public void sendMailNewGuestUser(User user, Crp crp) throws NoSuchAlgorithmException {
+    String toEmail = user.getEmail();
+    String ccEmail = null;
+    String bbcEmails = this.config.getEmailNotification();
+    String subject = this.getText("email.newUser.subject", new String[] {user.getFirstName()});
+    // Setting the password
+    String password = this.getText("email.outlookPassword");
+    if (!user.isCgiarUser()) {
+      password = this.user.getPassword();
+      // Applying the password to the user.
+      user.setPassword(password);
+    }
+
+    // get CRPAdmin contacts
+    String crpAdmins = "";
+    long adminRol = Long.parseLong((String) this.getSession().get(APConstants.CRP_ADMIN_ROLE));
+    Role roleAdmin = roleManager.getRoleById(adminRol);
+    List<UserRole> userRoles = roleAdmin.getUserRoles().stream()
+      .filter(ur -> ur.getUser() != null && ur.getUser().isActive()).collect(Collectors.toList());
+    for (UserRole userRole : userRoles) {
+      if (crpAdmins.isEmpty()) {
+        crpAdmins += userRole.getUser().getFirstName() + " (" + userRole.getUser().getEmail() + ")";
+      } else {
+        crpAdmins += ", " + userRole.getUser().getFirstName() + " (" + userRole.getUser().getEmail() + ")";
+      }
+    }
+
+    // Building the Email message:
+    StringBuilder message = new StringBuilder();
+    message.append(this.getText("email.dear", new String[] {user.getFirstName()}));
+
+    message.append(this.getText("email.newUser.part3",
+      new String[] {this.getText("global.sClusterOfActivities").toLowerCase(), config.getBaseUrl(), crp.getName(),
+        user.getEmail(), password, this.getText("email.support", new String[] {crpAdmins})}));
+    message.append(this.getText("email.bye"));
+
+    /**
+     * // Send pdf
+     * String contentType = "application/pdf";
+     * String fileName = "Introduction_To_MARLO_v2.1.pdf";
+     * byte[] buffer = null;
+     * InputStream inputStream = null;
+     * try {
+     * inputStream = this.getClass().getResourceAsStream("/manual/Introduction_To_MARLO_v2.1.pdf");
+     * buffer = readFully(inputStream);
+     * } catch (FileNotFoundException e) {
+     * // TODO Auto-generated catch block
+     * LOG.error("There was an error including the atachment: " + e.getMessage());
+     * } catch (IOException e) {
+     * // TODO Auto-generated catch block
+     * LOG.error("There was an error including the atachment: " + e.getMessage());
+     * } finally {
+     * if (inputStream != null) {
+     * try {
+     * inputStream.close();
+     * } catch (IOException e) {
+     * // TODO Auto-generated catch block
+     * LOG.error("There was an error including the atachment: " + e.getMessage());
+     * }
+     * }
+     * }
+     * if (buffer != null && fileName != null && contentType != null) {
+     * sendMail.send(toEmail, ccEmail, bbcEmails, subject, message.toString(), buffer, contentType, fileName, true);
+     * } else {
+     * sendMail.send(toEmail, ccEmail, bbcEmails, subject, message.toString(), null, null, null, true);
+     * }
+     */
+
+    sendMail.send(toEmail, ccEmail, bbcEmails, subject, message.toString(), null, null, null, true);
+
+  }
+
+
+  public void setCrpUserManager(CrpUserManager crpUserManager) {
+    this.crpUserManager = crpUserManager;
+  }
+
+  public void setIsNewUser(Boolean isNewUser) {
+    this.isNewUser = isNewUser;
+  }
+
+
+  public void setMessage(String message) {
+    this.message = message;
+  }
+
+
+  public void setUser(User user) {
+    this.user = user;
   }
 
 

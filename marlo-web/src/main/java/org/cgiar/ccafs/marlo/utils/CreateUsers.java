@@ -26,7 +26,7 @@ public class CreateUsers {
 
     LDAPUser user = null;
     try {
-      user = new LDAPService(true).searchUserByEmail("r.islas@cgiar.org");
+      user = new LDAPService(true).searchUserByEmail("m.quinn@cgiar.org");
     } catch (Exception e) {
       user = null;
     }

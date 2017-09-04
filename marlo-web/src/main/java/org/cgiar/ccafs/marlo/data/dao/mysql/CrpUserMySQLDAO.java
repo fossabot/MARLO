@@ -81,7 +81,7 @@ public class CrpUserMySQLDAO implements CrpUserDAO {
   public List<CrpUser> getCrpUserByUserId(long userId) {
     String query = "from " + CrpUser.class.getName() + " where is_active=1 and user_id= " + userId;
     List<CrpUser> list = dao.findAll(query);
-    if (list.size() > 0) {
+    if (list != null) {
       return list;
     }
     return null;
