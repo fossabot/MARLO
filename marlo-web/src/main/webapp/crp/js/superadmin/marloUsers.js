@@ -1,5 +1,6 @@
 var crpList = [];
 var $modal;
+var $marloUsersTable;
 $(document).ready(init);
 
 function init() {
@@ -21,7 +22,7 @@ function init() {
   /**
    * Users Datatable
    */
-  var $marloUsersTable = $('#marloUsersTable');
+  $marloUsersTable = $('#marloUsersTable');
 
   $marloUsersTable.DataTable({
       iDisplayLength: 20, // Number of rows to show on the table
@@ -271,8 +272,7 @@ function saveUser(e) {
   console.log(user);
   
   // Validate Email
-  var emailReg = /^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/;
-  if( (!((user["user.email"]).length > 0)) || (!(emailReg.test(user["user.email"]))) ) {
+  if( (!((user["user.email"]).length > 0)) || (!(validateEmail(user["user.email"]))) ) {
     showMessage("Invalid Email");
     return
   }
@@ -288,11 +288,15 @@ function saveUser(e) {
       if(data.message) {
         showMessage(data.message);
       } else {
-        // location.reload();
+        location.reload();
+        $modal.modal('hide');
       }
     },
     complete: function() {
       $modal.find('.loading').fadeOut();
+    },
+    error: function(e) {
+      $modal.find('.warning-info').text(e).fadeIn('slow');
     }
 });
   
