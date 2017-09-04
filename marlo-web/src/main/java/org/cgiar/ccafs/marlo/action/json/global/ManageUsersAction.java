@@ -141,6 +141,7 @@ public class ManageUsersAction extends BaseAction {
     newUser.setActive(false);
     newUser.setAutoSave(true);
     newUser.setId(null);
+    newUser.setCreatedBy(this.getCurrentUser());
 
     Long id = userManager.saveUser(newUser, this.getCurrentUser());
     // If successfully added.
@@ -421,6 +422,7 @@ public class ManageUsersAction extends BaseAction {
       newUser.setEmail(user.getEmail());
       newUser.setModificationJustification(" ");
       newUser.setModifiedBy(this.getCurrentUser());
+      newUser.setCreatedBy(this.getCurrentUser());
 
     } else {
       newUser = userManager.getUser(user.getId());
@@ -435,10 +437,10 @@ public class ManageUsersAction extends BaseAction {
     if (!user.isCgiarUser()) {
       if (!user.getPassword().isEmpty()) {
         newUser.setPassword(user.getPassword());
-        newUser.setUsername(user.getUsername());
-        newUser.setFirstName(user.getFirstName());
-        newUser.setLastName(user.getLastName());
       }
+      newUser.setUsername(user.getUsername());
+      newUser.setFirstName(user.getFirstName());
+      newUser.setLastName(user.getLastName());
     } else {
       User usrTmp = this.validateOutlookUser(user.getEmail());
 
@@ -446,8 +448,12 @@ public class ManageUsersAction extends BaseAction {
         newUser.setFirstName(usrTmp.getFirstName());
         newUser.setLastName(usrTmp.getLastName());
         newUser.setUsername(usrTmp.getUsername());
+      } else {
+        message = this.getText("guestusers.email.invalid");
+        return SUCCESS;
       }
     }
+
 
     // saving or update the user
     newUserID = userManager.saveUser(newUser, this.getCurrentUser());
@@ -632,19 +638,24 @@ public class ManageUsersAction extends BaseAction {
    * @return a populated user with all the information that is coming from the OAD, or null if the email does not exist.
    */
   private User validateOutlookUser(String email) {
-    LDAPService service = new LDAPService();
-    if (config.isProduction()) {
-      service.setInternalConnection(false);
-    } else {
-      service.setInternalConnection(true);
+    try {
+      LDAPService service = new LDAPService();
+      if (config.isProduction()) {
+        service.setInternalConnection(false);
+      } else {
+        service.setInternalConnection(true);
+      }
+      LDAPUser user = service.searchUserByEmail(email);
+      if (user != null) {
+        newUser.setFirstName(user.getFirstName());
+        newUser.setLastName(user.getLastName());
+        newUser.setUsername(user.getLogin().toLowerCase());
+        return newUser;
+      }
+    } catch (Exception e) {
+      LOG.error(this.getText("guestusers.email.invalid"));
     }
-    LDAPUser user = service.searchUserByEmail(email);
-    if (user != null) {
-      newUser.setFirstName(user.getFirstName());
-      newUser.setLastName(user.getLastName());
-      newUser.setUsername(user.getLogin().toLowerCase());
-      return newUser;
-    }
+
     return null;
   }
 

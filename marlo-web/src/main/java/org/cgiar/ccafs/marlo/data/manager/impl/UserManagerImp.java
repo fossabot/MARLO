@@ -165,7 +165,7 @@ public class UserManagerImp implements UserManager {
     if (!user.isCgiarUser()) {
       user.setPassword(MD5Convert.stringToMD5(user.getPassword()));
     }
-    user.setCreatedBy(createdBy);
+    // user.setCreatedBy(createdBy);
     return userDAO.saveUser(user);
 
   }

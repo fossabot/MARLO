@@ -172,6 +172,10 @@ public class SearchUserAction extends BaseAction {
                 role.put("roleInfo", roleInfo);
                 break;
 
+              case "CRP-Admin":
+                crp.put("isAdmin", crpUser.isAdmin());
+                break;
+
             }
 
             roleUserFound.add(role);
