@@ -73,6 +73,7 @@ function init() {
       // Modal
       $modal.on('shown.bs.modal', function () {
         // Model open
+        $modal.find('.warning-info, .error-info').empty().hide();
       })
       $modal.modal();
     })
@@ -270,7 +271,6 @@ function validateEmail(email) {
 function saveUser(e) {
   e.preventDefault();
   var user = $('form').serializeObject();
-  $modal.find('.warning-info, .error-info').empty().hide();
   
   // Validate Email
   if( (!((user["user.email"]).length > 0)) || (!(validateEmail(user["user.email"]))) ) {
