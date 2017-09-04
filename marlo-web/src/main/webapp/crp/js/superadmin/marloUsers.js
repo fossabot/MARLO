@@ -269,8 +269,6 @@ function saveUser(e) {
   var user = $('form').serializeObject();
   $modal.find('.warning-info').empty().hide();
   
-  console.log(user);
-  
   // Validate Email
   if( (!((user["user.email"]).length > 0)) || (!(validateEmail(user["user.email"]))) ) {
     showMessage("Invalid Email");
@@ -288,8 +286,15 @@ function saveUser(e) {
       if(data.message) {
         showMessage(data.message);
       } else {
-        location.reload();
         $modal.modal('hide');
+        $marloUsersTable.DataTable().ajax.reload();
+        
+        // Noty Message
+        var notyOptions = jQuery.extend({}, notyDefaultOptions);
+        notyOptions.type = "success";
+        notyOptions.text = data.successMessage;
+        $('.success-info').noty(notyOptions);
+        
       }
     },
     complete: function() {
@@ -300,10 +305,9 @@ function saveUser(e) {
     }
 });
   
-  /*
-   * var notyOptions = jQuery.extend({}, notyDefaultOptions); notyOptions.text = 'Please complete the fields to create
-   * the user guest'; noty(notyOptions);
-   */
+ 
+   
+  
 }
 
 function showMessage(message){

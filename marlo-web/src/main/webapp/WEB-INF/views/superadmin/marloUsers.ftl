@@ -29,6 +29,9 @@
       </div>
       <div class="col-md-9">
         
+        [#-- Success info message --]
+        <p class="success-info" style=""></p>
+        
         [#-- Add New User Button --]
         <br /><a href="#" id="addNewUser" class="btn btn-danger pull-right"> <span class="glyphicon glyphicon-plus"></span>  Add a new user</a>
         
