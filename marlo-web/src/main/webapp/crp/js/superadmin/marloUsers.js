@@ -191,9 +191,12 @@ function updateCrps(crps) {
   $list.empty();
   $.each(crps, function(i,e) {
     var $item = $("#crp-template").clone(true).removeAttr("id");
-    $item.find(".crpTitle").html((e.crpAcronym))
-    $item.find(".crpUserId").val(e.crpUserId)
+    $item.find(".crpTitle").html((e.crpAcronym));
+    $item.find(".crpUserId").val(e.crpUserId);
     $item.find(".crpUserCrpId").val(e.crpId);
+    
+    // Is CRP Admin
+    $item.find(".crpUserAdmin").prop('checked',e.isAdmin);
     // Remove CRPs from the select component
     $crpsSelect.find("option[value='" + e.crpId + "']").prop('disabled', true);
     // Role list

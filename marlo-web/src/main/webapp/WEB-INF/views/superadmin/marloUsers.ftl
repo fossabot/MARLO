@@ -114,6 +114,7 @@
                   <thead>
                     <tr>
                       <th class="col-md-1">CRP</th>
+                      <th class="col-md-1">Admin</th>
                       <th>Roles & responsibilities</th>
                       <th class="col-md-1">Remove</th>
                     </tr>
@@ -157,6 +158,11 @@
       <input type="hidden" class="crpUserId" name="${customName}.id" value=""/>
       <input type="hidden" class="crpUserCrpId" name="${customName}.crp.id" value="" />
       <span title="" class="crpTitle"></span>
+      
+    </td>
+    [#-- Is Admin --]
+    <td class="text-center ">
+      <input type="checkbox" class="crpUserAdmin" name="${customName}.admin" value="true"/>
     </td>
     [#-- Roles --]
     <td>
