@@ -287,6 +287,7 @@ function saveUser(e) {
     data: user,
     beforeSend: function() {
       $modal.find('.loading').fadeIn();
+      $modal.find('.warning-info, .error-info').empty().hide();
     },
     success: function(data) {
       if(data.message) {
