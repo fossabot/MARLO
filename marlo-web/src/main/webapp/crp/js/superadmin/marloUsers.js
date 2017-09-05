@@ -64,19 +64,8 @@ function init() {
       ]
   });
   $marloUsersTable.on('draw.dt', function() {
-    $marloUsersTable.find('tbody tr').on("click", function() {
-      var userSelectedEmail = $(this).find('span.email').text();
-
-      // Find user details
-      searchUserByEmail(userSelectedEmail);
-      
-      // Modal
-      $modal.on('shown.bs.modal', function () {
-        // Model open
-        $modal.find('.warning-info, .error-info').empty().hide();
-      })
-      $modal.modal();
-    })
+    // Set Event to see user information
+    $marloUsersTable.find('tbody tr').off('click').on('click', showUserInformation);
   });
   
   /**
@@ -102,6 +91,20 @@ function init() {
     $modal.modal();
   });
 
+}
+
+function showUserInformation(){
+  var userSelectedEmail = $(this).find('span.email').text();
+
+  // Find user details
+  searchUserByEmail(userSelectedEmail);
+  
+  // Modal
+  $modal.on('shown.bs.modal', function () {
+    // Model open
+    $modal.find('.warning-info, .error-info').empty().hide();
+  })
+  $modal.modal();
 }
 
 function attachEvents() {
