@@ -163,7 +163,9 @@ public class UserManagerImp implements UserManager {
   @Override
   public Long saveUser(User user, User createdBy) {
     if (!user.isCgiarUser()) {
-      user.setPassword(MD5Convert.stringToMD5(user.getPassword()));
+      if (!user.isKeepPassword()) {
+        user.setPassword(MD5Convert.stringToMD5(user.getPassword()));
+      }
     }
     // user.setCreatedBy(createdBy);
     return userDAO.saveUser(user);

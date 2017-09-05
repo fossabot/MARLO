@@ -51,7 +51,8 @@ public class CenterUserDAO implements ICenterUserDAO {
 
   @Override
   public boolean existCrpUser(long userId, long crpId) {
-    String query = "from " + CenterUser.class.getName() + " where user_id=" + userId + " and center_id=" + crpId;
+    String query =
+      "from " + CenterUser.class.getName() + " where user_id=" + userId + " and center_id=" + crpId + "and is_active=1";
     List<CenterUser> crpUser = dao.findAll(query);
     if (crpUser != null && crpUser.size() > 0) {
       return true;

@@ -76,6 +76,15 @@ public class User implements java.io.Serializable, IAuditLog {
 
   private Date lastLogin;
 
+  /**
+   * this field is created because we need to control
+   * in Guset User Interfaces when convert to MD5 the user's password.
+   * for more detail see ManageUsersAction.manageUserWithPrivileges method
+   * 
+   * @author Julián Rodríguez CIAT/CCAFS
+   */
+  private boolean keepPassword;
+
   private Set<UserRole> userRoles = new HashSet<UserRole>(0);
 
   private Set<CenterLeader> researchLeaders = new HashSet<CenterLeader>(0);
@@ -305,6 +314,10 @@ public class User implements java.io.Serializable, IAuditLog {
     return cgiarUser;
   }
 
+  public boolean isKeepPassword() {
+    return keepPassword;
+  }
+
   public void setActive(boolean active) {
     this.active = active;
   }
@@ -317,6 +330,7 @@ public class User implements java.io.Serializable, IAuditLog {
     this.autoSave = autoSave;
   }
 
+
   public void setCenterUserRoles(Set<CenterUserRole> centerUserRoles) {
     this.centerUserRoles = centerUserRoles;
   }
@@ -325,7 +339,6 @@ public class User implements java.io.Serializable, IAuditLog {
   public void setCenterUsers(Set<CenterUser> centerUsers) {
     this.centerUsers = centerUsers;
   }
-
 
   public void setCgiarUser(boolean cgiarUser) {
     this.cgiarUser = cgiarUser;
@@ -351,10 +364,10 @@ public class User implements java.io.Serializable, IAuditLog {
     this.crpUser = crpUser;
   }
 
+
   public void setCrpUsers(Set<CrpUser> crpUsers) {
     this.crpUsers = crpUsers;
   }
-
 
   public void setEmail(String email) {
     this.email = email;
@@ -371,6 +384,12 @@ public class User implements java.io.Serializable, IAuditLog {
   public void setIpLiaisonUsers(Set<IpLiaisonUser> ipLiaisonUsers) {
     this.ipLiaisonUsers = ipLiaisonUsers;
   }
+
+
+  public void setKeepPassword(boolean keepPassword) {
+    this.keepPassword = keepPassword;
+  }
+
 
   public void setLastLogin(Date lastLogin) {
     this.lastLogin = lastLogin;
@@ -396,11 +415,9 @@ public class User implements java.io.Serializable, IAuditLog {
     this.modifiedBy = modifiedBy;
   }
 
-
   public void setPassword(String password) {
     this.password = password;
   }
-
 
   public void setProjectPartnerPersons(Set<ProjectPartnerPerson> projectPartnerPersons) {
     this.projectPartnerPersons = projectPartnerPersons;
@@ -418,13 +435,17 @@ public class User implements java.io.Serializable, IAuditLog {
     this.username = username;
   }
 
+
   public void setUserRoles(Set<UserRole> userRoles) {
     this.userRoles = userRoles;
   }
+
 
   @Override
   public String toString() {
     return id.toString();
   }
+
+
 }
 
