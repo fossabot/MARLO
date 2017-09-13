@@ -297,15 +297,18 @@ public class ManageUsersAction extends BaseAction {
               long userRoleID = userRoleManager.saveUserRole(userRole);
 
               // if the user is new and has a rol, send a email with welcome message and instructions.
-              if (isNewUser && userRoleID != -1) {
-                try {
-                  this.sendMailNewAdminUser(newUser, crp);
-                } catch (NoSuchAlgorithmException e) {
-                  LOG.error(
-                    "GuestUsersAction.save(). There was an error sending the mail to the user: " + e.getMessage());
-
-                }
-              }
+              /*
+               * comment this part of code because the type of mail is not define yet
+               * and we release this version to create users. for now we send the mail manually.
+               * if (isNewUser && userRoleID != -1) {
+               * try {
+               * this.sendMailNewAdminUser(newUser, crp);
+               * } catch (NoSuchAlgorithmException e) {
+               * LOG.error(
+               * "GuestUsersAction.save(). There was an error sending the mail to the user: " + e.getMessage());
+               * }
+               * }
+               */
 
 
             } else {
@@ -319,15 +322,18 @@ public class ManageUsersAction extends BaseAction {
               long userRoleID = userRoleManager.saveUserRole(userRole);
 
               // if the user is new and has a rol, send a email with welcome message and instructions.
-              if (isNewUser && userRoleID != -1) {
-                try {
-                  this.sendMailNewGuestUser(newUser, crp);
-                } catch (NoSuchAlgorithmException e) {
-                  LOG.error(
-                    "GuestUsersAction.save(). There was an error sending the mail to the user: " + e.getMessage());
-
-                }
-              }
+              /*
+               * comment this part of code because the type of mail is not define yet
+               * and we release this version to create users. for now we send the mail manually.
+               * if (isNewUser && userRoleID != -1) {
+               * try {
+               * this.sendMailNewGuestUser(newUser, crp);
+               * } catch (NoSuchAlgorithmException e) {
+               * LOG.error(
+               * "GuestUsersAction.save(). There was an error sending the mail to the user: " + e.getMessage());
+               * }
+               * }
+               */
 
             }
 
