@@ -37,7 +37,23 @@
         [#-- -- -- Projects reports -- -- --]
         <div id="projects-contentOptions">
         
-        
+        [#-- ONGOING/ACTIVE Projects --]
+            <div class="summariesFiles borderBox col-md-12" >
+            <div class="col-md-12 title-file">
+           
+              <input class="hidden" type="radio" name="formOptions" id="OngoingActiveProjectsSummaryAction" value="OngoingActiveProjectsSummaryAction"/>
+              <label for="">[@s.text name="summaries.board.report.projectbasic" /]</label>
+            
+            </div>
+            <span class="description col-md-12">[@s.text name="summaries.board.report.projectbasic.description" /]</span>
+              <div class="extraOptions" style="display:none">
+              <span class="hidden fileTypes excelType">OntgoingActiveProjectsSummary-OntgoingActiveProjectsSummary</span>
+                        
+                <div class="pull-right">
+                  <a style="display:none;" target="_blank" class="generateReport addButton pull-right" style="" href="#">[@s.text name="form.buttons.generate" /]</a>
+                </div>
+            </div>
+          </div>  
         [#-- Full Project Report (PDF) --]
           <div class="summariesFiles borderBox col-md-12">
             <div class="col-md-12 title-file">
@@ -168,24 +184,7 @@
           </div>
             [/#if]
             
-          [#-- ONGOING/ACTIVE Projects --]
-            <div class="summariesFiles borderBox col-md-12" >
-            <div class="col-md-12 title-file">
-           
-              <input class="hidden" type="radio" name="formOptions" id="OngoingActiveProjectsSummaryAction" value="OngoingActiveProjectsSummaryAction"/>
-              <label for="">[@s.text name="summaries.board.report.projectbasic" /]</label>
-            
-            </div>
-            <span class="description col-md-12">[@s.text name="summaries.board.report.projectbasic.description" /]</span>
-              <div class="extraOptions" style="display:none">
-              <span class="hidden fileTypes excelType">OntgoingActiveProjectsSummary-OntgoingActiveProjectsSummary</span>
-              <span class="hidden forPlanningCycle forCycle"></span>
-              <span class="hidden forReportingCycle forCycle"></span>              
-                <div class="pull-right">
-                  <a style="display:none;" target="_blank" class="generateReport addButton pull-right" style="" href="#">[@s.text name="form.buttons.generate" /]</a>
-                </div>
-            </div>
-          </div>  
+          
           [#-- Synthesis by Outcome 
           <div class="summariesFiles borderBox col-md-12" >
             <div class="col-md-12 title-file">

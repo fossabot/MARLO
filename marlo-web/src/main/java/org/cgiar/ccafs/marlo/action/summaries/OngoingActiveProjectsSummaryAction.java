@@ -114,6 +114,12 @@ public class OngoingActiveProjectsSummaryAction extends BaseAction implements Su
       masterReport.getParameterValues().put("i8nLeadInstitution", this.getText("summaries.oaprojects.leadInstitution"));
       masterReport.getParameterValues().put("i8nProjectLeader", this.getText("summaries.oaprojects.projectLeader"));
       masterReport.getParameterValues().put("date", currentDate);
+      masterReport.getParameterValues().put("i8nProjectCoordinators",
+        this.getText("summaries.oaprojects.projectCoordinators"));
+      masterReport.getParameterValues().put("i8nCoA", this.getText("summaries.oaprojects.clusterOfActivities"));
+      masterReport.getParameterValues().put("i8nGender", this.getText("summaries.oaprojects.gender"));
+      masterReport.getParameterValues().put("i8nYouth", this.getText("summaries.oaprojects.youth"));
+      masterReport.getParameterValues().put("i8nCapacity", this.getText("summaries.oaprojects.capacity"));
 
 
       ExcelReportUtil.createXLSX(masterReport, os);
