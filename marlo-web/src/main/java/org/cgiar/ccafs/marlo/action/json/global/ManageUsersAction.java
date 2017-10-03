@@ -300,15 +300,15 @@ public class ManageUsersAction extends BaseAction {
               /*
                * comment this part of code because the type of mail is not define yet
                * and we release this version to create users. for now we send the mail manually.
-               * if (isNewUser && userRoleID != -1) {
-               * try {
-               * this.sendMailNewAdminUser(newUser, crp);
-               * } catch (NoSuchAlgorithmException e) {
-               * LOG.error(
-               * "GuestUsersAction.save(). There was an error sending the mail to the user: " + e.getMessage());
-               * }
-               * }
                */
+              if (isNewUser && userRoleID != -1) {
+                try {
+                  this.sendMailNewAdminUser(newUser, crp);
+                } catch (NoSuchAlgorithmException e) {
+                  LOG.error(
+                    "GuestUsersAction.save(). There was an error sending the mail to the user: " + e.getMessage());
+                }
+              }
 
 
             } else {
@@ -321,19 +321,20 @@ public class ManageUsersAction extends BaseAction {
 
               long userRoleID = userRoleManager.saveUserRole(userRole);
 
-              // if the user is new and has a rol, send a email with welcome message and instructions.
               /*
+               * if the user is new and has a rol, send a email with welcome message and instructions.
                * comment this part of code because the type of mail is not define yet
                * and we release this version to create users. for now we send the mail manually.
-               * if (isNewUser && userRoleID != -1) {
-               * try {
-               * this.sendMailNewGuestUser(newUser, crp);
-               * } catch (NoSuchAlgorithmException e) {
-               * LOG.error(
-               * "GuestUsersAction.save(). There was an error sending the mail to the user: " + e.getMessage());
-               * }
-               * }
                */
+              if (isNewUser && userRoleID != -1) {
+                try {
+                  this.sendMailNewGuestUser(newUser, crp);
+                } catch (NoSuchAlgorithmException e) {
+                  LOG.error(
+                    "GuestUsersAction.save(). There was an error sending the mail to the user: " + e.getMessage());
+                }
+              }
+
 
             }
 
@@ -619,9 +620,9 @@ public class ManageUsersAction extends BaseAction {
       .filter(ur -> ur.getUser() != null && ur.getUser().isActive()).collect(Collectors.toList());
     for (UserRole userRole : userRoles) {
       if (crpAdmins.isEmpty()) {
-        crpAdmins += userRole.getUser().getFirstName() + " (" + userRole.getUser().getEmail() + ")";
+        crpAdmins += userRole.getUser().getComposedName().replace("<", "&lt;").replace("&gt;", ">");
       } else {
-        crpAdmins += ", " + userRole.getUser().getFirstName() + " (" + userRole.getUser().getEmail() + ")";
+        crpAdmins += ", " + userRole.getUser().getComposedName().replace("<", "&lt;").replace("&gt;", ">");
       }
     }
 
@@ -698,9 +699,9 @@ public class ManageUsersAction extends BaseAction {
       .filter(ur -> ur.getUser() != null && ur.getUser().isActive()).collect(Collectors.toList());
     for (UserRole userRole : userRoles) {
       if (crpAdmins.isEmpty()) {
-        crpAdmins += userRole.getUser().getFirstName() + " (" + userRole.getUser().getEmail() + ")";
+        crpAdmins += userRole.getUser().getComposedName().replace("<", "&lt;").replace("&gt;", ">");
       } else {
-        crpAdmins += ", " + userRole.getUser().getFirstName() + " (" + userRole.getUser().getEmail() + ")";
+        crpAdmins += ", " + userRole.getUser().getComposedName().replace("<", "&lt;").replace("&gt;", ">");
       }
     }
 
@@ -708,9 +709,9 @@ public class ManageUsersAction extends BaseAction {
     StringBuilder message = new StringBuilder();
     message.append(this.getText("email.dear", new String[] {user.getFirstName()}));
 
-    message.append(this.getText("email.newUser.part3",
-      new String[] {this.getText("global.sClusterOfActivities").toLowerCase(), config.getBaseUrl(), crp.getAcronym(),
-        user.getEmail(), password, this.getText("email.support", new String[] {crpAdmins})}));
+    message.append(
+      this.getText("email.newUser.part3", new String[] {this.getText("global.sClusterOfActivities").toLowerCase(),
+        config.getBaseUrl(), user.getEmail(), password, this.getText("email.support", new String[] {crpAdmins})}));
     message.append(this.getText("email.bye"));
 
     /**
