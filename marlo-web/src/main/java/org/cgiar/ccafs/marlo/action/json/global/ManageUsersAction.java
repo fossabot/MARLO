@@ -168,7 +168,7 @@ public class ManageUsersAction extends BaseAction {
    * check if the user has CRPs assigned in database.
    * compare those crps with the crps assigned in the interface
    * if the method detects that if a crp is delete it from interaface
-   * delete that crp in database abd its permissions
+   * delete that crp in database and its permissions
    * 
    * @author Julián Rodríguez C. - CIAT/CCAFS
    * @param userId
@@ -253,13 +253,22 @@ public class ManageUsersAction extends BaseAction {
   }
 
 
+  /**
+   * The method detect if there is a new crp that has a new role
+   * and create the user into the crp and assign permissions.
+   * 
+   * @param user
+   * @param newUser
+   */
   public void checkNewCRPs(User user, User newUser) {
     // check if the user has crp's associated
     if (user.getCrpUser() != null) {
 
+      int cont = 0;
       for (CrpUser crpUser : user.getCrpUser()) {
 
         if (crpUser.getId() == -1) {
+          cont++;
 
           // search the crp with it's id
           Crp crp = crpManager.getCrpById(crpUser.getCrp().getId());
@@ -296,18 +305,10 @@ public class ManageUsersAction extends BaseAction {
 
               long userRoleID = userRoleManager.saveUserRole(userRole);
 
-              // if the user is new and has a rol, send a email with welcome message and instructions.
-              /*
-               * comment this part of code because the type of mail is not define yet
-               * and we release this version to create users. for now we send the mail manually.
-               */
-              if (isNewUser && userRoleID != -1) {
-                try {
-                  this.sendMailNewAdminUser(newUser, crp);
-                } catch (NoSuchAlgorithmException e) {
-                  LOG.error(
-                    "GuestUsersAction.save(). There was an error sending the mail to the user: " + e.getMessage());
-                }
+              if (cont == 1) {
+                this.sendMailToUser(newUser, crp, APConstants.CRP_ADMIN_ROLE, isNewUser);
+              } else {
+                this.sendMailToUser(newUser, crp, APConstants.CRP_ADMIN_ROLE, false);
               }
 
 
@@ -321,18 +322,11 @@ public class ManageUsersAction extends BaseAction {
 
               long userRoleID = userRoleManager.saveUserRole(userRole);
 
-              /*
-               * if the user is new and has a rol, send a email with welcome message and instructions.
-               * comment this part of code because the type of mail is not define yet
-               * and we release this version to create users. for now we send the mail manually.
-               */
-              if (isNewUser && userRoleID != -1) {
-                try {
-                  this.sendMailNewGuestUser(newUser, crp);
-                } catch (NoSuchAlgorithmException e) {
-                  LOG.error(
-                    "GuestUsersAction.save(). There was an error sending the mail to the user: " + e.getMessage());
-                }
+
+              if (cont == 1) {
+                this.sendMailToUser(newUser, crp, APConstants.CRP_GUEST_ROLE, isNewUser);
+              } else {
+                this.sendMailToUser(newUser, crp, APConstants.CRP_GUEST_ROLE, false);
               }
 
 
@@ -537,6 +531,83 @@ public class ManageUsersAction extends BaseAction {
     return SUCCESS;
   }
 
+  private void notifyNewUserCreated(User user) {
+    user = userManager.getUser(user.getId());
+
+    String toEmail = user.getEmail();
+    String ccEmail = null;
+    String bbcEmails = this.config.getEmailNotification();
+    String subject = this.getText("email.newUser.subject", new String[] {user.getFirstName()});
+    // Setting the password
+    String password = this.getText("email.outlookPassword");
+    if (!user.isCgiarUser()) {
+      // Generating a random password.
+      password = RandomStringUtils.randomNumeric(6);
+      // Applying the password to the user.
+      user.setPassword(password);
+    }
+
+    // Building the Email message:
+    StringBuilder message = new StringBuilder();
+    message.append(this.getText("email.dear", new String[] {user.getFirstName()}));
+
+    // get CRPAdmin contacts
+    String crpAdmins = "";
+    long adminRol = Long.parseLong((String) this.getSession().get(APConstants.CRP_ADMIN_ROLE));
+    Role roleAdmin = roleManager.getRoleById(adminRol);
+    List<UserRole> userRoles = roleAdmin.getUserRoles().stream()
+      .filter(ur -> ur.getUser() != null && ur.getUser().isActive()).collect(Collectors.toList());
+    for (UserRole userRole : userRoles) {
+      if (crpAdmins.isEmpty()) {
+        crpAdmins += userRole.getUser().getFirstName() + " (" + userRole.getUser().getEmail() + ")";
+      } else {
+        crpAdmins += ", " + userRole.getUser().getFirstName() + " (" + userRole.getUser().getEmail() + ")";
+      }
+    }
+
+    message.append(this.getText("email.newUser.part1", new String[] {this.getText("email.newUser.listRoles"),
+      config.getBaseUrl(), user.getEmail(), password, this.getText("email.support", new String[] {crpAdmins})}));
+    message.append(this.getText("email.bye"));
+
+    // Saving the new user configuration.
+    user.setActive(true);
+    userManager.saveUser(user, this.getCurrentUser());
+
+    // Send UserManual.pdf
+    String contentType = "application/pdf";
+    String fileName = "Introduction_To_MARLO_v2.1.pdf";
+    byte[] buffer = null;
+    InputStream inputStream = null;
+
+    try {
+      inputStream = this.getClass().getResourceAsStream("/manual/Introduction_To_MARLO_v2.1.pdf");
+      buffer = readFully(inputStream);
+    } catch (FileNotFoundException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    } finally {
+      if (inputStream != null) {
+        try {
+          inputStream.close();
+        } catch (IOException e) {
+          // TODO Auto-generated catch block
+          e.printStackTrace();
+        }
+      }
+    }
+
+    if (buffer != null && fileName != null && contentType != null) {
+      sendMail.send(toEmail, ccEmail, bbcEmails, subject, message.toString(), buffer, contentType, fileName, true);
+    } else {
+      sendMail.send(toEmail, ccEmail, bbcEmails, subject, message.toString(), null, null, null, true);
+    }
+
+  }
+
+
   @Override
   public void prepare() throws Exception {
     Map<String, Object> parameters = this.getParameters();
@@ -589,7 +660,6 @@ public class ManageUsersAction extends BaseAction {
     return SUCCESS;
   }
 
-
   /**
    * Send a mail to a new CRP Admin user.
    * 
@@ -599,11 +669,11 @@ public class ManageUsersAction extends BaseAction {
    * @param crp - the crp who the user has permissions
    * @throws NoSuchAlgorithmException
    */
-  public void sendMailNewAdminUser(User user, Crp crp) throws NoSuchAlgorithmException {
+  private void sendMailNewAdminUser(User user, Crp crp) throws NoSuchAlgorithmException {
     String toEmail = user.getEmail();
     String ccEmail = null;
     String bbcEmails = this.config.getEmailNotification();
-    String subject = this.getText("email.newUser.subject", new String[] {user.getFirstName()});
+    String subject = this.getText("email.adminuser.subject", new String[] {crp.getAcronym()});
     // Setting the password
     String password = this.getText("email.outlookPassword");
     if (!user.isCgiarUser()) {
@@ -614,8 +684,8 @@ public class ManageUsersAction extends BaseAction {
 
     // get CRPAdmin contacts
     String crpAdmins = "";
-    long adminRol = Long.parseLong((String) this.getSession().get(APConstants.CRP_ADMIN_ROLE));
-    Role roleAdmin = roleManager.getRoleById(adminRol);
+    List<Role> roles = new ArrayList<>(crp.getRoles());
+    Role roleAdmin = roles.stream().filter(r -> r.getAcronym().equals("CRP-Admin")).collect(Collectors.toList()).get(0);
     List<UserRole> userRoles = roleAdmin.getUserRoles().stream()
       .filter(ur -> ur.getUser() != null && ur.getUser().isActive()).collect(Collectors.toList());
     for (UserRole userRole : userRoles) {
@@ -626,48 +696,33 @@ public class ManageUsersAction extends BaseAction {
       }
     }
 
+    String crpAdminsEmail = "";
+    for (UserRole userRole : userRoles) {
+      if (crpAdminsEmail.isEmpty()) {
+        crpAdminsEmail += userRole.getUser().getEmail();
+      } else {
+        crpAdminsEmail += ", " + userRole.getUser().getEmail();
+      }
+    }
+
+    // add the ccEmail
+    ccEmail = this.getCurrentUser().getEmail() + ", " + crpAdminsEmail;
+
+
     // Building the Email message:
     StringBuilder message = new StringBuilder();
     message.append(this.getText("email.dear", new String[] {user.getFirstName()}));
 
-    message.append(this.getText("email.newUser.part2",
-      new String[] {this.getText("global.sClusterOfActivities").toLowerCase(), config.getBaseUrl(), crp.getAcronym(),
-        user.getEmail(), password, this.getText("email.support", new String[] {crpAdmins})}));
+    message.append(this.getText("email.adminuser.body",
+      new String[] {crp.getAcronym(), this.getText("email.support", new String[] {crpAdmins}), config.getBaseUrl()}));
     message.append(this.getText("email.bye"));
 
 
-    // Send pdf
-    String contentType = "application/pdf";
-    String fileName = "Introduction_To_MARLO_v2.1.pdf";
-    byte[] buffer = null;
-    InputStream inputStream = null;
-    try {
-      inputStream = this.getClass().getResourceAsStream("/manual/Introduction_To_MARLO_v2.1.pdf");
-      buffer = readFully(inputStream);
-    } catch (FileNotFoundException e) {
-      // TODO Auto-generated catch block
-      LOG.error("There was an error including the atachment: " + e.getMessage());
-    } catch (IOException e) {
-      // TODO Auto-generated catch block
-      LOG.error("There was an error including the atachment: " + e.getMessage());
-    } finally {
-      if (inputStream != null) {
-        try {
-          inputStream.close();
-        } catch (IOException e) {
-          // TODO Auto-generated catch block
-          LOG.error("There was an error including the atachment: " + e.getMessage());
-        }
-      }
-    }
-    if (buffer != null && fileName != null && contentType != null) {
-      sendMail.send(toEmail, ccEmail, bbcEmails, subject, message.toString(), buffer, contentType, fileName, true);
-    } else {
-      sendMail.send(toEmail, ccEmail, bbcEmails, subject, message.toString(), null, null, null, true);
-    }
+    sendMail.send(toEmail, ccEmail, bbcEmails, subject, message.toString(), null, null, null, true);
 
 
   }
+
 
   /**
    * Send a mail to a new Guest user.
@@ -678,11 +733,11 @@ public class ManageUsersAction extends BaseAction {
    * @param crp - the crp who the user has permissions
    * @throws NoSuchAlgorithmException
    */
-  public void sendMailNewGuestUser(User user, Crp crp) throws NoSuchAlgorithmException {
+  private void sendMailNewGuestUser(User user, Crp crp) throws NoSuchAlgorithmException {
     String toEmail = user.getEmail();
     String ccEmail = null;
     String bbcEmails = this.config.getEmailNotification();
-    String subject = this.getText("email.newUser.subject", new String[] {user.getFirstName()});
+    String subject = this.getText("email.guestuser.subject", new String[] {crp.getAcronym()});
     // Setting the password
     String password = this.getText("email.outlookPassword");
     if (!user.isCgiarUser()) {
@@ -693,8 +748,10 @@ public class ManageUsersAction extends BaseAction {
 
     // get CRPAdmin contacts
     String crpAdmins = "";
-    long adminRol = Long.parseLong((String) this.getSession().get(APConstants.CRP_ADMIN_ROLE));
-    Role roleAdmin = roleManager.getRoleById(adminRol);
+
+    List<Role> roles = new ArrayList<>(crp.getRoles());
+    Role roleAdmin = roles.stream().filter(r -> r.getAcronym().equals("CRP-Admin")).collect(Collectors.toList()).get(0);
+
     List<UserRole> userRoles = roleAdmin.getUserRoles().stream()
       .filter(ur -> ur.getUser() != null && ur.getUser().isActive()).collect(Collectors.toList());
     for (UserRole userRole : userRoles) {
@@ -705,48 +762,63 @@ public class ManageUsersAction extends BaseAction {
       }
     }
 
+    String crpAdminsEmail = "";
+    for (UserRole userRole : userRoles) {
+      if (crpAdminsEmail.isEmpty()) {
+        crpAdminsEmail += userRole.getUser().getEmail();
+      } else {
+        crpAdminsEmail += ", " + userRole.getUser().getEmail();
+      }
+    }
+
+    // add the ccEmail
+    ccEmail = this.getCurrentUser().getEmail() + ", " + crpAdminsEmail;
+
+
     // Building the Email message:
     StringBuilder message = new StringBuilder();
     message.append(this.getText("email.dear", new String[] {user.getFirstName()}));
 
-    message.append(
-      this.getText("email.newUser.part3", new String[] {this.getText("global.sClusterOfActivities").toLowerCase(),
-        config.getBaseUrl(), user.getEmail(), password, this.getText("email.support", new String[] {crpAdmins})}));
+    message.append(this.getText("email.guestuser.body",
+      new String[] {crp.getAcronym(), this.getText("email.support", new String[] {crpAdmins})}));
     message.append(this.getText("email.bye"));
 
-    /**
-     * // Send pdf
-     * String contentType = "application/pdf";
-     * String fileName = "Introduction_To_MARLO_v2.1.pdf";
-     * byte[] buffer = null;
-     * InputStream inputStream = null;
-     * try {
-     * inputStream = this.getClass().getResourceAsStream("/manual/Introduction_To_MARLO_v2.1.pdf");
-     * buffer = readFully(inputStream);
-     * } catch (FileNotFoundException e) {
-     * // TODO Auto-generated catch block
-     * LOG.error("There was an error including the atachment: " + e.getMessage());
-     * } catch (IOException e) {
-     * // TODO Auto-generated catch block
-     * LOG.error("There was an error including the atachment: " + e.getMessage());
-     * } finally {
-     * if (inputStream != null) {
-     * try {
-     * inputStream.close();
-     * } catch (IOException e) {
-     * // TODO Auto-generated catch block
-     * LOG.error("There was an error including the atachment: " + e.getMessage());
-     * }
-     * }
-     * }
-     * if (buffer != null && fileName != null && contentType != null) {
-     * sendMail.send(toEmail, ccEmail, bbcEmails, subject, message.toString(), buffer, contentType, fileName, true);
-     * } else {
-     * sendMail.send(toEmail, ccEmail, bbcEmails, subject, message.toString(), null, null, null, true);
-     * }
-     */
-
     sendMail.send(toEmail, ccEmail, bbcEmails, subject, message.toString(), null, null, null, true);
+
+  }
+
+
+  /**
+   * Help to the system to choose what kind of email it must send
+   * depending of the rol and if the user is new or not
+   * 
+   * @author Julián Rodríguez Calderón
+   * @date 04/10/2017
+   * @param user the user
+   * @param crp this is the crp when the user has the new role
+   * @param newRole this is the new rol
+   * @param isNew it is a flag to know if the user is new or not
+   */
+  public void sendMailToUser(User user, Crp crp, String newRole, boolean isNew) {
+
+    if (isNew) {
+      this.notifyNewUserCreated(user);
+    }
+
+    try {
+      switch (newRole) {
+        case APConstants.CRP_ADMIN_ROLE:
+          this.sendMailNewAdminUser(user, crp);
+          break;
+        case APConstants.CRP_GUEST_ROLE:
+          this.sendMailNewGuestUser(user, crp);
+          break;
+      }
+    } catch (Exception e) {
+      LOG.error("ManageUserAction.sendMailToUser(). Message: There was an error trying to send the mail to the user: "
+        + user.getComposedName());
+    }
+
 
   }
 
