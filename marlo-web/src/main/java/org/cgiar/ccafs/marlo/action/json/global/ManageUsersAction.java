@@ -808,7 +808,8 @@ public class ManageUsersAction extends BaseAction {
     try {
       switch (newRole) {
         case APConstants.CRP_ADMIN_ROLE:
-          this.sendMailNewAdminUser(user, crp);
+          // comment this line because the mail format is no define yet.
+          // this.sendMailNewAdminUser(user, crp);
           break;
         case APConstants.CRP_GUEST_ROLE:
           this.sendMailNewGuestUser(user, crp);
