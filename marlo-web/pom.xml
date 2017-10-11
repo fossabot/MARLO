@@ -39,6 +39,7 @@
     <pentaho-report.version>6.1.0.1-196</pentaho-report.version>
     <org-apache-axis.version>1.4</org-apache-axis.version> 
     <javax-xml.version>1.1</javax-xml.version>
+    <org.mapstruct.version>1.1.0.Final</org.mapstruct.version>
   </properties>
 
   <developers>
@@ -493,6 +494,13 @@
     <scope>provided</scope>
 </dependency>
 
+<!-- MapStruct -->
+    <dependency>
+        <groupId>org.mapstruct</groupId>
+        <artifactId>mapstruct-jdk8</artifactId>
+        <version>${org.mapstruct.version}</version>
+    </dependency>
+
   </dependencies>
 
 
@@ -553,6 +561,13 @@
           <source>1.8</source>
           <target>1.8</target>
           <debug>true</debug>
+          <annotationProcessorPaths>
+            <path>
+              <groupId>org.mapstruct</groupId>
+              <artifactId>mapstruct-processor</artifactId>
+              <version>${org.mapstruct.version}</version>
+            </path>
+           </annotationProcessorPaths>
         </configuration>
       </plugin>
       <plugin>

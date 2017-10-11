@@ -19,6 +19,7 @@ import org.cgiar.ccafs.marlo.action.BaseAction;
 import org.cgiar.ccafs.marlo.config.APConstants;
 import org.cgiar.ccafs.marlo.data.manager.AgreementManager;
 import org.cgiar.ccafs.marlo.data.model.Agreement;
+import org.cgiar.ccafs.marlo.data.model.dto.AgreementDTO;
 import org.cgiar.ccafs.marlo.ocs.model.AgreementOCS;
 import org.cgiar.ccafs.marlo.ocs.model.CountryOCS;
 import org.cgiar.ccafs.marlo.ocs.model.CrpOCS;
@@ -90,7 +91,22 @@ public class OcsServiceAction extends BaseAction {
      * }
      * }
      */
-    json = ocsClient.getagreement(ocsCode);
+
+    /*
+     * search an agreement into the database. If the agreement doesn't exits
+     * call the service and save the data into the database. If the agreement exits
+     * validate the date of the agreement and return the object of the database instead
+     * the object of the service.
+     */
+    AgreementDTO agreement = agreementManager.loadAgreement(ocsCode);
+
+    if (agreement != null) {
+      // something to do
+
+
+    } else {
+      json = ocsClient.getagreement(ocsCode);
+    }
 
 
     return SUCCESS;

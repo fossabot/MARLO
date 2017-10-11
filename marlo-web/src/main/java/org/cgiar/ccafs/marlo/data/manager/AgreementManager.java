@@ -17,18 +17,40 @@
 package org.cgiar.ccafs.marlo.data.manager;
 
 import org.cgiar.ccafs.marlo.data.manager.impl.AgreementManagerImpl;
-import org.cgiar.ccafs.marlo.data.model.Agreement;
+import org.cgiar.ccafs.marlo.data.model.dto.AgreementDTO;
 
 import com.google.inject.ImplementedBy;
 
+/**
+ * Manager for the agrements
+ * 
+ * @author Julián Rodríguez - CCAFS/CIAT
+ * @date 20171011
+ */
 @ImplementedBy(AgreementManagerImpl.class)
 public interface AgreementManager {
 
-  public Agreement find(String id);
 
-  public String save(Agreement agreement);
+  /**
+   * this method load an agreement form database given its code
+   * 
+   * @author Julián Rodríguez
+   * @date 20171011
+   * @param codAgreement - the code of the agreement
+   * @return an AgreementDTO object
+   */
+  public AgreementDTO loadAgreement(String codAgreement);
 
-  public String update(Agreement agreement);
+
+  /**
+   * this method saves a new agreement into the database
+   * 
+   * @author Julián Rodríguez
+   * @date 20171011
+   * @param agreement - this is an AgreementDTO object
+   * @return an string with the id of the agreement into the database
+   */
+  public String saveAgreement(AgreementDTO agreement);
 
 
 }

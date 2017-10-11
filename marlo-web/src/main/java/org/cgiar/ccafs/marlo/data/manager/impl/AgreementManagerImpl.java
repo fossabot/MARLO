@@ -19,6 +19,8 @@ package org.cgiar.ccafs.marlo.data.manager.impl;
 import org.cgiar.ccafs.marlo.data.dao.AgreementDAO;
 import org.cgiar.ccafs.marlo.data.manager.AgreementManager;
 import org.cgiar.ccafs.marlo.data.model.Agreement;
+import org.cgiar.ccafs.marlo.data.model.dto.AgreementDTO;
+import org.cgiar.ccafs.marlo.mappers.AgreementMapper;
 
 import com.google.inject.Inject;
 
@@ -33,19 +35,41 @@ public class AgreementManagerImpl implements AgreementManager {
     this.agreementDAO = agreementDAO;
   }
 
+
+  /**
+   * this method load an agreement form database given its code
+   * 
+   * @author Julián Rodríguez
+   * @date 20171011
+   * @param codAgreement - the code of the agreement
+   * @return an AgreementDTO object
+   */
   @Override
-  public Agreement find(String id) {
-    return this.agreementDAO.find(id);
+  public AgreementDTO loadAgreement(String codAgreement) {
+    AgreementDTO agreementDTO = null;
+    Agreement agreement = this.agreementDAO.find(codAgreement);
+
+    if (agreement != null) {
+      agreementDTO = AgreementMapper.INSTANCE.agreementToAgreementDTO(agreement);
+    }
+
+    return agreementDTO;
   }
 
+
+  /**
+   * this method saves or updates a new agreement into the database
+   * 
+   * @author Julián Rodríguez
+   * @date 20171011
+   * @param agreement - this is an AgreementDTO object
+   * @return an string with the id of the agreement into the database
+   */
   @Override
-  public String save(Agreement agreement) {
-    return this.agreementDAO.save(agreement);
+  public String saveAgreement(AgreementDTO agreement) {
+    // In progress
+    return null;
   }
 
-  @Override
-  public String update(Agreement agreement) {
-    return this.agreementDAO.update(agreement);
-  }
 
 }
