@@ -505,8 +505,8 @@
       <groupId>org.mapstruct</groupId>
       <artifactId>mapstruct-processor</artifactId>
       <version>${org.mapstruct.version}</version>
-      <!-- IntelliJ does not pick up the processor if it is not in the dependencies.
-             There is already an open issue for IntelliJ see https://youtrack.jetbrains.com/issue/IDEA-150621
+      <!-- STS does not pick up the processor if it is not in the dependencies.
+            Julián Rodríguez
             -->
       <scope>provided</scope>
     </dependency>

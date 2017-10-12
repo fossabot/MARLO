@@ -70,29 +70,6 @@ public class OcsServiceAction extends BaseAction {
 
   @Override
   public String execute() throws Exception {
-
-    /*
-     * Agreement agreement = agreementManager.find(ocsCode);
-     * if (agreement != null) {
-     * Date today = new Date();
-     * if (agreement.getSyncDate().compareTo(today) == 0) {
-     * json = this.returnOCS(agreement);
-     * } else {
-     * json = ocsClient.getagreement(ocsCode);
-     * if (json != null) {
-     * Agreement theAgreement = this.returnAgreement(json);
-     * agreementManager.update(theAgreement);
-     * }
-     * }
-     * } else {
-     * json = ocsClient.getagreement(ocsCode);
-     * if (json != null) {
-     * Agreement theAgreement = this.returnAgreement(json);
-     * agreementManager.save(theAgreement);
-     * }
-     * }
-     */
-
     /*
      * search an agreement into the database. If the agreement doesn't exits
      * call the service and save the data into the database. If the agreement exits
@@ -109,7 +86,7 @@ public class OcsServiceAction extends BaseAction {
        */
       Date today = new Date();
       if (agreement.getSyncDate().compareTo(today) == 0) {
-        // return the agreementDTO
+
       } else {
         json = ocsClient.getagreement(ocsCode);
       }

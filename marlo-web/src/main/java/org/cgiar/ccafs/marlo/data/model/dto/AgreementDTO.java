@@ -16,7 +16,9 @@
 
 package org.cgiar.ccafs.marlo.data.model.dto;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * a simple DTO class for Agreement
@@ -43,9 +45,21 @@ public class AgreementDTO {
   private String contractStatus;
   private String fundingType;
   private Date syncDate;
+  private List<PlaAgreementDTO> plasAgreements = new ArrayList<PlaAgreementDTO>(0);
+  private List<CountryAgreementDTO> countriesAgreements = new ArrayList<CountryAgreementDTO>(0);
+  private List<FundingSourceAgreementDTO> fundingSourcesAgreementses = new ArrayList<FundingSourceAgreementDTO>(0);
+  private List<CrpAgreementDTO> crpsAgreements = new ArrayList<CrpAgreementDTO>(0);
 
   public String getContractStatus() {
     return contractStatus;
+  }
+
+  public List<CountryAgreementDTO> getCountriesAgreements() {
+    return countriesAgreements;
+  }
+
+  public List<CrpAgreementDTO> getCrpsAgreements() {
+    return crpsAgreements;
   }
 
   public String getDescription() {
@@ -66,6 +80,10 @@ public class AgreementDTO {
 
   public Date getExtensionDate() {
     return extensionDate;
+  }
+
+  public List<FundingSourceAgreementDTO> getFundingSourcesAgreementses() {
+    return fundingSourcesAgreementses;
   }
 
   public String getFundingType() {
@@ -92,6 +110,10 @@ public class AgreementDTO {
     return originalDonorId;
   }
 
+  public List<PlaAgreementDTO> getPlasAgreements() {
+    return plasAgreements;
+  }
+
   public String getReasearchName() {
     return reasearchName;
   }
@@ -116,6 +138,14 @@ public class AgreementDTO {
     this.contractStatus = contractStatus;
   }
 
+  public void setCountriesAgreements(List<CountryAgreementDTO> countriesAgreements) {
+    this.countriesAgreements = countriesAgreements;
+  }
+
+  public void setCrpsAgreements(List<CrpAgreementDTO> crpsAgreements) {
+    this.crpsAgreements = crpsAgreements;
+  }
+
   public void setDescription(String description) {
     this.description = description;
   }
@@ -136,6 +166,10 @@ public class AgreementDTO {
     this.extensionDate = extensionDate;
   }
 
+  public void setFundingSourcesAgreementses(List<FundingSourceAgreementDTO> fundingSourcesAgreementses) {
+    this.fundingSourcesAgreementses = fundingSourcesAgreementses;
+  }
+
   public void setFundingType(String fundingType) {
     this.fundingType = fundingType;
   }
@@ -152,29 +186,41 @@ public class AgreementDTO {
     this.objectives = objectives;
   }
 
+
   public void setOriginalDonor(String originalDonor) {
     this.originalDonor = originalDonor;
   }
+
 
   public void setOriginalDonorId(String originalDonorId) {
     this.originalDonorId = originalDonorId;
   }
 
+
+  public void setPlasAgreements(List<PlaAgreementDTO> plasAgreements) {
+    this.plasAgreements = plasAgreements;
+  }
+
+
   public void setReasearchName(String reasearchName) {
     this.reasearchName = reasearchName;
   }
+
 
   public void setResearchId(String researchId) {
     this.researchId = researchId;
   }
 
+
   public void setShortTitle(String shortTitle) {
     this.shortTitle = shortTitle;
   }
 
+
   public void setStartDate(Date startDate) {
     this.startDate = startDate;
   }
+
 
   public void setSyncDate(Date syncDate) {
     this.syncDate = syncDate;

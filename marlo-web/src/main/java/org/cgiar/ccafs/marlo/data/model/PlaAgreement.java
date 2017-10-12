@@ -8,6 +8,10 @@ package org.cgiar.ccafs.marlo.data.model;
 public class PlaAgreement implements java.io.Serializable {
 
 
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
   private Long id;
   private Agreement agreements;
   private String plaId;
@@ -31,44 +35,44 @@ public class PlaAgreement implements java.io.Serializable {
     this.ammount = ammount;
   }
 
-  public Long getId() {
-    return this.id;
-  }
-
-  public void setId(Long id) {
-    this.id = id;
-  }
-
   public Agreement getAgreements() {
     return this.agreements;
-  }
-
-  public void setAgreements(Agreement agreements) {
-    this.agreements = agreements;
-  }
-
-  public String getPlaId() {
-    return this.plaId;
-  }
-
-  public void setPlaId(String plaId) {
-    this.plaId = plaId;
-  }
-
-  public String getDescription() {
-    return this.description;
-  }
-
-  public void setDescription(String description) {
-    this.description = description;
   }
 
   public Double getAmmount() {
     return this.ammount;
   }
 
+  public String getDescription() {
+    return this.description;
+  }
+
+  public Long getId() {
+    return this.id;
+  }
+
+  public String getPlaId() {
+    return this.plaId;
+  }
+
+  public void setAgreements(Agreement agreements) {
+    this.agreements = agreements;
+  }
+
   public void setAmmount(Double ammount) {
     this.ammount = ammount;
+  }
+
+  public void setDescription(String description) {
+    this.description = description;
+  }
+
+  public void setId(Long id) {
+    this.id = id;
+  }
+
+  public void setPlaId(String plaId) {
+    this.plaId = plaId;
   }
 
 
