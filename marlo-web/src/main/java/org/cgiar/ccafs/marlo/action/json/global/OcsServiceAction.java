@@ -30,6 +30,7 @@ import org.cgiar.ccafs.marlo.ocs.ws.MarloOcsClient;
 import org.cgiar.ccafs.marlo.utils.APConfig;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -101,7 +102,17 @@ public class OcsServiceAction extends BaseAction {
     AgreementDTO agreement = agreementManager.loadAgreement(ocsCode);
 
     if (agreement != null) {
-      // something to do
+      /*
+       * check the date of the last sync. if the date of synchronization is less than
+       * the current date, call the service and save/update the new data. If not call the data
+       * store in the database
+       */
+      Date today = new Date();
+      if (agreement.getSyncDate().compareTo(today) == 0) {
+        // return the agreementDTO
+      } else {
+        json = ocsClient.getagreement(ocsCode);
+      }
 
 
     } else {
