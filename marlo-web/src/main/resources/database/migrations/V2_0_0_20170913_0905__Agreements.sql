@@ -2,9 +2,9 @@ SET FOREIGN_KEY_CHECKS=0;
 DROP TABLE IF EXISTS `agreements`;
 CREATE TABLE `agreements` (
 `id` varchar (20) not null,
-`description` varchar(255) not null,
+`description` varchar(400) not null,
 `short_title` varchar(255),
-`objectives` varchar(255),
+`objectives` varchar(1000),
 `donor_id` varchar(50),
 `donor` varchar(255),
 `original_donor_id` varchar(50),
