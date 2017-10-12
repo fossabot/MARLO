@@ -85,16 +85,17 @@ public class OcsServiceAction extends BaseAction {
        * the current date, call the service and save/update the new data. If not call the data
        * store in the database
        */
-      SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-      Date today = new Date();
-      Date syncDate = sdf.parse(agreement.getSyncDate().toString());
-      Date todayDate = sdf.parse(today.toString());
+
+      SimpleDateFormat format = new SimpleDateFormat("dd/MM/yy");
+      String syncDate = format.format(agreement.getSyncDate());
+      String today = format.format(new Date());
 
 
-      if (syncDate.before(todayDate)) {
+      if (!syncDate.equals(today)) {
         json = ocsClient.getagreement(ocsCode);
         AgreementDTO theAgreement = this.returnAgreement(json);
-
+        theAgreement.setNew(false);
+        theAgreement.setSyncDate(new Date());
         // save or update the method
         agreementManager.saveAgreement(theAgreement);
 
@@ -106,6 +107,11 @@ public class OcsServiceAction extends BaseAction {
 
     } else {
       json = ocsClient.getagreement(ocsCode);
+      AgreementDTO theAgreement = this.returnAgreement(json);
+      theAgreement.setNew(true);
+      theAgreement.setSyncDate(new Date());
+      // save or update the method
+      agreementManager.saveAgreement(theAgreement);
     }
 
 

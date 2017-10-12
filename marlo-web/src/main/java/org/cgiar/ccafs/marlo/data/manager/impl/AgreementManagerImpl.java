@@ -67,8 +67,16 @@ public class AgreementManagerImpl implements AgreementManager {
    */
   @Override
   public String saveAgreement(AgreementDTO agreement) {
-    // In progress
-    return null;
+    String response = null;
+    Agreement agreementDB = AgreementMapper.INSTANCE.agreementDTOToAgreement(agreement);
+
+    if (agreement.isNew()) {
+      response = this.agreementDAO.save(agreementDB);
+    } else {
+      response = this.agreementDAO.update(agreementDB);
+    }
+
+    return response;
   }
 
 

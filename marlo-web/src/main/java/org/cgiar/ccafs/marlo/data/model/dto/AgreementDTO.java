@@ -50,6 +50,8 @@ public class AgreementDTO {
   private List<FundingSourceAgreementDTO> fundingSourcesAgreementses = new ArrayList<FundingSourceAgreementDTO>(0);
   private List<CrpAgreementDTO> crpsAgreements = new ArrayList<CrpAgreementDTO>(0);
 
+  private boolean isNew;
+
   public String getContractStatus() {
     return contractStatus;
   }
@@ -134,6 +136,10 @@ public class AgreementDTO {
     return syncDate;
   }
 
+  public boolean isNew() {
+    return isNew;
+  }
+
   public void setContractStatus(String contractStatus) {
     this.contractStatus = contractStatus;
   }
@@ -181,6 +187,12 @@ public class AgreementDTO {
   public void setId(String id) {
     this.id = id;
   }
+
+
+  public void setNew(boolean isNew) {
+    this.isNew = isNew;
+  }
+
 
   public void setObjectives(String objectives) {
     this.objectives = objectives;
