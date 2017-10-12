@@ -18,8 +18,10 @@ package org.cgiar.ccafs.marlo.action.json.global;
 import org.cgiar.ccafs.marlo.action.BaseAction;
 import org.cgiar.ccafs.marlo.config.APConstants;
 import org.cgiar.ccafs.marlo.data.manager.AgreementManager;
-import org.cgiar.ccafs.marlo.data.model.Agreement;
 import org.cgiar.ccafs.marlo.data.model.dto.AgreementDTO;
+import org.cgiar.ccafs.marlo.data.model.dto.CountryAgreementDTO;
+import org.cgiar.ccafs.marlo.data.model.dto.CrpAgreementDTO;
+import org.cgiar.ccafs.marlo.data.model.dto.PlaAgreementDTO;
 import org.cgiar.ccafs.marlo.ocs.model.AgreementOCS;
 import org.cgiar.ccafs.marlo.ocs.model.CountryOCS;
 import org.cgiar.ccafs.marlo.ocs.model.CrpOCS;
@@ -29,12 +31,11 @@ import org.cgiar.ccafs.marlo.ocs.model.ResearcherOCS;
 import org.cgiar.ccafs.marlo.ocs.ws.MarloOcsClient;
 import org.cgiar.ccafs.marlo.utils.APConfig;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
@@ -84,11 +85,22 @@ public class OcsServiceAction extends BaseAction {
        * the current date, call the service and save/update the new data. If not call the data
        * store in the database
        */
+      SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
       Date today = new Date();
-      if (agreement.getSyncDate().compareTo(today) == 0) {
+      Date syncDate = sdf.parse(agreement.getSyncDate().toString());
+      Date todayDate = sdf.parse(today.toString());
+
+
+      if (syncDate.before(todayDate)) {
+        json = ocsClient.getagreement(ocsCode);
+        AgreementDTO theAgreement = this.returnAgreement(json);
+
+        // save or update the method
+        agreementManager.saveAgreement(theAgreement);
 
       } else {
-        json = ocsClient.getagreement(ocsCode);
+        // map the json object from the DTO
+        json = this.returnOCS(agreement);
       }
 
 
@@ -118,12 +130,12 @@ public class OcsServiceAction extends BaseAction {
    * 
    * @author Julián Rodríguez CCAFS/CIAT
    * @param agreementOCS this is the object from the service
-   * @since 11/09/2017
-   * @return an Agreement Object
+   * @since 20171012
+   * @return an AgreementDTO Object
    */
-  private Agreement returnAgreement(AgreementOCS agreementOCS) {
+  private AgreementDTO returnAgreement(AgreementOCS agreementOCS) {
 
-    Agreement agreement = new Agreement();
+    AgreementDTO agreement = new AgreementDTO();
     agreement.setId(agreementOCS.getId());
     agreement.setDescription(agreementOCS.getDescription());
     agreement.setShortTitle(agreementOCS.getShortTitle());
@@ -141,28 +153,55 @@ public class OcsServiceAction extends BaseAction {
     agreement.setResearchId(agreementOCS.getResearcher().getId());
     agreement.setReasearchName(agreementOCS.getResearcher().getName());
 
-    Set<CountryOCS> countries = agreementOCS.getCountries().stream().collect(Collectors.toSet());
+    List<CountryAgreementDTO> countries = new ArrayList<>();
+    for (CountryOCS country : agreementOCS.getCountries()) {
+      CountryAgreementDTO countryDTO = new CountryAgreementDTO();
+      countryDTO.setAgreement(agreement);
+      countryDTO.setCode(country.getCode());
+      countryDTO.setDescription(country.getDescription());
+      countryDTO.setPercentage(country.getPercentage());
+      countries.add(countryDTO);
+    }
+
     agreement.setCountriesAgreements(countries);
 
-    Set<CrpOCS> crps = agreementOCS.getCrps().stream().collect(Collectors.toSet());
+    List<PlaAgreementDTO> plas = new ArrayList<>();
+    for (PlaOCS pla : agreementOCS.getPlas()) {
+      PlaAgreementDTO plaDTO = new PlaAgreementDTO();
+      plaDTO.setPlaId(pla.getId());
+      plaDTO.setDescription(pla.getDescription());
+      plaDTO.setAmmount(pla.getAmmount());
+      plaDTO.setAgreement(agreement);
+      plas.add(plaDTO);
+    }
+
+    agreement.setPlasAgreements(plas);
+
+    List<CrpAgreementDTO> crps = new ArrayList<>();
+    for (CrpOCS crp : agreementOCS.getCrps()) {
+      CrpAgreementDTO crpDTO = new CrpAgreementDTO();
+      crpDTO.setAgreement(agreement);
+      crpDTO.setCrpId(crp.getId());
+      crpDTO.setDescription(crp.getDescription());
+      crpDTO.setPercentage(crp.getPercentage());
+      crps.add(crpDTO);
+    }
     agreement.setCrpsAgreements(crps);
 
-    Set<PlaOCS> plas = agreementOCS.getPlas().stream().collect(Collectors.toSet());
-    agreement.setPlasAgreements(plas);
 
     return agreement;
 
   }
 
   /**
-   * return an object type AgreementOCS given an Agreement type
+   * return an object type AgreementOCS given an AgreementDTO type
    * 
    * @author Julián Rodríguez CCAFS/CIAT
    * @param agreement this is the object store in Database
-   * @since 11/09/2017
+   * @since 20171012
    * @return an AgreementOCS
    */
-  private AgreementOCS returnOCS(Agreement agreement) {
+  private AgreementOCS returnOCS(AgreementDTO agreement) {
 
     AgreementOCS agreementOCS = new AgreementOCS();
     agreementOCS.setId(agreement.getId());
@@ -193,17 +232,38 @@ public class OcsServiceAction extends BaseAction {
     agreementOCS.setResearcher(researcher);
 
 
-    List<CountryOCS> countries = new ArrayList<CountryOCS>();
-    countries.addAll(agreement.getCountriesAgreements());
+    List<CountryOCS> countries = new ArrayList<>();
+    for (CountryAgreementDTO country : agreement.getCountriesAgreements()) {
+      CountryOCS countryOCS = new CountryOCS();
+      countryOCS.setCode(country.getCode());
+      countryOCS.setDescription(country.getDescription());
+      countryOCS.setPercentage(country.getPercentage());
+      countries.add(countryOCS);
+    }
+
     agreementOCS.setCountries(countries);
 
-    List<CrpOCS> crps = new ArrayList<CrpOCS>();
-    crps.addAll(agreement.getCrpsAgreements());
-    agreementOCS.setCrps(crps);
+    List<PlaOCS> plas = new ArrayList<>();
+    for (PlaAgreementDTO pla : agreement.getPlasAgreements()) {
+      PlaOCS plaOCS = new PlaOCS();
+      plaOCS.setId(pla.getPlaId());
+      plaOCS.setDescription(pla.getDescription());
+      plaOCS.setAmmount(pla.getAmmount());
 
-    List<PlaOCS> plas = new ArrayList<PlaOCS>();
-    plas.addAll(agreement.getPlasAgreements());
+      plas.add(plaOCS);
+    }
+
     agreementOCS.setPlas(plas);
+
+    List<CrpOCS> crps = new ArrayList<>();
+    for (CrpAgreementDTO crp : agreement.getCrpsAgreements()) {
+      CrpOCS crpOCS = new CrpOCS();
+      crpOCS.setId(crp.getCrpId());
+      crpOCS.setDescription(crp.getDescription());
+      crpOCS.setPercentage(crp.getPercentage());
+      crps.add(crpOCS);
+    }
+    agreementOCS.setCrps(crps);
 
 
     return agreementOCS;

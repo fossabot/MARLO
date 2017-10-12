@@ -16,8 +16,6 @@
 
 package org.cgiar.ccafs.marlo.data.model.dto;
 
-import org.cgiar.ccafs.marlo.data.model.Agreement;
-
 /**
  * a simple DTO class for CountryAgreement
  * 
@@ -28,12 +26,12 @@ import org.cgiar.ccafs.marlo.data.model.Agreement;
 public class CountryAgreementDTO {
 
   private Long id;
-  private Agreement agreement;
+  private AgreementDTO agreement;
   private String code;
   private String description;
   private Double percentage;
 
-  public Agreement getAgreement() {
+  public AgreementDTO getAgreement() {
     return agreement;
   }
 
@@ -53,7 +51,7 @@ public class CountryAgreementDTO {
     return percentage;
   }
 
-  public void setAgreement(Agreement agreement) {
+  public void setAgreement(AgreementDTO agreement) {
     this.agreement = agreement;
   }
 
