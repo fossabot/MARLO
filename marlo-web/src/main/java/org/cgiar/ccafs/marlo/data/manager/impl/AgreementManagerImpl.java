@@ -19,8 +19,11 @@ package org.cgiar.ccafs.marlo.data.manager.impl;
 import org.cgiar.ccafs.marlo.data.dao.AgreementDAO;
 import org.cgiar.ccafs.marlo.data.manager.AgreementManager;
 import org.cgiar.ccafs.marlo.data.model.Agreement;
+import org.cgiar.ccafs.marlo.data.model.CountryAgreement;
 import org.cgiar.ccafs.marlo.data.model.dto.AgreementDTO;
 import org.cgiar.ccafs.marlo.mappers.AgreementMapper;
+
+import java.util.Iterator;
 
 import com.google.inject.Inject;
 
@@ -67,16 +70,28 @@ public class AgreementManagerImpl implements AgreementManager {
    */
   @Override
   public String saveAgreement(AgreementDTO agreement) {
-    String response = null;
+    String codAgreement = null;
     Agreement agreementDB = AgreementMapper.INSTANCE.agreementDTOToAgreement(agreement);
 
     if (agreement.isNew()) {
-      response = this.agreementDAO.save(agreementDB);
+      codAgreement = this.agreementDAO.save(agreementDB);
     } else {
-      response = this.agreementDAO.update(agreementDB);
+      codAgreement = this.agreementDAO.update(agreementDB);
     }
 
-    return response;
+    // Saving the countries of the agreement
+    Iterator iterCountries = agreementDB.getCountriesAgreements().iterator();
+
+    if (iterCountries != null) {
+      if (iterCountries.hasNext()) {
+        CountryAgreement theCountry = (CountryAgreement) iterCountries.next();
+        // save or update the country
+
+      }
+    }
+
+    return codAgreement;
+
   }
 
 
