@@ -93,11 +93,15 @@ public class OcsServiceAction extends BaseAction {
 
       if (!syncDate.equals(today)) {
         json = ocsClient.getagreement(ocsCode);
-        AgreementDTO theAgreement = this.returnAgreement(json);
-        theAgreement.setNew(false);
-        theAgreement.setSyncDate(new Date());
-        // save or update the method
-        agreementManager.saveAgreement(theAgreement);
+
+        if (json != null) {
+          AgreementDTO theAgreement = this.returnAgreement(json);
+          theAgreement.setNew(false);
+          theAgreement.setSyncDate(new Date());
+          // save or update the method
+          agreementManager.saveAgreement(theAgreement);
+        }
+
 
       } else {
         // map the json object from the DTO
@@ -107,11 +111,15 @@ public class OcsServiceAction extends BaseAction {
 
     } else {
       json = ocsClient.getagreement(ocsCode);
-      AgreementDTO theAgreement = this.returnAgreement(json);
-      theAgreement.setNew(true);
-      theAgreement.setSyncDate(new Date());
-      // save or update the method
-      agreementManager.saveAgreement(theAgreement);
+
+      if (json != null) {
+        AgreementDTO theAgreement = this.returnAgreement(json);
+        theAgreement.setNew(true);
+        theAgreement.setSyncDate(new Date());
+        // save or update the method
+        agreementManager.saveAgreement(theAgreement);
+      }
+
     }
 
 

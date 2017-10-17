@@ -17,11 +17,22 @@
 package org.cgiar.ccafs.marlo.data.manager.impl;
 
 import org.cgiar.ccafs.marlo.data.dao.AgreementDAO;
+import org.cgiar.ccafs.marlo.data.dao.CountryAgreementDAO;
+import org.cgiar.ccafs.marlo.data.dao.CrpAgreementDAO;
+import org.cgiar.ccafs.marlo.data.dao.PlaAgreementDAO;
 import org.cgiar.ccafs.marlo.data.manager.AgreementManager;
 import org.cgiar.ccafs.marlo.data.model.Agreement;
 import org.cgiar.ccafs.marlo.data.model.CountryAgreement;
+import org.cgiar.ccafs.marlo.data.model.CrpAgreement;
+import org.cgiar.ccafs.marlo.data.model.PlaAgreement;
 import org.cgiar.ccafs.marlo.data.model.dto.AgreementDTO;
+import org.cgiar.ccafs.marlo.data.model.dto.CountryAgreementDTO;
+import org.cgiar.ccafs.marlo.data.model.dto.CrpAgreementDTO;
+import org.cgiar.ccafs.marlo.data.model.dto.PlaAgreementDTO;
 import org.cgiar.ccafs.marlo.mappers.AgreementMapper;
+import org.cgiar.ccafs.marlo.mappers.CountryAgreementMapper;
+import org.cgiar.ccafs.marlo.mappers.CrpAgreementMapper;
+import org.cgiar.ccafs.marlo.mappers.PlaAgreementMapper;
 
 import java.util.Iterator;
 
@@ -31,11 +42,18 @@ import com.google.inject.Inject;
 public class AgreementManagerImpl implements AgreementManager {
 
   private AgreementDAO agreementDAO;
+  private CountryAgreementDAO countryAgreement;
+  private CrpAgreementDAO crpAgreement;
+  private PlaAgreementDAO plaAgreement;
 
 
   @Inject
-  public AgreementManagerImpl(AgreementDAO agreementDAO) {
+  public AgreementManagerImpl(AgreementDAO agreementDAO, CountryAgreementDAO countryAgreement,
+    CrpAgreementDAO crpAgreement, PlaAgreementDAO plaAgreement) {
     this.agreementDAO = agreementDAO;
+    this.countryAgreement = countryAgreement;
+    this.crpAgreement = crpAgreement;
+    this.plaAgreement = plaAgreement;
   }
 
 
@@ -73,6 +91,7 @@ public class AgreementManagerImpl implements AgreementManager {
     String codAgreement = null;
     Agreement agreementDB = AgreementMapper.INSTANCE.agreementDTOToAgreement(agreement);
 
+    // save or update the agreement
     if (agreement.isNew()) {
       codAgreement = this.agreementDAO.save(agreementDB);
     } else {
@@ -80,15 +99,62 @@ public class AgreementManagerImpl implements AgreementManager {
     }
 
     // Saving the countries of the agreement
-    Iterator iterCountries = agreementDB.getCountriesAgreements().iterator();
+    Iterator iterCountries = agreement.getCountriesAgreements().iterator();
 
     if (iterCountries != null) {
-      if (iterCountries.hasNext()) {
-        CountryAgreement theCountry = (CountryAgreement) iterCountries.next();
+      while (iterCountries.hasNext()) {
+        CountryAgreementDTO theCountry = (CountryAgreementDTO) iterCountries.next();
+
+        CountryAgreement country = CountryAgreementMapper.INSTANCE.countryAgreementDTOToCountryAgreement(theCountry);
+
         // save or update the country
+        if (agreement.isNew()) {
+          countryAgreement.save(country);
+        } else {
+          countryAgreement.update(country);
+        }
 
       }
     }
+
+    // saving the crps of the agreement
+    Iterator iterCrps = agreement.getCrpsAgreements().iterator();
+
+    if (iterCrps != null) {
+      while (iterCrps.hasNext()) {
+        CrpAgreementDTO theCrp = (CrpAgreementDTO) iterCrps.next();
+
+        CrpAgreement crp = CrpAgreementMapper.INSTANCE.crpAgreementDTOToCrpAgreement(theCrp);
+
+        // save or update the crp
+        if (agreement.isNew()) {
+          crpAgreement.save(crp);
+        } else {
+          crpAgreement.update(crp);
+        }
+      }
+    }
+
+
+    // saving the plas of the agreement
+    Iterator iterPlas = agreement.getPlasAgreements().iterator();
+
+    if (iterPlas != null) {
+      while (iterPlas.hasNext()) {
+        PlaAgreementDTO thePla = (PlaAgreementDTO) iterPlas.next();
+
+        PlaAgreement pla = PlaAgreementMapper.INSTANCE.plaAgreementDTOToPlaAgreement(thePla);
+
+        // save or update the pla
+        if (agreement.isNew()) {
+          plaAgreement.save(pla);
+        } else {
+          plaAgreement.update(pla);
+        }
+
+      }
+    }
+
 
     return codAgreement;
 

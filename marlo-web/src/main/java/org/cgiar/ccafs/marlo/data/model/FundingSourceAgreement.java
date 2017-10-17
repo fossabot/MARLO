@@ -19,12 +19,12 @@ public class FundingSourceAgreement implements java.io.Serializable {
   public FundingSourceAgreement() {
   }
 
-  public FundingSourceAgreement(Agreement agreements, long fundingSourceId) {
-    this.agreement = agreements;
+  public FundingSourceAgreement(Agreement agreement, long fundingSourceId) {
+    this.agreement = agreement;
     this.fundingSourceId = fundingSourceId;
   }
 
-  public Agreement getAgreements() {
+  public Agreement getAgreement() {
     return this.agreement;
   }
 
@@ -36,8 +36,8 @@ public class FundingSourceAgreement implements java.io.Serializable {
     return this.id;
   }
 
-  public void setAgreements(Agreement agreements) {
-    this.agreement = agreements;
+  public void setAgreement(Agreement agreement) {
+    this.agreement = agreement;
   }
 
   public void setFundingSourceId(long fundingSourceId) {

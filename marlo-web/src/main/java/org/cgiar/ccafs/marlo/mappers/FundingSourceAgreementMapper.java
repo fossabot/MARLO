@@ -21,6 +21,8 @@ import org.cgiar.ccafs.marlo.data.model.dto.FundingSourceAgreementDTO;
 
 import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.Mappings;
 import org.mapstruct.factory.Mappers;
 
 @Mapper
@@ -28,7 +30,7 @@ public interface FundingSourceAgreementMapper {
 
   FundingSourceAgreementMapper INSTANCE = Mappers.getMapper(FundingSourceAgreementMapper.class);
 
-
+  @Mappings({@Mapping(target = "agreement.id", source = "agreement.id")})
   FundingSourceAgreement
     fundingSourceAgreementDTOToFundingSourceAgreement(FundingSourceAgreementDTO fundingSourceAgreement);
 

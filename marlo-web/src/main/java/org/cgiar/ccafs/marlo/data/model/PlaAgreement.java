@@ -22,20 +22,20 @@ public class PlaAgreement implements java.io.Serializable {
   }
 
 
-  public PlaAgreement(Agreement agreements, String plaId, String description) {
-    this.agreement = agreements;
+  public PlaAgreement(Agreement agreement, String plaId, String description) {
+    this.agreement = agreement;
     this.plaId = plaId;
     this.description = description;
   }
 
-  public PlaAgreement(Agreement agreements, String plaId, String description, Double ammount) {
-    this.agreement = agreements;
+  public PlaAgreement(Agreement agreement, String plaId, String description, Double ammount) {
+    this.agreement = agreement;
     this.plaId = plaId;
     this.description = description;
     this.ammount = ammount;
   }
 
-  public Agreement getAgreements() {
+  public Agreement getAgreement() {
     return this.agreement;
   }
 
@@ -55,8 +55,8 @@ public class PlaAgreement implements java.io.Serializable {
     return this.plaId;
   }
 
-  public void setAgreements(Agreement agreements) {
-    this.agreement = agreements;
+  public void setAgreement(Agreement agreement) {
+    this.agreement = agreement;
   }
 
   public void setAmmount(Double ammount) {
