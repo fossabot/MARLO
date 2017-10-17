@@ -29,7 +29,7 @@ public class CountryAgreementDTO {
   private AgreementDTO agreement;
   private String code;
   private String description;
-  private Double percentage;
+  private double percentage;
 
   public AgreementDTO getAgreement() {
     return agreement;
@@ -67,7 +67,7 @@ public class CountryAgreementDTO {
     this.id = id;
   }
 
-  public void setPercentage(Double percentage) {
+  public void setPercentage(double percentage) {
     this.percentage = percentage;
   }
 

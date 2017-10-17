@@ -18,20 +18,20 @@ public class CrpAgreement implements java.io.Serializable {
   }
 
 
-  public CrpAgreement(Agreement agreements, String crpId, String description) {
-    this.agreement = agreements;
+  public CrpAgreement(Agreement agreement, String crpId, String description) {
+    this.agreement = agreement;
     this.crpId = crpId;
     this.description = description;
   }
 
-  public CrpAgreement(Agreement agreements, String crpId, String description, Double percentage) {
-    this.agreement = agreements;
+  public CrpAgreement(Agreement agreement, String crpId, String description, Double percentage) {
+    this.agreement = agreement;
     this.crpId = crpId;
     this.description = description;
     this.percentage = percentage;
   }
 
-  public Agreement getAgreements() {
+  public Agreement getAgreement() {
     return this.agreement;
   }
 
@@ -51,8 +51,8 @@ public class CrpAgreement implements java.io.Serializable {
     return this.percentage;
   }
 
-  public void setAgreements(Agreement agreements) {
-    this.agreement = agreements;
+  public void setAgreement(Agreement agreement) {
+    this.agreement = agreement;
   }
 
   public void setCrpId(String crpId) {

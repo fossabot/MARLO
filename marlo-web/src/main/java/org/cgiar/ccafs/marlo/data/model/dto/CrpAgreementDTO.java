@@ -30,7 +30,7 @@ public class CrpAgreementDTO {
   private AgreementDTO agreement;
   private String crpId;
   private String description;
-  private Double percentage;
+  private double percentage;
 
   public AgreementDTO getAgreement() {
     return agreement;

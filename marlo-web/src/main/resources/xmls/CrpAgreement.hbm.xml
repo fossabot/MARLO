@@ -16,7 +16,7 @@
             <column name="description" not-null="true"/>
         </property>
         <property generated="never" lazy="false" name="percentage" optimistic-lock="true" type="java.lang.Double" unique="false">
-            <column name="percentage" precision="2"/>
+            <column name="percentage" precision="5" scale="2"/>
         </property>
     </class>
 </hibernate-mapping>

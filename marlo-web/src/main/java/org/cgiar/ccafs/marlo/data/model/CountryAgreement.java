@@ -18,20 +18,20 @@ public class CountryAgreement implements java.io.Serializable {
   }
 
 
-  public CountryAgreement(Agreement agreements, String code, String description) {
-    this.agreement = agreements;
+  public CountryAgreement(Agreement agreement, String code, String description) {
+    this.agreement = agreement;
     this.code = code;
     this.description = description;
   }
 
-  public CountryAgreement(Agreement agreements, String code, String description, Double percentage) {
-    this.agreement = agreements;
+  public CountryAgreement(Agreement agreement, String code, String description, Double percentage) {
+    this.agreement = agreement;
     this.code = code;
     this.description = description;
     this.percentage = percentage;
   }
 
-  public Agreement getAgreements() {
+  public Agreement getAgreement() {
     return this.agreement;
   }
 
@@ -51,8 +51,8 @@ public class CountryAgreement implements java.io.Serializable {
     return this.percentage;
   }
 
-  public void setAgreements(Agreement agreements) {
-    this.agreement = agreements;
+  public void setAgreement(Agreement agreement) {
+    this.agreement = agreement;
   }
 
   public void setCode(String code) {

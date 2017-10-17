@@ -27,7 +27,7 @@ CREATE TABLE `countries_agreement`(
 `agreement_id` varchar(20) not null,
 `code` varchar(50) not null,
 `description` varchar(255) not null,
-`percentage` double(2,2),
+`percentage` double(5,2),
 PRIMARY KEY (`id`),
 KEY `agreement_id` (`agreement_id`) USING BTREE,
 CONSTRAINT `countries_agreement_fk1` FOREIGN KEY (`agreement_id`) REFERENCES `agreements` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
@@ -39,7 +39,7 @@ CREATE TABLE `crps_agreement`(
 `agreement_id` varchar(20) not null,
 `crp_id` varchar(20) not null,
 `description` varchar(255) not null,
-`percentage` double (2,2),
+`percentage` double (5,2),
 PRIMARY KEY (`id`),
 KEY `agreement_id` (`agreement_id`) USING BTREE,
 CONSTRAINT `crps_agreement_fk1` FOREIGN KEY (`agreement_id`) REFERENCES `agreements` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
@@ -51,7 +51,7 @@ CREATE TABLE `plas_agreement`(
  `agreement_id` varchar(20) not null,
  `pla_id` varchar(20) not null,
  `description` varchar(255) not null,
- `ammount` double(30,2),
+ `ammount` double(50,2),
  PRIMARY KEY (`id`),
  KEY `agreement_id` (`agreement_id`) USING BTREE,
  CONSTRAINT `plas_agreement_fk1` FOREIGN KEY (`agreement_id`) REFERENCES `agreements` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
