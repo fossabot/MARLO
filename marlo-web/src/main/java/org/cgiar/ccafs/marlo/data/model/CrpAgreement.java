@@ -9,7 +9,7 @@ public class CrpAgreement implements java.io.Serializable {
 
 
   private Long id;
-  private Agreement agreements;
+  private Agreement agreement;
   private String crpId;
   private String description;
   private Double percentage;
@@ -19,52 +19,52 @@ public class CrpAgreement implements java.io.Serializable {
 
 
   public CrpAgreement(Agreement agreements, String crpId, String description) {
-    this.agreements = agreements;
+    this.agreement = agreements;
     this.crpId = crpId;
     this.description = description;
   }
 
   public CrpAgreement(Agreement agreements, String crpId, String description, Double percentage) {
-    this.agreements = agreements;
+    this.agreement = agreements;
     this.crpId = crpId;
     this.description = description;
     this.percentage = percentage;
   }
 
-  public Long getId() {
-    return this.id;
-  }
-
-  public void setId(Long id) {
-    this.id = id;
-  }
-
   public Agreement getAgreements() {
-    return this.agreements;
-  }
-
-  public void setAgreements(Agreement agreements) {
-    this.agreements = agreements;
+    return this.agreement;
   }
 
   public String getCrpId() {
     return this.crpId;
   }
 
-  public void setCrpId(String crpId) {
-    this.crpId = crpId;
-  }
-
   public String getDescription() {
     return this.description;
+  }
+
+  public Long getId() {
+    return this.id;
+  }
+
+  public Double getPercentage() {
+    return this.percentage;
+  }
+
+  public void setAgreements(Agreement agreements) {
+    this.agreement = agreements;
+  }
+
+  public void setCrpId(String crpId) {
+    this.crpId = crpId;
   }
 
   public void setDescription(String description) {
     this.description = description;
   }
 
-  public Double getPercentage() {
-    return this.percentage;
+  public void setId(Long id) {
+    this.id = id;
   }
 
   public void setPercentage(Double percentage) {

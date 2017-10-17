@@ -45,9 +45,10 @@ public class AgreementDTO {
   private String contractStatus;
   private String fundingType;
   private Date syncDate;
+  private FundingSourceAgreementDTO fundingSourcesAgreement;
   private List<PlaAgreementDTO> plasAgreements = new ArrayList<PlaAgreementDTO>(0);
   private List<CountryAgreementDTO> countriesAgreements = new ArrayList<CountryAgreementDTO>(0);
-  private List<FundingSourceAgreementDTO> fundingSourcesAgreementses = new ArrayList<FundingSourceAgreementDTO>(0);
+
   private List<CrpAgreementDTO> crpsAgreements = new ArrayList<CrpAgreementDTO>(0);
 
   private boolean isNew;
@@ -84,8 +85,9 @@ public class AgreementDTO {
     return extensionDate;
   }
 
-  public List<FundingSourceAgreementDTO> getFundingSourcesAgreementses() {
-    return fundingSourcesAgreementses;
+
+  public FundingSourceAgreementDTO getFundingSourcesAgreement() {
+    return fundingSourcesAgreement;
   }
 
   public String getFundingType() {
@@ -168,21 +170,24 @@ public class AgreementDTO {
     this.endDate = endDate;
   }
 
+
   public void setExtensionDate(Date extensionDate) {
     this.extensionDate = extensionDate;
   }
 
-  public void setFundingSourcesAgreementses(List<FundingSourceAgreementDTO> fundingSourcesAgreementses) {
-    this.fundingSourcesAgreementses = fundingSourcesAgreementses;
+  public void setFundingSourcesAgreement(FundingSourceAgreementDTO fundingSourcesAgreement) {
+    this.fundingSourcesAgreement = fundingSourcesAgreement;
   }
 
   public void setFundingType(String fundingType) {
     this.fundingType = fundingType;
   }
 
+
   public void setGrantAmmount(String grantAmmount) {
     this.grantAmmount = grantAmmount;
   }
+
 
   public void setId(String id) {
     this.id = id;

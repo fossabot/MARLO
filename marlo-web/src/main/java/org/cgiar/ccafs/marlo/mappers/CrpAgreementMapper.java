@@ -20,16 +20,15 @@ import org.cgiar.ccafs.marlo.data.model.CrpAgreement;
 import org.cgiar.ccafs.marlo.data.model.dto.CrpAgreementDTO;
 
 import org.mapstruct.InheritInverseConfiguration;
-import org.mapstruct.Mapping;
-import org.mapstruct.Mappings;
+import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
+@Mapper
 public interface CrpAgreementMapper {
 
   CrpAgreementMapper INSTANCE = Mappers.getMapper(CrpAgreementMapper.class);
 
 
-  @Mappings({@Mapping(source = "agreement", target = "agreements")})
   CrpAgreement crpAgreementDTOToCrpAgreement(CrpAgreementDTO crpAgreement);
 
   @InheritInverseConfiguration

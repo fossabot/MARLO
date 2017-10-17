@@ -20,16 +20,15 @@ import org.cgiar.ccafs.marlo.data.model.PlaAgreement;
 import org.cgiar.ccafs.marlo.data.model.dto.PlaAgreementDTO;
 
 import org.mapstruct.InheritInverseConfiguration;
-import org.mapstruct.Mapping;
-import org.mapstruct.Mappings;
+import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
+@Mapper
 public interface PlaAgreementMapper {
 
   PlaAgreementMapper INSTANCE = Mappers.getMapper(PlaAgreementMapper.class);
 
 
-  @Mappings({@Mapping(source = "agreement", target = "agreements")})
   PlaAgreement plaAgreementDTOToPlaAgreement(PlaAgreementDTO plaAgreement);
 
   @InheritInverseConfiguration

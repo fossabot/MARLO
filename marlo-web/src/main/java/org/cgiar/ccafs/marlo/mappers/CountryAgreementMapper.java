@@ -20,16 +20,15 @@ import org.cgiar.ccafs.marlo.data.model.CountryAgreement;
 import org.cgiar.ccafs.marlo.data.model.dto.CountryAgreementDTO;
 
 import org.mapstruct.InheritInverseConfiguration;
-import org.mapstruct.Mapping;
-import org.mapstruct.Mappings;
+import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
+@Mapper
 public interface CountryAgreementMapper {
 
   CountryAgreementMapper INSTANCE = Mappers.getMapper(CountryAgreementMapper.class);
 
 
-  @Mappings({@Mapping(source = "agreement", target = "agreements")})
   CountryAgreement countryAgreementDTOToCountryAgreement(CountryAgreementDTO countryAgreement);
 
   @InheritInverseConfiguration

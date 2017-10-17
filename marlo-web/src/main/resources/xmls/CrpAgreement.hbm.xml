@@ -6,7 +6,7 @@
             <column name="id"/>
             <generator class="identity"/>
         </id>
-        <many-to-one class="org.cgiar.ccafs.marlo.data.model.Agreement" embed-xml="true" fetch="select" insert="true" name="agreements" not-found="exception" optimistic-lock="true" unique="false" update="true">
+        <many-to-one class="org.cgiar.ccafs.marlo.data.model.Agreement" embed-xml="true" fetch="select" insert="true" name="agreement" not-found="exception" optimistic-lock="true" unique="false" update="true">
             <column length="20" name="agreement_id" not-null="true"/>
         </many-to-one>
         <property generated="never" lazy="false" name="crpId" optimistic-lock="true" type="string" unique="false">

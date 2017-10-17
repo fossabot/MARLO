@@ -13,7 +13,7 @@ public class PlaAgreement implements java.io.Serializable {
    */
   private static final long serialVersionUID = 1L;
   private Long id;
-  private Agreement agreements;
+  private Agreement agreement;
   private String plaId;
   private String description;
   private Double ammount;
@@ -23,20 +23,20 @@ public class PlaAgreement implements java.io.Serializable {
 
 
   public PlaAgreement(Agreement agreements, String plaId, String description) {
-    this.agreements = agreements;
+    this.agreement = agreements;
     this.plaId = plaId;
     this.description = description;
   }
 
   public PlaAgreement(Agreement agreements, String plaId, String description, Double ammount) {
-    this.agreements = agreements;
+    this.agreement = agreements;
     this.plaId = plaId;
     this.description = description;
     this.ammount = ammount;
   }
 
   public Agreement getAgreements() {
-    return this.agreements;
+    return this.agreement;
   }
 
   public Double getAmmount() {
@@ -56,7 +56,7 @@ public class PlaAgreement implements java.io.Serializable {
   }
 
   public void setAgreements(Agreement agreements) {
-    this.agreements = agreements;
+    this.agreement = agreements;
   }
 
   public void setAmmount(Double ammount) {

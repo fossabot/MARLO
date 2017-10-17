@@ -9,7 +9,7 @@ public class CountryAgreement implements java.io.Serializable {
 
 
   private Long id;
-  private Agreement agreements;
+  private Agreement agreement;
   private String code;
   private String description;
   private Double percentage;
@@ -19,52 +19,52 @@ public class CountryAgreement implements java.io.Serializable {
 
 
   public CountryAgreement(Agreement agreements, String code, String description) {
-    this.agreements = agreements;
+    this.agreement = agreements;
     this.code = code;
     this.description = description;
   }
 
   public CountryAgreement(Agreement agreements, String code, String description, Double percentage) {
-    this.agreements = agreements;
+    this.agreement = agreements;
     this.code = code;
     this.description = description;
     this.percentage = percentage;
   }
 
-  public Long getId() {
-    return this.id;
-  }
-
-  public void setId(Long id) {
-    this.id = id;
-  }
-
   public Agreement getAgreements() {
-    return this.agreements;
-  }
-
-  public void setAgreements(Agreement agreements) {
-    this.agreements = agreements;
+    return this.agreement;
   }
 
   public String getCode() {
     return this.code;
   }
 
-  public void setCode(String code) {
-    this.code = code;
-  }
-
   public String getDescription() {
     return this.description;
+  }
+
+  public Long getId() {
+    return this.id;
+  }
+
+  public Double getPercentage() {
+    return this.percentage;
+  }
+
+  public void setAgreements(Agreement agreements) {
+    this.agreement = agreements;
+  }
+
+  public void setCode(String code) {
+    this.code = code;
   }
 
   public void setDescription(String description) {
     this.description = description;
   }
 
-  public Double getPercentage() {
-    return this.percentage;
+  public void setId(Long id) {
+    this.id = id;
   }
 
   public void setPercentage(Double percentage) {

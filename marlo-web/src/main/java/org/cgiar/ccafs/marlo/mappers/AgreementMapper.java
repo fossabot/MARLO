@@ -16,13 +16,12 @@
 
 package org.cgiar.ccafs.marlo.mappers;
 
+
 import org.cgiar.ccafs.marlo.data.model.Agreement;
 import org.cgiar.ccafs.marlo.data.model.dto.AgreementDTO;
 
 import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.Mappings;
 import org.mapstruct.factory.Mappers;
 
 @Mapper
@@ -31,7 +30,7 @@ public interface AgreementMapper {
   AgreementMapper INSTANCE = Mappers.getMapper(AgreementMapper.class);
 
 
-  @Mappings({@Mapping(source = "id", target = "id"), @Mapping(source = "description", target = "description")})
+  // @Mappings({@Mapping(source = "id", target = "id"), @Mapping(source = "description", target = "description")})
   Agreement agreementDTOToAgreement(AgreementDTO agreement);
 
   @InheritInverseConfiguration
