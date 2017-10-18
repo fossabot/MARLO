@@ -18,6 +18,7 @@ package org.cgiar.ccafs.marlo.data.manager;
 
 import org.cgiar.ccafs.marlo.data.manager.impl.AgreementManagerImpl;
 import org.cgiar.ccafs.marlo.data.model.dto.AgreementDTO;
+import org.cgiar.ccafs.marlo.data.model.dto.FundingSourceAgreementDTO;
 
 import com.google.inject.ImplementedBy;
 
@@ -43,6 +44,19 @@ public interface AgreementManager {
 
 
   /**
+   * load an agreement relationship with the funding source id and the code of
+   * the agreement
+   * 
+   * @author Julián Rodríguez Calderón CCAFS/CIAT
+   * @since 20171018
+   * @param codAgreement code of the agreement
+   * @param idFundingSource id of the funding source
+   * @return a DTO object
+   */
+  public FundingSourceAgreementDTO loadFSAgreement(String codAgreement, String idFundingSource);
+
+
+  /**
    * this method saves a new agreement into the database
    * 
    * @author Julián Rodríguez
@@ -51,6 +65,16 @@ public interface AgreementManager {
    * @return an string with the id of the agreement into the database
    */
   public String saveAgreement(AgreementDTO agreement);
+
+  /**
+   * this method saves or update a new funding source agreement into the database
+   * 
+   * @author Julián Rodríguez Calderón
+   * @since 20171018
+   * @param fsAgreement an DTO object to save
+   * @return String with the id of the object
+   */
+  public String saveFSAgreement(FundingSourceAgreementDTO fsAgreement);
 
 
 }
