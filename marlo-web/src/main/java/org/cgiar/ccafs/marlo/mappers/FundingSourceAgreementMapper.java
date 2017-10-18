@@ -30,7 +30,8 @@ public interface FundingSourceAgreementMapper {
 
   FundingSourceAgreementMapper INSTANCE = Mappers.getMapper(FundingSourceAgreementMapper.class);
 
-  @Mappings({@Mapping(target = "agreement.id", source = "agreement.id")})
+  @Mappings({@Mapping(target = "agreement.id", source = "codAgreement"),
+    @Mapping(target = "fundingSourceId", source = "codfundingSource")})
   FundingSourceAgreement
     fundingSourceAgreementDTOToFundingSourceAgreement(FundingSourceAgreementDTO fundingSourceAgreement);
 
