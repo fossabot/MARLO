@@ -18,6 +18,7 @@ package org.cgiar.ccafs.marlo.action.funding;
 
 import org.cgiar.ccafs.marlo.action.BaseAction;
 import org.cgiar.ccafs.marlo.config.APConstants;
+import org.cgiar.ccafs.marlo.data.manager.AgreementManager;
 import org.cgiar.ccafs.marlo.data.manager.AuditLogManager;
 import org.cgiar.ccafs.marlo.data.manager.BudgetTypeManager;
 import org.cgiar.ccafs.marlo.data.manager.CrpManager;
@@ -48,6 +49,7 @@ import org.cgiar.ccafs.marlo.data.model.LocElement;
 import org.cgiar.ccafs.marlo.data.model.LocElementType;
 import org.cgiar.ccafs.marlo.data.model.PartnerDivision;
 import org.cgiar.ccafs.marlo.data.model.User;
+import org.cgiar.ccafs.marlo.ocs.model.AgreementOCS;
 import org.cgiar.ccafs.marlo.security.Permission;
 import org.cgiar.ccafs.marlo.utils.APConfig;
 import org.cgiar.ccafs.marlo.utils.AutoSaveReader;
@@ -155,6 +157,10 @@ public class FundingSourceAction extends BaseAction {
   // TODO delete when fix the budget permissions
   private RoleManager userRoleManager;
 
+  // Agreements
+  private AgreementManager agreementManager;
+  private AgreementOCS theAgreement;
+
   @Inject
   public FundingSourceAction(APConfig config, CrpManager crpManager, FundingSourceManager fundingSourceManager,
     InstitutionManager institutionManager, LiaisonInstitutionManager liaisonInstitutionManager,
@@ -164,7 +170,7 @@ public class FundingSourceAction extends BaseAction {
     PartnerDivisionManager partnerDivisionManager, FundingSourceInstitutionManager fundingSourceInstitutionManager,
     LocElementManager locElementManager, FundingSourceLocationsManager fundingSourceLocationsManager,
     LocElementTypeManager locElementTypeManager,
-    /* TODO delete when fix the budget permissions */ RoleManager userRoleManager) {
+    /* TODO delete when fix the budget permissions */ RoleManager userRoleManager, AgreementManager agreementManager) {
     super(config);
     this.crpManager = crpManager;
     this.fundingSourceManager = fundingSourceManager;
@@ -185,6 +191,7 @@ public class FundingSourceAction extends BaseAction {
     this.locElementTypeManager = locElementTypeManager;
     // TODO delete when fix the budget permissions
     this.userRoleManager = userRoleManager;
+    this.agreementManager = agreementManager;
   }
 
   @Override
@@ -373,6 +380,11 @@ public class FundingSourceAction extends BaseAction {
 
   public Map<String, String> getStatus() {
     return status;
+  }
+
+
+  public AgreementOCS getTheAgreement() {
+    return theAgreement;
   }
 
 
@@ -691,8 +703,15 @@ public class FundingSourceAction extends BaseAction {
       }
 
     }
-  }
 
+    // search for the agreement
+    if (fundingSource.getSynced()) {
+      if (fundingSource.getFinanceCode() != null) {
+        this.theAgreement = this.agreementManager.loadAgreement(fundingSource.getFinanceCode());
+      }
+    }
+
+  }
 
   @Override
   public String save() {
@@ -1014,6 +1033,7 @@ public class FundingSourceAction extends BaseAction {
     this.fileID = fileID;
   }
 
+
   public void setFundingSource(FundingSource fundingSource) {
     this.fundingSource = fundingSource;
   }
@@ -1023,24 +1043,23 @@ public class FundingSourceAction extends BaseAction {
     this.fundingSourceID = fundingSourceID;
   }
 
-
   public void setInstitutions(List<Institution> institutions) {
     this.institutions = institutions;
   }
+
 
   public void setInstitutionsDonors(List<Institution> institutionsDonors) {
     this.institutionsDonors = institutionsDonors;
   }
 
-
   public void setLiaisonInstitutions(List<LiaisonInstitution> liaisonInstitutions) {
     this.liaisonInstitutions = liaisonInstitutions;
   }
 
+
   public void setLoggedCrp(Crp loggedCrp) {
     this.loggedCrp = loggedCrp;
   }
-
 
   public void setRegion(boolean region) {
     this.region = region;
@@ -1050,18 +1069,24 @@ public class FundingSourceAction extends BaseAction {
     this.regionLists = regionLists;
   }
 
+
   public void setScopeRegionLists(List<LocElementType> scopeRegionLists) {
     this.scopeRegionLists = scopeRegionLists;
   }
-
 
   public void setStatus(Map<String, String> status) {
     this.status = status;
   }
 
+  public void setTheAgreement(AgreementOCS theAgreement) {
+    this.theAgreement = theAgreement;
+  }
+
+
   public void setTransaction(String transaction) {
     this.transaction = transaction;
   }
+
 
   @Override
   public void validate() {
@@ -1069,5 +1094,6 @@ public class FundingSourceAction extends BaseAction {
       validator.validate(this, fundingSource, true);
     }
   }
+
 
 }

@@ -12,7 +12,7 @@ function initSync() {
     // Set Datepicker
     settingDate(".startDateInput", ".endDateInput", ".extensionDateInput");
   }
-  
+
   // Harvest metadata from URL
   $syncButtons.on("click", syncMetadata);
 
@@ -88,23 +88,23 @@ function syncFundingSource() {
   // Update Funding source last update
   var today = new Date();
   var dd = today.getDate();
-  var mm = today.getMonth()+1; // January is 0!
+  var mm = today.getMonth() + 1; // January is 0!
 
   var yyyy = today.getFullYear();
-  if(dd<10){
-      dd='0'+dd;
-  } 
-  if(mm<10){
-      mm='0'+mm;
-  } 
-  $('.fundingSourceSyncedDate').val(yyyy+'-'+mm+'-'+dd);
+  if(dd < 10) {
+    dd = '0' + dd;
+  }
+  if(mm < 10) {
+    mm = '0' + mm;
+  }
+  $('.fundingSourceSyncedDate').val(yyyy + '-' + mm + '-' + dd);
   $('.lastDaySync').show();
-  $('.lastDaySync span').html($.datepicker.formatDate( "M dd, yy", new Date(yyyy, mm -1, dd) ));
+  $('.lastDaySync span').html($.datepicker.formatDate("M dd, yy", new Date(yyyy, mm - 1, dd)));
   // Hide Date labels
   $('.dateLabel').addClass('disabled');
   // Update component
   $(document).trigger('updateComponent');
-  
+
   // Set isSynced parameter
   isSynced = true;
 }
@@ -156,17 +156,20 @@ function unSyncFundingSource() {
 
   // Update component
   $(document).trigger('updateComponent');
-  
+
   // Set isSynced parameter
   isSynced = false;
 }
 
 function getOCSMetadata() {
   var currentCode = $('input.financeCode').val();
-  if(!currentCode || syncing){
+  if(!currentCode || syncing) {
     return
+
+    
+
   }
-  
+
   // Ajax to service
   $.ajax({
       'url': baseURL + '/ocsService.do',
@@ -174,7 +177,7 @@ function getOCSMetadata() {
         ocsCode: $('input.financeCode').val()
       },
       beforeSend: function() {
-        $('.loading.syncBlock').show(); 
+        $('.loading.syncBlock').show();
         $(".financeCode").addClass('input-loading');
         $('.financeCode-message').text("");
         $syncButtons.addClass('button-disabled');
@@ -185,16 +188,16 @@ function getOCSMetadata() {
           var agreement = data.json;
           console.log(agreement);
           // Extension date validation
-          if(!allowExtensionDate){
+          if(!allowExtensionDate) {
             agreement.endDate = agreement.extensionDate;
           }
           // Principal Investigator
           agreement.pInvestigator = agreement.researcher.name;
           // Donors
-          if(agreement.originalDonor){
+          if(agreement.originalDonor) {
             agreement.originalDonorName = agreement.originalDonor.name;
           }
-          if(agreement.directDonor){
+          if(agreement.directDonor) {
             agreement.directDonorName = agreement.directDonor.name;
           }
           // Validate extension date
@@ -235,7 +238,7 @@ function getOCSMetadata() {
         }
       },
       complete: function() {
-        $('.loading.syncBlock').hide(); 
+        $('.loading.syncBlock').hide();
         $(".financeCode").removeClass('input-loading');
         $syncButtons.removeClass('button-disabled');
         syncing = false;
