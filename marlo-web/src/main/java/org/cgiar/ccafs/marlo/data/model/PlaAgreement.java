@@ -18,6 +18,7 @@ public class PlaAgreement implements java.io.Serializable {
   private String description;
   private Double ammount;
 
+
   public PlaAgreement() {
   }
 

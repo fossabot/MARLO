@@ -17,7 +17,7 @@
 package org.cgiar.ccafs.marlo.mappers;
 
 import org.cgiar.ccafs.marlo.data.model.CrpAgreement;
-import org.cgiar.ccafs.marlo.data.model.dto.CrpAgreementDTO;
+import org.cgiar.ccafs.marlo.ocs.model.CrpOCS;
 
 import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
@@ -30,12 +30,12 @@ public interface CrpAgreementMapper {
 
   CrpAgreementMapper INSTANCE = Mappers.getMapper(CrpAgreementMapper.class);
 
-  @Mappings({@Mapping(target = "agreement.id", source = "agreement.id"),
-    @Mapping(target = "agreement.description", source = "agreement.description")})
-  CrpAgreement crpAgreementDTOToCrpAgreement(CrpAgreementDTO crpAgreement);
+  @Mappings({@Mapping(target = "crpId", source = "id"), @Mapping(target = "id", source = "consecutive"),
+    @Mapping(target = "description", source = "description"), @Mapping(target = "percentage", source = "percentage")})
+  CrpAgreement crpAgreementDTOToCrpAgreement(CrpOCS crpAgreement);
 
   @InheritInverseConfiguration
-  CrpAgreementDTO crpAgreementToCrpAgreementDTO(CrpAgreement crpAgreement);
+  CrpOCS crpAgreementToCrpAgreementDTO(CrpAgreement crpAgreement);
 
 
 }

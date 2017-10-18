@@ -40,6 +40,8 @@ public class AgreementOCS {
   private String contractStatus;
   private String fundingType;
   private List<PlaOCS> plas;
+  private Date SyncDate;
+  private boolean isNew;
 
   public String getContractStatus() {
     return contractStatus;
@@ -71,7 +73,7 @@ public class AgreementOCS {
 
   @JSON(format = "yyyy-MM-dd")
   public Date getExtensionDate() {
-     try {
+    try {
       return extensionDate;
     } catch (Exception e) {
       return null;
@@ -124,9 +126,19 @@ public class AgreementOCS {
   }
 
 
+  public Date getSyncDate() {
+    return SyncDate;
+  }
+
+  public boolean isNew() {
+    return isNew;
+  }
+
+
   public void setContractStatus(String contractStatus) {
     this.contractStatus = contractStatus;
   }
+
 
   public void setCountries(List<CountryOCS> countries) {
     this.countries = countries;
@@ -172,11 +184,13 @@ public class AgreementOCS {
     this.id = id;
   }
 
+  public void setNew(boolean isNew) {
+    this.isNew = isNew;
+  }
 
   public void setObjectives(String objectives) {
     this.objectives = objectives;
   }
-
 
   public void setOriginalDonor(DonorOCS originalDonor) {
     this.originalDonor = originalDonor;
@@ -186,16 +200,24 @@ public class AgreementOCS {
     this.plas = plas;
   }
 
+
   public void setResearcher(ResearcherOCS researcher) {
     this.researcher = researcher;
   }
+
 
   public void setShortTitle(String shortTitle) {
     this.shortTitle = shortTitle;
   }
 
+
   public void setStartDate(Date startDate) {
     this.startDate = startDate;
+  }
+
+
+  public void setSyncDate(Date syncDate) {
+    SyncDate = syncDate;
   }
 
 

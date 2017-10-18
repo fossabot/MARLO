@@ -23,6 +23,7 @@ public class PlaOCS {
   private String id;
   private String description;
   private double ammount;
+  private String consecutive;
 
   private List<PartnerOCS> partners;
 
@@ -31,6 +32,10 @@ public class PlaOCS {
 
   public double getAmmount() {
     return ammount;
+  }
+
+  public String getConsecutive() {
+    return consecutive;
   }
 
   public List<CountryOCS> getCountries() {
@@ -53,6 +58,10 @@ public class PlaOCS {
     this.ammount = ammount;
   }
 
+  public void setConsecutive(String consecutive) {
+    this.consecutive = consecutive;
+  }
+
   public void setCountries(List<CountryOCS> countries) {
     this.countries = countries;
   }
@@ -61,12 +70,15 @@ public class PlaOCS {
     this.description = description;
   }
 
+
   public void setId(String id) {
     this.id = id;
   }
 
+
   public void setPartners(List<PartnerOCS> partners) {
     this.partners = partners;
   }
+
 
 }

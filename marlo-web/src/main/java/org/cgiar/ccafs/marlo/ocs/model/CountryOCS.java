@@ -19,7 +19,7 @@ package org.cgiar.ccafs.marlo.ocs.model;
 
 public class CountryOCS {
 
-
+  private String id;
   private String code;
 
   private String description;
@@ -34,6 +34,10 @@ public class CountryOCS {
     return description;
   }
 
+  public String getId() {
+    return id;
+  }
+
   public double getPercentage() {
     return percentage;
   }
@@ -46,8 +50,15 @@ public class CountryOCS {
     this.description = description;
   }
 
+
+  public void setId(String id) {
+    this.id = id;
+  }
+
+
   public void setPercentage(double percentage) {
     this.percentage = percentage;
   }
+
 
 }

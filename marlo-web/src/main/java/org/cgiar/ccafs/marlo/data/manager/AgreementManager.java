@@ -17,8 +17,8 @@
 package org.cgiar.ccafs.marlo.data.manager;
 
 import org.cgiar.ccafs.marlo.data.manager.impl.AgreementManagerImpl;
-import org.cgiar.ccafs.marlo.data.model.dto.AgreementDTO;
 import org.cgiar.ccafs.marlo.data.model.dto.FundingSourceAgreementDTO;
+import org.cgiar.ccafs.marlo.ocs.model.AgreementOCS;
 
 import com.google.inject.ImplementedBy;
 
@@ -40,7 +40,7 @@ public interface AgreementManager {
    * @param codAgreement - the code of the agreement
    * @return an AgreementDTO object
    */
-  public AgreementDTO loadAgreement(String codAgreement);
+  public AgreementOCS loadAgreement(String codAgreement);
 
 
   /**
@@ -64,7 +64,7 @@ public interface AgreementManager {
    * @param agreement - this is an AgreementDTO object
    * @return an string with the id of the agreement into the database
    */
-  public String saveAgreement(AgreementDTO agreement);
+  public String saveAgreement(AgreementOCS agreement);
 
   /**
    * this method saves or update a new funding source agreement into the database

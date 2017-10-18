@@ -17,7 +17,7 @@
 package org.cgiar.ccafs.marlo.mappers;
 
 import org.cgiar.ccafs.marlo.data.model.CountryAgreement;
-import org.cgiar.ccafs.marlo.data.model.dto.CountryAgreementDTO;
+import org.cgiar.ccafs.marlo.ocs.model.CountryOCS;
 
 import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
@@ -30,11 +30,11 @@ public interface CountryAgreementMapper {
 
   CountryAgreementMapper INSTANCE = Mappers.getMapper(CountryAgreementMapper.class);
 
-  @Mappings({@Mapping(target = "agreement.id", source = "agreement.id"),
-    @Mapping(target = "agreement.description", source = "agreement.description")})
-  CountryAgreement countryAgreementDTOToCountryAgreement(CountryAgreementDTO countryAgreement);
+  @Mappings({@Mapping(target = "code", source = "code"), @Mapping(target = "description", source = "description"),
+    @Mapping(target = "percentage", source = "percentage"), @Mapping(target = "id", source = "id")})
+  CountryAgreement countryAgreementDTOToCountryAgreement(CountryOCS countryAgreement);
 
   @InheritInverseConfiguration
-  CountryAgreementDTO countryAgreementToCountryAgreementDTO(CountryAgreement countryAgreement);
+  CountryOCS countryAgreementToCountryAgreementDTO(CountryAgreement countryAgreement);
 
 }

@@ -27,18 +27,16 @@ import org.cgiar.ccafs.marlo.data.model.CountryAgreement;
 import org.cgiar.ccafs.marlo.data.model.CrpAgreement;
 import org.cgiar.ccafs.marlo.data.model.FundingSourceAgreement;
 import org.cgiar.ccafs.marlo.data.model.PlaAgreement;
-import org.cgiar.ccafs.marlo.data.model.dto.AgreementDTO;
-import org.cgiar.ccafs.marlo.data.model.dto.CountryAgreementDTO;
-import org.cgiar.ccafs.marlo.data.model.dto.CrpAgreementDTO;
 import org.cgiar.ccafs.marlo.data.model.dto.FundingSourceAgreementDTO;
-import org.cgiar.ccafs.marlo.data.model.dto.PlaAgreementDTO;
 import org.cgiar.ccafs.marlo.mappers.AgreementMapper;
 import org.cgiar.ccafs.marlo.mappers.CountryAgreementMapper;
 import org.cgiar.ccafs.marlo.mappers.CrpAgreementMapper;
 import org.cgiar.ccafs.marlo.mappers.FundingSourceAgreementMapper;
 import org.cgiar.ccafs.marlo.mappers.PlaAgreementMapper;
-
-import java.util.Iterator;
+import org.cgiar.ccafs.marlo.ocs.model.AgreementOCS;
+import org.cgiar.ccafs.marlo.ocs.model.CountryOCS;
+import org.cgiar.ccafs.marlo.ocs.model.CrpOCS;
+import org.cgiar.ccafs.marlo.ocs.model.PlaOCS;
 
 import com.google.inject.Inject;
 
@@ -71,8 +69,8 @@ public class AgreementManagerImpl implements AgreementManager {
    * @return an AgreementDTO object
    */
   @Override
-  public AgreementDTO loadAgreement(String codAgreement) {
-    AgreementDTO agreementDTO = null;
+  public AgreementOCS loadAgreement(String codAgreement) {
+    AgreementOCS agreementDTO = null;
     Agreement agreement = this.agreementDAO.find(codAgreement);
 
     if (agreement != null) {
@@ -115,10 +113,10 @@ public class AgreementManagerImpl implements AgreementManager {
    * @return an string with the id of the agreement into the database
    */
   @Override
-  public String saveAgreement(AgreementDTO agreement) {
+  public String saveAgreement(AgreementOCS agreement) {
     String codAgreement = null;
-    Agreement agreementDB = AgreementMapper.INSTANCE.agreementDTOToAgreement(agreement);
 
+    Agreement agreementDB = AgreementMapper.INSTANCE.agreementDTOToAgreement(agreement);
     // save or update the agreement
     if (agreement.isNew()) {
       codAgreement = this.agreementDAO.save(agreementDB);
@@ -126,63 +124,46 @@ public class AgreementManagerImpl implements AgreementManager {
       codAgreement = this.agreementDAO.update(agreementDB);
     }
 
+
     // Saving the countries of the agreement
-    Iterator iterCountries = agreement.getCountriesAgreements().iterator();
+    for (CountryOCS country : agreement.getCountries()) {
+      CountryAgreement theCountry = CountryAgreementMapper.INSTANCE.countryAgreementDTOToCountryAgreement(country);
+      theCountry.setAgreement(agreementDB);
 
-    if (iterCountries != null) {
-      while (iterCountries.hasNext()) {
-        CountryAgreementDTO theCountry = (CountryAgreementDTO) iterCountries.next();
-
-        CountryAgreement country = CountryAgreementMapper.INSTANCE.countryAgreementDTOToCountryAgreement(theCountry);
-
-        // save or update the country
-        if (agreement.isNew()) {
-          countryAgreement.save(country);
-        } else {
-          countryAgreement.update(country);
-        }
-
+      if (country.getId() != null) {
+        this.countryAgreement.update(theCountry);
+      } else {
+        this.countryAgreement.save(theCountry);
       }
+
     }
 
-    // saving the crps of the agreement
-    Iterator iterCrps = agreement.getCrpsAgreements().iterator();
+    for (CrpOCS crp : agreement.getCrps()) {
+      CrpAgreement theCrp = CrpAgreementMapper.INSTANCE.crpAgreementDTOToCrpAgreement(crp);
+      theCrp.setAgreement(agreementDB);
 
-    if (iterCrps != null) {
-      while (iterCrps.hasNext()) {
-        CrpAgreementDTO theCrp = (CrpAgreementDTO) iterCrps.next();
-
-        CrpAgreement crp = CrpAgreementMapper.INSTANCE.crpAgreementDTOToCrpAgreement(theCrp);
-
-        // save or update the crp
-        if (agreement.isNew()) {
-          crpAgreement.save(crp);
-        } else {
-          crpAgreement.update(crp);
-        }
+      if (crp.getId() != null) {
+        this.crpAgreement.update(theCrp);
+      } else {
+        this.crpAgreement.save(theCrp);
       }
+
     }
 
 
     // saving the plas of the agreement
-    Iterator iterPlas = agreement.getPlasAgreements().iterator();
 
-    if (iterPlas != null) {
-      while (iterPlas.hasNext()) {
-        PlaAgreementDTO thePla = (PlaAgreementDTO) iterPlas.next();
+    for (PlaOCS pla : agreement.getPlas()) {
+      PlaAgreement thePla = PlaAgreementMapper.INSTANCE.plaAgreementDTOToPlaAgreement(pla);
+      thePla.setAgreement(agreementDB);
 
-        PlaAgreement pla = PlaAgreementMapper.INSTANCE.plaAgreementDTOToPlaAgreement(thePla);
-
-        // save or update the pla
-        if (agreement.isNew()) {
-          plaAgreement.save(pla);
-        } else {
-          plaAgreement.update(pla);
-        }
-
+      if (pla.getId() != null) {
+        this.plaAgreement.update(thePla);
+      } else {
+        this.plaAgreement.save(thePla);
       }
-    }
 
+    }
 
     return codAgreement;
 

@@ -26,28 +26,41 @@ public class CrpOCS {
 
   private double percentage;
 
-  public String getId() {
-    return id;
+  private String consecutive;
+
+  public String getConsecutive() {
+    return consecutive;
   }
 
   public String getDescription() {
     return description;
   }
 
+  public String getId() {
+    return id;
+  }
+
   public double getPercentage() {
     return percentage;
   }
 
-  public void setId(String code) {
-    this.id = code;
+  public void setConsecutive(String consecutive) {
+    this.consecutive = consecutive;
   }
 
   public void setDescription(String description) {
     this.description = description;
   }
 
+
+  public void setId(String code) {
+    this.id = code;
+  }
+
+
   public void setPercentage(double percentage) {
     this.percentage = percentage;
   }
+
 
 }

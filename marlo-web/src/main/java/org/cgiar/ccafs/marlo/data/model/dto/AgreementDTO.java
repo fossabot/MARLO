@@ -16,7 +16,6 @@
 
 package org.cgiar.ccafs.marlo.data.model.dto;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -46,10 +45,9 @@ public class AgreementDTO {
   private String fundingType;
   private Date syncDate;
   private FundingSourceAgreementDTO fundingSourcesAgreement;
-  private List<PlaAgreementDTO> plasAgreements = new ArrayList<PlaAgreementDTO>(0);
-  private List<CountryAgreementDTO> countriesAgreements = new ArrayList<CountryAgreementDTO>(0);
-
-  private List<CrpAgreementDTO> crpsAgreements = new ArrayList<CrpAgreementDTO>(0);
+  private List<PlaAgreementDTO> plasAgreements;
+  private List<CountryAgreementDTO> countriesAgreements;
+  private List<CrpAgreementDTO> crpsAgreements;
 
   private boolean isNew;
 
