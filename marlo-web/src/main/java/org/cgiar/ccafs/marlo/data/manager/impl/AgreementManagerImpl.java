@@ -25,13 +25,10 @@ import org.cgiar.ccafs.marlo.data.manager.AgreementManager;
 import org.cgiar.ccafs.marlo.data.model.Agreement;
 import org.cgiar.ccafs.marlo.data.model.CountryAgreement;
 import org.cgiar.ccafs.marlo.data.model.CrpAgreement;
-import org.cgiar.ccafs.marlo.data.model.FundingSourceAgreement;
 import org.cgiar.ccafs.marlo.data.model.PlaAgreement;
-import org.cgiar.ccafs.marlo.data.model.dto.FundingSourceAgreementDTO;
 import org.cgiar.ccafs.marlo.mappers.AgreementMapper;
 import org.cgiar.ccafs.marlo.mappers.CountryAgreementMapper;
 import org.cgiar.ccafs.marlo.mappers.CrpAgreementMapper;
-import org.cgiar.ccafs.marlo.mappers.FundingSourceAgreementMapper;
 import org.cgiar.ccafs.marlo.mappers.PlaAgreementMapper;
 import org.cgiar.ccafs.marlo.ocs.model.AgreementOCS;
 import org.cgiar.ccafs.marlo.ocs.model.CountryOCS;
@@ -78,29 +75,6 @@ public class AgreementManagerImpl implements AgreementManager {
     }
 
     return agreementDTO;
-  }
-
-  /**
-   * load an agreement relationship with the funding source id and the code of
-   * the agreement
-   * 
-   * @author Julián Rodríguez Calderón CCAFS/CIAT
-   * @since 20171018
-   * @param codAgreement code of the agreement
-   * @param idFundingSource id of the funding source
-   * @return a DTO object
-   */
-  @Override
-  public FundingSourceAgreementDTO loadFSAgreement(String codAgreement, String idFundingSource) {
-    FundingSourceAgreementDTO fsAgreementDTO = null;
-    FundingSourceAgreement fsAgreement = this.fsAgreement.find(codAgreement, idFundingSource);
-
-    if (fsAgreement != null) {
-      fsAgreementDTO =
-        FundingSourceAgreementMapper.INSTANCE.fundingSourceAgreementToFundingSourceAgreementDTO(fsAgreement);
-    }
-
-    return fsAgreementDTO;
   }
 
 
@@ -166,32 +140,6 @@ public class AgreementManagerImpl implements AgreementManager {
     }
 
     return codAgreement;
-
-  }
-
-  /**
-   * this method saves or update a new funding source agreement into the database
-   * 
-   * @author Julián Rodríguez Calderón
-   * @since 20171018
-   * @param fsAgreement an DTO object to save
-   * @return String with the id of the object
-   */
-  @Override
-  public String saveFSAgreement(FundingSourceAgreementDTO fsAgreement) {
-    FundingSourceAgreement fsAgreementDB = null;
-    String idFsAgreement = null;
-
-    fsAgreementDB =
-      FundingSourceAgreementMapper.INSTANCE.fundingSourceAgreementDTOToFundingSourceAgreement(fsAgreement);
-
-    if (fsAgreement.getId() != null) {
-      idFsAgreement = this.fsAgreement.update(fsAgreementDB);
-    } else {
-      idFsAgreement = this.fsAgreement.save(fsAgreementDB);
-    }
-
-    return idFsAgreement;
 
   }
 

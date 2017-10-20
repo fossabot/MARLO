@@ -59,14 +59,4 @@ CREATE TABLE `plas_agreement`(
 
 
 DROP TABLE IF EXISTS `funding_sources_agreements`;
-CREATE TABLE `funding_sources_agreements`(
-`id` bigint not null auto_increment,
-`funding_source_id` bigint(20) not null,
-`agreement_id` varchar(20) not null,
-PRIMARY KEY (`id`),
-KEY `agreement_id` (`agreement_id`) USING BTREE,
-KEY `funding_source_id` (`funding_source_id`) USING BTREE,
-CONSTRAINT `funding_sources_agreements_fk1` FOREIGN KEY (`agreement_id`) REFERENCES `agreements` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-CONSTRAINT `funding_sources_agreements_fk2` FOREIGN KEY (`funding_source_id`) REFERENCES `funding_sources` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-)ENGINE=InnoDB AUTO_INCREMENT=1369 DEFAULT CHARSET=utf8;
 
