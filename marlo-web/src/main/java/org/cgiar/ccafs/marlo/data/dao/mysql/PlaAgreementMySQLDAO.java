@@ -17,9 +17,12 @@
 package org.cgiar.ccafs.marlo.data.dao.mysql;
 
 import org.cgiar.ccafs.marlo.data.dao.PlaAgreementDAO;
+import org.cgiar.ccafs.marlo.data.model.Agreement;
 import org.cgiar.ccafs.marlo.data.model.PlaAgreement;
 
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import com.google.inject.Inject;
 
@@ -57,12 +60,48 @@ public class PlaAgreementMySQLDAO implements PlaAgreementDAO {
    */
   @Override
   public PlaAgreement findByPlaIdAndAgreement(String plaId, String agreement) {
-    String query = "from " + PlaAgreement.class.getName() + "agreements.id =" + agreement + " and plaId=" + plaId;
-    List<PlaAgreement> list = dao.findAll(query);
+    PlaAgreement thePla = null;
+    String query =
+      "select pa.id,pa.agreement_id,pa.pla_id,pa.description,pa.ammount from plas_agreement pa where pa.pla_id='"
+        + plaId + "' and pa.agreement_id='" + agreement + "'";
+    List<Map<String, Object>> list = dao.findCustomQuery(query);
     if (list.size() > 0) {
-      return list.iterator().next();
+      thePla = new PlaAgreement();
+      Iterator iterPla = list.iterator();
+
+      while (iterPla.hasNext()) {
+        Map<String, Object> mapTmp = (Map<String, Object>) iterPla.next();
+
+        Iterator itMap = mapTmp.entrySet().iterator();
+
+        while (itMap.hasNext()) {
+          Map.Entry record = (Map.Entry) itMap.next();
+
+          switch (record.getKey().toString()) {
+            case "id":
+              thePla.setId(Long.parseLong(record.getValue().toString()));
+              break;
+            case "description":
+              thePla.setDescription(record.getValue().toString());
+              break;
+            case "pla_id":
+              thePla.setPlaId(record.getValue().toString());
+              break;
+            case "agreement_id":
+              Agreement theAgreement = new Agreement();
+              theAgreement.setId(record.getValue().toString());
+              thePla.setAgreement(theAgreement);
+              break;
+            case "ammount":
+              thePla.setAmmount(Double.valueOf(record.getValue().toString()));
+              break;
+          }
+
+
+        }
+      }
     }
-    return null;
+    return thePla;
   }
 
   /**
@@ -75,7 +114,7 @@ public class PlaAgreementMySQLDAO implements PlaAgreementDAO {
    */
   @Override
   public List<PlaAgreement> getPlasByAgreement(String codAgreement) {
-    String query = "from " + PlaAgreement.class.getName() + "agreements.id =" + codAgreement;
+    String query = "from " + PlaAgreement.class.getName() + " agreements.id =" + codAgreement;
     List<PlaAgreement> list = dao.findAll(query);
     if (list.size() > 0) {
       return list;

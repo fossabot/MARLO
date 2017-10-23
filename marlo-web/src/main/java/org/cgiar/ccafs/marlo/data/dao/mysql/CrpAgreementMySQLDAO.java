@@ -17,9 +17,12 @@
 package org.cgiar.ccafs.marlo.data.dao.mysql;
 
 import org.cgiar.ccafs.marlo.data.dao.CrpAgreementDAO;
+import org.cgiar.ccafs.marlo.data.model.Agreement;
 import org.cgiar.ccafs.marlo.data.model.CrpAgreement;
 
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import com.google.inject.Inject;
 
@@ -57,12 +60,50 @@ public class CrpAgreementMySQLDAO implements CrpAgreementDAO {
    */
   @Override
   public CrpAgreement findByCrpIdAndAgreement(String crpId, String agreement) {
-    String query = "from " + CrpAgreement.class.getName() + "agreements.id =" + agreement + " and crpId=" + crpId;
-    List<CrpAgreement> list = dao.findAll(query);
+    CrpAgreement theCrp = null;
+    String query =
+      "select cp.id,cp.agreement_id,cp.crp_id,cp.description,cp.percentage from crps_agreement cp where cp.agreement_id='"
+        + agreement + "' and cp.crp_id=" + crpId;
+    List<Map<String, Object>> list = dao.findCustomQuery(query);
     if (list.size() > 0) {
-      return list.iterator().next();
+      theCrp = new CrpAgreement();
+      Iterator iterCrp = list.iterator();
+
+      while (iterCrp.hasNext()) {
+        Map<String, Object> mapTmp = (Map<String, Object>) iterCrp.next();
+
+        Iterator itMap = mapTmp.entrySet().iterator();
+
+        while (itMap.hasNext()) {
+          Map.Entry record = (Map.Entry) itMap.next();
+
+          switch (record.getKey().toString()) {
+            case "id":
+              theCrp.setId(Long.parseLong(record.getValue().toString()));
+              break;
+            case "description":
+              theCrp.setDescription(record.getValue().toString());
+              break;
+            case "crp_id":
+              theCrp.setCrpId(record.getValue().toString());
+              break;
+            case "agreement_id":
+              Agreement theAgreement = new Agreement();
+              theAgreement.setId(record.getValue().toString());
+              theCrp.setAgreement(theAgreement);
+              break;
+            case "percentage":
+              theCrp.setPercentage(Double.valueOf(record.getValue().toString()));
+              break;
+          }
+
+
+        }
+
+
+      }
     }
-    return null;
+    return theCrp;
   }
 
   /**
@@ -75,7 +116,7 @@ public class CrpAgreementMySQLDAO implements CrpAgreementDAO {
    */
   @Override
   public List<CrpAgreement> getCrpsByAgreement(String codAgreement) {
-    String query = "from " + CrpAgreement.class.getName() + "agreements.id =" + codAgreement;
+    String query = "from " + CrpAgreement.class.getName() + " agreements.id =" + codAgreement;
     List<CrpAgreement> list = dao.findAll(query);
     if (list.size() > 0) {
       return list;

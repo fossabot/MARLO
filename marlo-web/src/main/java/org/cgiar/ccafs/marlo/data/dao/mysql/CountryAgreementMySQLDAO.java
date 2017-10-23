@@ -17,9 +17,12 @@
 package org.cgiar.ccafs.marlo.data.dao.mysql;
 
 import org.cgiar.ccafs.marlo.data.dao.CountryAgreementDAO;
+import org.cgiar.ccafs.marlo.data.model.Agreement;
 import org.cgiar.ccafs.marlo.data.model.CountryAgreement;
 
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import com.google.inject.Inject;
 
@@ -57,12 +60,52 @@ public class CountryAgreementMySQLDAO implements CountryAgreementDAO {
    */
   @Override
   public CountryAgreement findByCodeAndAgreement(String code, String agreement) {
-    String query = "from " + CountryAgreement.class.getName() + "agreements.id =" + agreement + "and code=" + code;
-    List<CountryAgreement> list = dao.findAll(query);
+    CountryAgreement theCountry = null;
+
+    String query =
+      "select ca.id,ca.agreement_id,ca.code,ca.description,ca.percentage from countries_agreement ca where ca.code='"
+        + code + "' and ca.agreement_id='" + agreement + "'";
+    List<Map<String, Object>> list = dao.findCustomQuery(query);
     if (list.size() > 0) {
-      return list.iterator().next();
+      theCountry = new CountryAgreement();
+      Iterator iterCountry = list.iterator();
+
+      while (iterCountry.hasNext()) {
+        Map<String, Object> mapTmp = (Map<String, Object>) iterCountry.next();
+
+        Iterator itMap = mapTmp.entrySet().iterator();
+
+        while (itMap.hasNext()) {
+          Map.Entry record = (Map.Entry) itMap.next();
+
+          switch (record.getKey().toString()) {
+            case "id":
+              theCountry.setId(Long.parseLong(record.getValue().toString()));
+              break;
+            case "description":
+              theCountry.setDescription(record.getValue().toString());
+              break;
+            case "code":
+              theCountry.setCode(record.getValue().toString());
+              break;
+            case "agreement_id":
+              Agreement theAgreement = new Agreement();
+              theAgreement.setId(record.getValue().toString());
+              theCountry.setAgreement(theAgreement);
+              break;
+            case "percentage":
+              theCountry.setPercentage(Double.valueOf(record.getValue().toString()));
+              break;
+          }
+
+
+        }
+
+
+      }
+
     }
-    return null;
+    return theCountry;
   }
 
   /**
@@ -76,7 +119,7 @@ public class CountryAgreementMySQLDAO implements CountryAgreementDAO {
   @Override
   public List<CountryAgreement> getCountriesByAgreement(String codAgreement) {
 
-    String query = "from " + CountryAgreement.class.getName() + "agreements.id =" + codAgreement;
+    String query = "from " + CountryAgreement.class.getName() + " agreements.id =" + codAgreement;
     List<CountryAgreement> list = dao.findAll(query);
     if (list.size() > 0) {
       return list;
