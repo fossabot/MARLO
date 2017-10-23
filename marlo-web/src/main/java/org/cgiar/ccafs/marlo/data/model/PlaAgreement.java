@@ -49,7 +49,11 @@ public class PlaAgreement implements java.io.Serializable {
   }
 
   public Long getId() {
-    return this.id;
+    try {
+      return this.id;
+    } catch (Exception e) {
+      return (long) 0;
+    }
   }
 
   public String getPlaId() {

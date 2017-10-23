@@ -95,6 +95,15 @@ public class AgreementManagerImpl implements AgreementManager {
     if (agreement.isNew()) {
       codAgreement = this.agreementDAO.save(agreementDB);
     } else {
+      /**
+       * this is necessary because the mapper don't map the list, and when the object
+       * updates there is a problem with the data types of the list.So putting in null
+       * solves the problem. But we need to understand how to make the map wit MapStructs
+       * in this kind of cases.
+       */
+      agreementDB.setCountriesAgreements(null);
+      agreementDB.setPlasAgreements(null);
+      agreementDB.setCrpsAgreements(null);
       codAgreement = this.agreementDAO.update(agreementDB);
     }
 

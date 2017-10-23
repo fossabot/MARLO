@@ -54,29 +54,25 @@
         <property generated="never" lazy="false" name="syncDate" optimistic-lock="true" type="timestamp" unique="false">
             <column length="19" name="sync_date"/>
         </property>
-        <set embed-xml="true" fetch="select" inverse="true" lazy="true" mutable="true" name="plasAgreements" optimistic-lock="true" sort="unsorted" table="plas_agreement">
-            <key on-delete="noaction">
+         
+        <set fetch="select" inverse="true" lazy="true" name="plasAgreements"  table="plas_agreement">
+            <key >
                 <column length="20" name="agreement_id" not-null="true"/>
             </key>
-            <one-to-many class="org.cgiar.ccafs.marlo.data.model.PlaAgreement" embed-xml="true" not-found="exception"/>
+            <one-to-many class="org.cgiar.ccafs.marlo.data.model.PlaAgreement"/>
+        </set> 
+        <set  fetch="select" inverse="true" lazy="true"  name="countriesAgreements"  table="countries_agreement" cascade="none">
+            <key>
+                <column length="20" name="agreement_id" not-null="true"/>
+            </key>
+            <one-to-many class="org.cgiar.ccafs.marlo.data.model.CountryAgreement"/>
         </set>
-        <set embed-xml="true" fetch="select" inverse="true" lazy="true" mutable="true" name="countriesAgreements" optimistic-lock="true" sort="unsorted" table="countries_agreement">
-            <key on-delete="noaction">
+        
+        <set fetch="select" inverse="true" lazy="true" name="crpsAgreements"   table="crps_agreement" >
+            <key>
                 <column length="20" name="agreement_id" not-null="true"/>
             </key>
-            <one-to-many class="org.cgiar.ccafs.marlo.data.model.CountryAgreement" embed-xml="true" not-found="exception"/>
-        </set>
-        <set embed-xml="true" fetch="select" inverse="true" lazy="true" mutable="true" name="fundingSourcesAgreementses" optimistic-lock="true" sort="unsorted" table="funding_sources_agreements">
-            <key on-delete="noaction">
-                <column length="20" name="agreement_id" not-null="true"/>
-            </key>
-            <one-to-many class="org.cgiar.ccafs.marlo.data.model.FundingSourceAgreement" embed-xml="true" not-found="exception"/>
-        </set>
-        <set embed-xml="true" fetch="select" inverse="true" lazy="true" mutable="true" name="crpsAgreements" optimistic-lock="true" sort="unsorted" table="crps_agreement">
-            <key on-delete="noaction">
-                <column length="20" name="agreement_id" not-null="true"/>
-            </key>
-            <one-to-many class="org.cgiar.ccafs.marlo.data.model.CrpAgreement" embed-xml="true" not-found="exception"/>
+            <one-to-many class="org.cgiar.ccafs.marlo.data.model.CrpAgreement" />
         </set>
     </class>
 </hibernate-mapping>
