@@ -26,12 +26,57 @@ import com.google.inject.ImplementedBy;
 @ImplementedBy(CrpAgreementMySQLDAO.class)
 public interface CrpAgreementDAO {
 
+  /**
+   * fin a crp agreement by its id
+   * 
+   * @author JULIANRODRIGUEZ
+   * @since 20171023
+   * @param id
+   * @return
+   */
   public CrpAgreement find(String id);
 
+  /**
+   * find a crp agreement by its crpid and the agreement
+   * 
+   * @author JULIANRODRIGUEZ
+   * @since 20171023
+   * @param crpId - id of the crp
+   * @param agreement - id of the agreement
+   * @return - The crp agreement object
+   */
+  public CrpAgreement findByCrpIdAndAgreement(String crpId, String agreement);
+
+  /**
+   * get a list of crp related to the agreement
+   * 
+   * @author JULIANRODRIGUEZ
+   * @since 20171023
+   * @param codAgreement - id of the agreement
+   * @return - a list with all the crps
+   */
   public List<CrpAgreement> getCrpsByAgreement(String codAgreement);
 
+
+  /**
+   * save a new crp agreement
+   * 
+   * @author JULIANRODRIGUEZ
+   * @since 20171023
+   * @param crp - a crp agreement object to save
+   * @return - the id of the new agreement
+   */
   public String save(CrpAgreement crp);
 
+
+  /**
+   * update a crp agreement
+   * 
+   * @author JULIANRODRIGUEZ
+   * @since 20171023
+   * @param crp - a object to update
+   * @return - the id of the updated object
+   */
   public String update(CrpAgreement crp);
 
 }

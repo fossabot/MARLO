@@ -33,11 +33,46 @@ public class CrpAgreementMySQLDAO implements CrpAgreementDAO {
     this.dao = dao;
   }
 
+  /**
+   * fin a crp agreement by its id
+   * 
+   * @author JULIANRODRIGUEZ
+   * @since 20171023
+   * @param id
+   * @return
+   */
   @Override
   public CrpAgreement find(String id) {
     return dao.find(CrpAgreement.class, id);
   }
 
+  /**
+   * find a crp agreement by its crpid and the agreement
+   * 
+   * @author JULIANRODRIGUEZ
+   * @since 20171023
+   * @param crpId - id of the crp
+   * @param agreement - id of the agreement
+   * @return - The crp agreement object
+   */
+  @Override
+  public CrpAgreement findByCrpIdAndAgreement(String crpId, String agreement) {
+    String query = "from " + CrpAgreement.class.getName() + "agreements.id =" + agreement + " and crpId=" + crpId;
+    List<CrpAgreement> list = dao.findAll(query);
+    if (list.size() > 0) {
+      return list.iterator().next();
+    }
+    return null;
+  }
+
+  /**
+   * get a list of crp related to the agreement
+   * 
+   * @author JULIANRODRIGUEZ
+   * @since 20171023
+   * @param codAgreement - id of the agreement
+   * @return - a list with all the crps
+   */
   @Override
   public List<CrpAgreement> getCrpsByAgreement(String codAgreement) {
     String query = "from " + CrpAgreement.class.getName() + "agreements.id =" + codAgreement;
@@ -48,12 +83,28 @@ public class CrpAgreementMySQLDAO implements CrpAgreementDAO {
     return null;
   }
 
+  /**
+   * save a new crp agreement
+   * 
+   * @author JULIANRODRIGUEZ
+   * @since 20171023
+   * @param crp - a crp agreement object to save
+   * @return - the id of the new agreement
+   */
   @Override
   public String save(CrpAgreement crp) {
     dao.save(crp);
     return String.valueOf(crp.getId());
   }
 
+  /**
+   * update a crp agreement
+   * 
+   * @author JULIANRODRIGUEZ
+   * @since 20171023
+   * @param crp - a object to update
+   * @return - the id of the updated object
+   */
   @Override
   public String update(CrpAgreement crp) {
     dao.update(crp);

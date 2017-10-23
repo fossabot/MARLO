@@ -33,12 +33,46 @@ public class CountryAgreementMySQLDAO implements CountryAgreementDAO {
     this.dao = dao;
   }
 
-
+  /**
+   * find a country agreement by its id
+   * 
+   * @author Julián Rodríguez Calderón
+   * @since 20171023
+   * @param id - id of the country agreement
+   * @return
+   */
   @Override
   public CountryAgreement find(String id) {
     return dao.find(CountryAgreement.class, id);
   }
 
+  /**
+   * find a country agreement by its code and agreement id
+   * 
+   * @author Julián Rodríguez Calderón
+   * @since 20171023
+   * @param code - code of the country
+   * @param agreement - id of the agreement
+   * @return
+   */
+  @Override
+  public CountryAgreement findByCodeAndAgreement(String code, String agreement) {
+    String query = "from " + CountryAgreement.class.getName() + "agreements.id =" + agreement + "and code=" + code;
+    List<CountryAgreement> list = dao.findAll(query);
+    if (list.size() > 0) {
+      return list.iterator().next();
+    }
+    return null;
+  }
+
+  /**
+   * find all the countries agreement of an agreement
+   * 
+   * @author Julián Rodríguez Calderón
+   * @since 20171023
+   * @param codAgreement - id code of the agreement
+   * @return
+   */
   @Override
   public List<CountryAgreement> getCountriesByAgreement(String codAgreement) {
 
@@ -51,12 +85,29 @@ public class CountryAgreementMySQLDAO implements CountryAgreementDAO {
 
   }
 
+  /**
+   * save a new country agreement
+   * 
+   * @author Julián Rodríguez Calderón
+   * @since 20171023
+   * @param country - the country agreement object
+   * @return - the code of the new agreement
+   */
   @Override
   public String save(CountryAgreement country) {
     dao.save(country);
     return String.valueOf(country.getId());
   }
 
+
+  /**
+   * update a country agreement
+   * 
+   * @author Julián Rodríguez Calderón
+   * @since 20171023
+   * @param country - the country agreement object
+   * @return - the code of the updated agreement
+   */
   @Override
   public String update(CountryAgreement country) {
     dao.update(country);

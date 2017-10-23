@@ -26,12 +26,58 @@ import com.google.inject.ImplementedBy;
 @ImplementedBy(PlaAgreementMySQLDAO.class)
 public interface PlaAgreementDAO {
 
+  /**
+   * find a pla agreement by its id
+   * 
+   * @author JULIANRODRIGUEZ
+   * @since 20171023
+   * @param id - id of the agreement
+   * @return
+   */
   public PlaAgreement find(String id);
 
+
+  /**
+   * find a pla agreement by its pla id and its agreement\
+   * 
+   * @author JULIANRODRIGUEZ\
+   * @since 20171023
+   * @param plaId - id of the pla agreement
+   * @param agreement - id of the agreement
+   * @return - a pla agreement object
+   */
+
+  public PlaAgreement findByPlaIdAndAgreement(String plaId, String agreement);
+
+  /**
+   * find a list of all the pla agreements related to the agreement
+   * 
+   * @author JULIANRODRIGUEZ\
+   * @since 20171023
+   * @param codAgreement - code of the agreement
+   * @return - a list with all the pla agreement
+   */
   public List<PlaAgreement> getPlasByAgreement(String codAgreement);
 
+
+  /**
+   * save a new pla agreement
+   * 
+   * @author JULIANRODRIGUEZ\
+   * @since 20171023
+   * @param pla - the pla agreement object
+   * @return - the id of the agreement
+   */
   public String save(PlaAgreement pla);
 
+  /**
+   * update a pla agreement
+   * 
+   * @author JULIANRODRIGUEZ\
+   * @since 20171023
+   * @param pla - the pla agreement object
+   * @return - the id of the updated pla agreement
+   */
   public String update(PlaAgreement pla);
 
 }

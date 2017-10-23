@@ -104,10 +104,12 @@ public class AgreementManagerImpl implements AgreementManager {
       CountryAgreement theCountry = CountryAgreementMapper.INSTANCE.countryAgreementDTOToCountryAgreement(country);
       theCountry.setAgreement(agreementDB);
 
-      if (country.getId() != null) {
-        this.countryAgreement.update(theCountry);
-      } else {
+      if (agreement.isNew()) {
         this.countryAgreement.save(theCountry);
+      } else {
+        CountryAgreement countryDB = countryAgreement.findByCodeAndAgreement(theCountry.getCode(), agreement.getId());
+        theCountry.setId(countryDB.getId());
+        this.countryAgreement.update(theCountry);
       }
 
     }
@@ -116,10 +118,12 @@ public class AgreementManagerImpl implements AgreementManager {
       CrpAgreement theCrp = CrpAgreementMapper.INSTANCE.crpAgreementDTOToCrpAgreement(crp);
       theCrp.setAgreement(agreementDB);
 
-      if (crp.getId() != null) {
-        this.crpAgreement.update(theCrp);
-      } else {
+      if (agreement.isNew()) {
         this.crpAgreement.save(theCrp);
+      } else {
+        CrpAgreement crpAgreementDB = this.crpAgreement.findByCrpIdAndAgreement(theCrp.getCrpId(), agreement.getId());
+        theCrp.setId(crpAgreementDB.getId());
+        this.crpAgreement.update(theCrp);
       }
 
     }
@@ -131,10 +135,12 @@ public class AgreementManagerImpl implements AgreementManager {
       PlaAgreement thePla = PlaAgreementMapper.INSTANCE.plaAgreementDTOToPlaAgreement(pla);
       thePla.setAgreement(agreementDB);
 
-      if (pla.getId() != null) {
-        this.plaAgreement.update(thePla);
-      } else {
+      if (agreement.isNew()) {
         this.plaAgreement.save(thePla);
+      } else {
+        PlaAgreement plaAgreementDB = this.plaAgreement.findByPlaIdAndAgreement(thePla.getPlaId(), agreement.getId());
+        thePla.setId(plaAgreementDB.getId());
+        this.plaAgreement.update(thePla);
       }
 
     }

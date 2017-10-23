@@ -26,12 +26,58 @@ import com.google.inject.ImplementedBy;
 @ImplementedBy(CountryAgreementMySQLDAO.class)
 public interface CountryAgreementDAO {
 
+  /**
+   * find a country agreement by its id
+   * 
+   * @author Julián Rodríguez Calderón
+   * @since 20171023
+   * @param id - id of the country agreement
+   * @return
+   */
   public CountryAgreement find(String id);
 
+  /**
+   * find a country agreement by its code and agreement id
+   * 
+   * @author Julián Rodríguez Calderón
+   * @since 20171023
+   * @param code - code of the country
+   * @param agreement - id of the agreement
+   * @return
+   */
+
+  public CountryAgreement findByCodeAndAgreement(String code, String agreement);
+
+  /**
+   * find all the countries agreement of an agreement
+   * 
+   * @author Julián Rodríguez Calderón
+   * @since 20171023
+   * @param codAgreement - id code of the agreement
+   * @return
+   */
   public List<CountryAgreement> getCountriesByAgreement(String codAgreement);
 
+
+  /**
+   * save a new country agreement
+   * 
+   * @author Julián Rodríguez Calderón
+   * @since 20171023
+   * @param country - the country agreement object
+   * @return - the code of the new agreement
+   */
   public String save(CountryAgreement country);
 
+
+  /**
+   * update a country agreement
+   * 
+   * @author Julián Rodríguez Calderón
+   * @since 20171023
+   * @param country - the country agreement object
+   * @return - the code of the updated agreement
+   */
   public String update(CountryAgreement country);
 
 }
