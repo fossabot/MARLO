@@ -52,6 +52,8 @@ public class SearchUserAction extends BaseAction {
 
   private String userEmail;
 
+  private String userUsername;
+
 
   private User user;
 
@@ -252,6 +254,11 @@ public class SearchUserAction extends BaseAction {
   }
 
 
+  public String getUserUsername() {
+    return userUsername;
+  }
+
+
   @Override
   public void prepare() throws Exception {
     Map<String, Object> parameters = this.getParameters();
@@ -259,17 +266,37 @@ public class SearchUserAction extends BaseAction {
   }
 
 
+  public String searchUserByUsername() {
+    boolean existsUser = false;
+
+    existsUser = userManager.getUserByUsername(userUsername) == null ? false : true;
+
+    if (existsUser) {
+      return SUCCESS;
+    } else {
+      return INPUT;
+    }
+
+
+  }
+
+
   public void setCrpUserFound(List<Map<String, Object>> crpUserFound) {
     this.crpUserFound = crpUserFound;
   }
-
 
   public void setUserEmail(String userEmail) {
     this.userEmail = userEmail;
   }
 
+
   public void setUserFound(Map<String, Object> userFound) {
     this.userFound = userFound;
+  }
+
+
+  public void setUserUsername(String userUsername) {
+    this.userUsername = userUsername;
   }
 
 
