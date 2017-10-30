@@ -272,6 +272,19 @@ public class SearchUserAction extends BaseAction {
     existsUser = userManager.getUserByUsername(userUsername) == null ? false : true;
 
     if (existsUser) {
+
+      user = userManager.getUserByUsername(userUsername);
+      userFound.put("newUser", false);
+      userFound.put("id", user.getId());
+      userFound.put("name", user.getFirstName());
+      userFound.put("lastName", user.getLastName());
+      userFound.put("username", user.getUsername());
+      userFound.put("email", user.getEmail());
+      userFound.put("cgiar", user.isCgiarUser());
+      userFound.put("active", user.isActive());
+      userFound.put("autosave", user.isAutoSave());
+      userFound.put("newUser", false);
+
       return SUCCESS;
     } else {
       return INPUT;

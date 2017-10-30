@@ -509,23 +509,31 @@ public class ManageUsersAction extends BaseAction {
     }
 
 
-    // saving or update the user
-    newUserID = userManager.saveUser(newUser, this.getCurrentUser());
+    boolean existsUser = false;
 
-    // if the user saved without errors
-    if (newUserID != -1) {
-      userID = newUserID;
-      newUser = userManager.getUser(newUserID);
+    existsUser = userManager.getUserByUsername(newUser.getUsername()) == null ? false : true;
 
-      // validate crps that the user has in Database
-      this.checkCRPsInDB(newUserID, user);
+    if (existsUser) {
+      message = this.getText("guestusers.username.invalid");
+    } else {
+      // saving or update the user
+      newUserID = userManager.saveUser(newUser, this.getCurrentUser());
 
-      // check if the user has new CRPs
-      this.checkNewCRPs(user, newUser);
+      // if the user saved without errors
+      if (newUserID != -1) {
+        userID = newUserID;
+        newUser = userManager.getUser(newUserID);
 
+        // validate crps that the user has in Database
+        this.checkCRPsInDB(newUserID, user);
+
+        // check if the user has new CRPs
+        this.checkNewCRPs(user, newUser);
+
+      }
+
+      successMessage = this.getText("saving.saved");
     }
-
-    successMessage = this.getText("saving.saved");
 
 
     return SUCCESS;

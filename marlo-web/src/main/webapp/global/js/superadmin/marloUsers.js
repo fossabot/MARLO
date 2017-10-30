@@ -153,22 +153,6 @@ function searchUserByEmail(email) {
   });
 }
 
-function searchUserByUsername(username){
-  $.ajax({
-      url:baseURL + "/searchUserByUsername.do",
-      type: 'GET',
-      date: {
-        userUsername: username
-      },
-      success: function(m){
-     // Update User Info
-        updateData(m.userFound);
-        // Update CRPs
-        updateCrps(m.crpUserFound);
-        $(".crpSelect").attr("disabled", false);
-      }
-  });
-}
 
 function updateData(user) {
   // User data
@@ -298,6 +282,7 @@ function saveUser(e) {
     return
   }
   
+    
   // Execute save
   $.ajax({
     url: baseURL + '/manageUserWithPrivileges.do',
