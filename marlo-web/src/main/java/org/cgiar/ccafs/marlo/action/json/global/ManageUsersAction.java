@@ -198,6 +198,54 @@ public class ManageUsersAction extends BaseAction {
           if (cont == 0) {
             crpsForDeleting.add(crpUserBD);
           }
+        } else {
+          // all the crps were removed
+          for (CrpUser crpUserDelete : crpsInDb) {
+            Crp crp = crpManager.getCrpById(crpUserDelete.getCrp().getId());
+            UserRole userRole = new UserRole();
+
+            List<Role> roles = new ArrayList<>(crp.getRoles());
+
+            if (crpUserDelete.isAdmin()) {
+              Role adminRole =
+                roles.stream().filter(r -> r.getAcronym().equals("CRP-Admin")).collect(Collectors.toList()).get(0);
+
+              userRole.setRole(adminRole);
+              userRole.setUser(newUser);
+
+              List<UserRole> rolesInDb = userRoleManager.getUserRolesByUserId(crpUserDelete.getUser().getId());
+
+              if (rolesInDb != null) {
+                for (UserRole rol : rolesInDb) {
+                  if (rol.getRole().getId().equals(adminRole.getId())) {
+                    userRoleManager.deleteUserRole(rol.getId());
+                  }
+                }
+              }
+
+              crpUserManager.deleteCrpUser(crpUserDelete.getId());
+            } else {
+              Role guestRole =
+                roles.stream().filter(r -> r.getAcronym().equals("G")).collect(Collectors.toList()).get(0);
+
+              userRole.setRole(guestRole);
+              userRole.setUser(newUser);
+
+              List<UserRole> rolesInDb = userRoleManager.getUserRolesByUserId(crpUserDelete.getUser().getId());
+
+              if (rolesInDb != null) {
+                for (UserRole rol : rolesInDb) {
+                  if (rol.getRole().getId().equals(guestRole.getId())) {
+                    userRoleManager.deleteUserRole(rol.getId());
+                  }
+                }
+              }
+
+              crpUserManager.deleteCrpUser(crpUserDelete.getId());
+            }
+
+          }
+
         }
       }
 
