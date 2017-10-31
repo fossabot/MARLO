@@ -1,7 +1,15 @@
 var allowExtensionDate, dateFormat, from, to, extension;
+var W1W2, ON_GOING;
+var $fundingType;
 $(document).ready(init);
 
 function init() {
+  
+  // Setting constants
+  W1W2 = 1;
+  ON_GOING = 2;
+  
+  $fundingType = $(".type");
   
   // Check if (crp_funding_source_extension_date) parameter is true
   allowExtensionDate = $('.allowExtensionDate').text() === "true";
@@ -26,19 +34,28 @@ function init() {
   // Original Donor
   $(".donor").on("change", function() {
     var $option = $(this).find("option:selected");
+    
     var selectedValue = $option.val();
     var count = 0;
+    
+    if(selectedValue == "-1"){
+      return
+    }
+    
     // Count repeated donors
-    $('select.donor').each(function(i, e){
-      if (e.value == selectedValue) {
-        count++;
-      }
-    });
+     $('select.donor').each(function(i, e){ 
+         if (e.value == selectedValue) { 
+           count++;
+         }
+     });
+    
+     
+    
     // Check if the donor is already selected
     if (count > 1){
       // Reset Select
-      $(this).val(-1);
-      $(this).trigger('select2:change');
+      $('.donor:eq(1)').val(-1);
+      $(this).trigger('select2:change');      
       // Noty Message
       var message ="Donors must be different";
       var notyOptions = jQuery.extend({}, notyDefaultOptions);
@@ -117,10 +134,11 @@ function init() {
       width: '100%'
   });
 
-  changeDonorByFundingType($(".type").val(), $(".donor"))
+  
+  changeDonorByFundingType($fundingType.val(), $(".donor:eq(0)"))
 
   // Check Funding type
-  onChangeFundingType($(".type").val());
+  onChangeFundingType($fundingType.val());
 
   // Funding Window / Budget type
   $("select.type").select2({
@@ -133,7 +151,8 @@ function init() {
     var $option = $(this).find("option:selected");
     var optionValue = $option.val();
     // Change Donor list
-    getInstitutionsBudgetByType(optionValue);
+    getInstitutionsBudgetByType(optionValue);  
+    
     // Event on change
     onChangeFundingType(optionValue);
   });
@@ -216,6 +235,7 @@ function keyupBudgetYear(){
   });
   $('#grantTotalAmount .remaining').text(setCurrencyFormat(grantAmount - total));
   
+  // Validate total of agreement and budget type
   if (grantAmount < total){
     $('#grantTotalAmount').addClass('fieldError').animateCss('shake');
   }else{
@@ -229,9 +249,6 @@ function keyupBudgetYear(){
  * @param {number} typeID - Funding budget type
  */
 function onChangeFundingType(typeID) {
-  var W1W2 = 1;
-  var ON_GOING = 2;
-
   // Change Agreement Status when is (W1W2 Type => 1)
   var $agreementStatus = $('select.agreementStatus');
   var onlyOngoingStatus = $agreementStatus.hasClass('onlyOngoing');
@@ -888,8 +905,9 @@ function addDataTable() {
  * @returns
  */
 function getInstitutionsBudgetByType(budgetTypeID) {
-  var $select = $(".donor");
-  var url = baseURL + "/institutionsByBudgetType.do";
+  // var $select = $(".donor");
+  var $select = $(".donor:eq(0)");
+  var url = baseURL + "/institutionsByBudgetType.do";  
   $.ajax({
       url: url,
       type: 'GET',
@@ -904,14 +922,16 @@ function getInstitutionsBudgetByType(budgetTypeID) {
         $select.addOption("-1", "Select an option...");
         $.each(m.institutions, function(i,e) {
           $select.addOption(e.id, e.name);
-        });
+        });  
+        
         changeDonorByFundingType(budgetTypeID, $select);
+            
       },
       error: function(e) {
         console.log(e);
       },
       complete: function() {
-        $('.loading').hide();
+        $('.loading').hide();       
         $select.trigger("change.select2");
       }
   });
@@ -920,8 +940,9 @@ function getInstitutionsBudgetByType(budgetTypeID) {
 function changeDonorByFundingType(budgetType,$select) {
   var donorId = $select.find("option:selected").val();
   if((donorId == "-1") && (budgetType == "1")) {
-    $select.val($(".cgiarConsortium").text()).trigger("change");
+      $select.val($(".cgiarConsortium").text()).trigger("change");
   }
+  
 }
 
 function formatState(state) {

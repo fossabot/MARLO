@@ -92,8 +92,10 @@ public final class APConstants {
   public static final String CUSTOM_LAGUAGE = "en";
   public static final String CRP_CLUSTER_LEADER = "crp_cluster_leader";
   public static final String CRP_NEXT_USERS = "crp_next_users";
+  public static final String CRP_IP_OUTCOME_INDICATOR = "crp_ip_outcome_indicator";
   // Email parameters to copy to FL FM CL
   public static final String CRP_EMAIL_CC_FL_FM_CL = "crp_email_cc_fl_fm_cl";
+  public static final String GENDER_KEYWORDS = "show_gender_keywords_summaries";
 
   public static final String CYCLE = "cycle";
   // Date Formats
@@ -107,6 +109,8 @@ public final class APConstants {
   public static final int DELIVERABLE_QUALITY_ANSWER_NO = 3;
   public static final int DELIVERABLE_QUALITY_ANSWER_YES = 2;
   public static final int DELIVERABLE_QUALITY_ANSWER_YES_BUT_NO = 1;
+
+  public static final int BUDGET_TYPE = 1;
 
   public static final String DELIVERABLE_TYPE_ID = "deliverableTypeId";
   // Request variables
@@ -397,6 +401,8 @@ public final class APConstants {
   public static final String NEXT_USER_ID = "nextUserID";
   public static final String PROJECT_ID = "projectID";
   public static final String OUTPUT_NAME = "outputName";
+  public static final String CENTER_PROJECT_SYNC_CODE = "syncCode";
+  public static final String CENTER_PROJECT_SYNC_TYPE = "syncTypeID";
 
   // Relations Name
   public static final String RESEARCH_PROGRAM_IMPACT_RELATION =
