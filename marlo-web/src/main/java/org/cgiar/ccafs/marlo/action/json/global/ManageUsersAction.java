@@ -186,6 +186,7 @@ public class ManageUsersAction extends BaseAction {
       crpsForDeleting = new ArrayList<>();
 
       // compare the crps assigned in db
+
       for (CrpUser crpUserBD : crpsInDb) {
         int cont = 0;
         if (user.getCrpUser() != null) {
@@ -199,14 +200,24 @@ public class ManageUsersAction extends BaseAction {
             crpsForDeleting.add(crpUserBD);
           }
         } else {
-          // all the crps were removed
+          /*
+           * if the user.getCrpUser is null, it's because
+           * the user eliminate all the roles that the user had.
+           * so, we check the roles in database and eliminate them
+           * with the role asigined.
+           */
           for (CrpUser crpUserDelete : crpsInDb) {
+
+            // obtain the crp
             Crp crp = crpManager.getCrpById(crpUserDelete.getCrp().getId());
             UserRole userRole = new UserRole();
 
             List<Role> roles = new ArrayList<>(crp.getRoles());
 
+            // verify the kind of role the user has
             if (crpUserDelete.isAdmin()) {
+
+              // admin role
               Role adminRole =
                 roles.stream().filter(r -> r.getAcronym().equals("CRP-Admin")).collect(Collectors.toList()).get(0);
 
@@ -218,13 +229,18 @@ public class ManageUsersAction extends BaseAction {
               if (rolesInDb != null) {
                 for (UserRole rol : rolesInDb) {
                   if (rol.getRole().getId().equals(adminRole.getId())) {
+
+                    // delete the user from userRoles table
                     userRoleManager.deleteUserRole(rol.getId());
                   }
                 }
               }
 
+              // delete the user from crpusers table
               crpUserManager.deleteCrpUser(crpUserDelete.getId());
             } else {
+
+              // guest role
               Role guestRole =
                 roles.stream().filter(r -> r.getAcronym().equals("G")).collect(Collectors.toList()).get(0);
 
@@ -236,11 +252,13 @@ public class ManageUsersAction extends BaseAction {
               if (rolesInDb != null) {
                 for (UserRole rol : rolesInDb) {
                   if (rol.getRole().getId().equals(guestRole.getId())) {
+                    // delete the user from userRoles table
                     userRoleManager.deleteUserRole(rol.getId());
                   }
                 }
               }
 
+              // delete the user from crpusers table
               crpUserManager.deleteCrpUser(crpUserDelete.getId());
             }
 
@@ -248,6 +266,12 @@ public class ManageUsersAction extends BaseAction {
 
         }
       }
+
+      /*
+       * this list (crpsForDeleting) is the result to compare the user.getCrpUser list
+       * (That contain the roles and crps from the interface)
+       * between the roles and crps in database
+       */
 
       for (CrpUser crpUserDelete : crpsForDeleting) {
         Crp crp = crpManager.getCrpById(crpUserDelete.getCrp().getId());
@@ -257,6 +281,7 @@ public class ManageUsersAction extends BaseAction {
 
 
         if (crpUserDelete.isAdmin()) {
+          // admin role
           Role adminRole =
             roles.stream().filter(r -> r.getAcronym().equals("CRP-Admin")).collect(Collectors.toList()).get(0);
 
@@ -268,13 +293,16 @@ public class ManageUsersAction extends BaseAction {
           if (rolesInDb != null) {
             for (UserRole rol : rolesInDb) {
               if (rol.getRole().getId().equals(adminRole.getId())) {
+                // delete the user from userRoles table
                 userRoleManager.deleteUserRole(rol.getId());
               }
             }
           }
 
+          // delete the user from crpusers table
           crpUserManager.deleteCrpUser(crpUserDelete.getId());
         } else {
+          // guest role
           Role guestRole = roles.stream().filter(r -> r.getAcronym().equals("G")).collect(Collectors.toList()).get(0);
 
           userRole.setRole(guestRole);
@@ -285,11 +313,12 @@ public class ManageUsersAction extends BaseAction {
           if (rolesInDb != null) {
             for (UserRole rol : rolesInDb) {
               if (rol.getRole().getId().equals(guestRole.getId())) {
+                // delete the user from userRoles table
                 userRoleManager.deleteUserRole(rol.getId());
               }
             }
           }
-
+          // delete the user from crpusers table
           crpUserManager.deleteCrpUser(crpUserDelete.getId());
         }
 
