@@ -458,6 +458,7 @@ public class ManageUsersAction extends BaseAction {
   public String manageUserWithPrivileges() throws Exception {
     User newUser;
     long newUserID;
+    boolean existsUser = false;
 
 
     // set the fields, depending if it's a new user or an old one
@@ -474,6 +475,7 @@ public class ManageUsersAction extends BaseAction {
       newUser.setModificationJustification(" ");
       newUser.setModifiedBy(this.getCurrentUser());
       newUser.setCreatedBy(this.getCurrentUser());
+      existsUser = userManager.getUserByUsername(newUser.getUsername()) == null ? false : true;
 
     } else {
       newUser = userManager.getUser(user.getId());
@@ -508,10 +510,6 @@ public class ManageUsersAction extends BaseAction {
       }
     }
 
-
-    boolean existsUser = false;
-
-    existsUser = userManager.getUserByUsername(newUser.getUsername()) == null ? false : true;
 
     if (existsUser) {
       message = this.getText("guestusers.username.invalid");

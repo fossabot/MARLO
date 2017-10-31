@@ -262,7 +262,12 @@ function removeCRP(){
   if($(this).hasClass('disabled')){
     return
   }
-  $(this).parents('tr').remove();    
+  var crpID = $(this).parents('tr').find('.crpUserCrpId').val();
+  var $crpsSelect = $(".crpSelect");
+  // Enable CRP from the select list
+  $crpsSelect.find("option[value='" + crpID + "']").prop('disabled', false); 
+  // Remove CRP row
+  $(this).parents('tr').remove();  
   updateCrpIndex();
 }
 
