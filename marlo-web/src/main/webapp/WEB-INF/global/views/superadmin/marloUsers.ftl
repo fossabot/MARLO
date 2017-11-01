@@ -87,7 +87,7 @@
                         [@customForm.input name="user.username" i18nkey="Username" value="" className="userUsername" type="text"   editable=true /]
                       </div>
                       <div class="col-md-6">
-                        [@customForm.input name="user.password" i18nkey="Password" value="" className="userPassword" placeholder="Change password" type="password"  required=true  editable=true /]
+                        [@customForm.input name="user.password" i18nkey="Password" value="" className="userPassword" placeholder="Change password" type="password"  required=false  editable=true /]
                       </div>
                       <div class="col-md-6 ">
                         [@customForm.input name="user.firstName" i18nkey="First name" value="" className="userFirstName" type="text"  required=true  editable=true /]

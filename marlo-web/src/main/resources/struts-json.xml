@@ -200,6 +200,7 @@
       <result type="json">
         <param name="noCache">true</param>
         <param name="excludeNullProperties">true</param>
+        <param name="includeParameters">success</param> 
       </result>
     </action>
 

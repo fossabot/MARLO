@@ -287,6 +287,12 @@ function saveUser(e) {
     return
   }
   
+  // Validate password
+  if((user["user.password"]).length<3){
+    showMessage("The password must have at least 3 characters");
+    return
+  }
+  
     
   // Execute save
   $.ajax({

@@ -118,6 +118,8 @@ public class ManageUsersAction extends BaseAction {
   private String actionName;
   private String queryParameter;
 
+  private String userPassword;
+
   @Inject
   public ManageUsersAction(APConfig config, UserManager userManager, CrpManager crpManager,
     CrpUserManager crpUserManager, UserRoleManager userRoleManager, RoleManager roleManager, SendMailS sendMail) {
@@ -554,6 +556,17 @@ public class ManageUsersAction extends BaseAction {
       newUser.setCreatedBy(this.getCurrentUser());
       existsUser = userManager.getUserByUsername(newUser.getUsername()) == null ? false : true;
 
+      if (!user.isCgiarUser()) {
+        if (!user.getPassword().isEmpty()) {
+          newUser.setPassword(user.getPassword());
+          this.userPassword = user.getPassword();
+        } else {
+          String password = RandomStringUtils.randomNumeric(6);
+          newUser.setPassword(password);
+          this.userPassword = password;
+        }
+      }
+
     } else {
       newUser = userManager.getUser(user.getId());
 
@@ -566,7 +579,6 @@ public class ManageUsersAction extends BaseAction {
     // check if it's a cgiar user
     if (!user.isCgiarUser()) {
       if (!user.getPassword().isEmpty()) {
-        newUser.setPassword(user.getPassword());
         newUser.setKeepPassword(false);
       } else {
         newUser.setKeepPassword(true);
@@ -608,8 +620,9 @@ public class ManageUsersAction extends BaseAction {
       }
 
       successMessage = this.getText("saving.saved");
-    }
 
+
+    }
 
     return SUCCESS;
   }
@@ -624,10 +637,8 @@ public class ManageUsersAction extends BaseAction {
     // Setting the password
     String password = this.getText("email.outlookPassword");
     if (!user.isCgiarUser()) {
-      // Generating a random password.
-      password = RandomStringUtils.randomNumeric(6);
-      // Applying the password to the user.
-      user.setPassword(password);
+      // Display the password
+      password = this.userPassword;
     }
 
     // Building the Email message:
