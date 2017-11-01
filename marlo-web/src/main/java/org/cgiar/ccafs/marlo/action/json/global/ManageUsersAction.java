@@ -663,9 +663,6 @@ public class ManageUsersAction extends BaseAction {
       config.getBaseUrl(), user.getEmail(), password, this.getText("email.support", new String[] {crpAdmins})}));
     message.append(this.getText("email.bye"));
 
-    // Saving the new user configuration.
-    user.setActive(true);
-    userManager.saveUser(user, this.getCurrentUser());
 
     // Send UserManual.pdf
     String contentType = "application/pdf";
@@ -768,13 +765,6 @@ public class ManageUsersAction extends BaseAction {
     String ccEmail = null;
     String bbcEmails = this.config.getEmailNotification();
     String subject = this.getText("email.adminuser.subject", new String[] {crp.getAcronym()});
-    // Setting the password
-    String password = this.getText("email.outlookPassword");
-    if (!user.isCgiarUser()) {
-      password = this.user.getPassword();
-      // Applying the password to the user.
-      user.setPassword(password);
-    }
 
     // get CRPAdmin contacts
     String crpAdmins = "";
@@ -832,13 +822,6 @@ public class ManageUsersAction extends BaseAction {
     String ccEmail = null;
     String bbcEmails = this.config.getEmailNotification();
     String subject = this.getText("email.guestuser.subject", new String[] {crp.getAcronym()});
-    // Setting the password
-    String password = this.getText("email.outlookPassword");
-    if (!user.isCgiarUser()) {
-      password = this.user.getPassword();
-      // Applying the password to the user.
-      user.setPassword(password);
-    }
 
     // get CRPAdmin contacts
     String crpAdmins = "";
