@@ -541,37 +541,48 @@ public class ManageUsersAction extends BaseAction {
 
     // set the fields, depending if it's a new user or an old one
     if (isNewUser) {
-      newUser = new User();
-      newUser.setActiveSince(new Date());
-      newUser.setFirstName(user.getFirstName());
-      newUser.setLastName(user.getLastName());
-      newUser.setUsername(user.getUsername());
-      newUser.setActive(user.isActive());
-      newUser.setCgiarUser(user.isCgiarUser());
-      newUser.setAutoSave(user.isAutoSave());
-      newUser.setEmail(user.getEmail());
-      newUser.setModificationJustification(" ");
-      newUser.setModifiedBy(this.getCurrentUser());
-      newUser.setCreatedBy(this.getCurrentUser());
-      if (!newUser.getUsername().isEmpty()) {
-        existsUser = userManager.getUserByUsername(newUser.getUsername()) == null ? false : true;
-      } else {
-        newUser.setUsername(null);
-      }
+
+      // validate if exits an user with the same email
+      boolean emailExists = false;
+      // We need to validate that the email does not exist yet into our database.
+      emailExists = userManager.getUserByEmail(user.getEmail()) == null ? false : true;
+
+      if (!emailExists) {
+
+        newUser = new User();
+        newUser.setActiveSince(new Date());
+        newUser.setFirstName(user.getFirstName());
+        newUser.setLastName(user.getLastName());
+        // newUser.setUsername(user.getUsername());
+        newUser.setActive(user.isActive());
+        newUser.setCgiarUser(user.isCgiarUser());
+        newUser.setAutoSave(user.isAutoSave());
+        newUser.setEmail(user.getEmail());
+        newUser.setModificationJustification(" ");
+        newUser.setModifiedBy(this.getCurrentUser());
+        newUser.setCreatedBy(this.getCurrentUser());
 
 
-      if (!user.isCgiarUser()) {
-        if (!user.getPassword().isEmpty()) {
-          newUser.setPassword(user.getPassword());
-          this.userPassword = user.getPassword();
-        } else {
-          String password = RandomStringUtils.randomNumeric(6);
-          newUser.setPassword(password);
-          this.userPassword = password;
+        if (!user.isCgiarUser()) {
+          if (!user.getPassword().isEmpty()) {
+            newUser.setPassword(user.getPassword());
+            this.userPassword = user.getPassword();
+          } else {
+            String password = RandomStringUtils.randomNumeric(6);
+            newUser.setPassword(password);
+            this.userPassword = password;
+          }
+
+          newUser.setKeepPassword(false);
         }
 
-        newUser.setKeepPassword(false);
+
+      } else {
+        message = this.getText("manageUsers.email.existing");
+        newUser = null;
+        return SUCCESS;
       }
+
 
     } else {
       newUser = userManager.getUser(user.getId());
@@ -595,7 +606,7 @@ public class ManageUsersAction extends BaseAction {
 
     // check if it's a cgiar user
     if (!user.isCgiarUser()) {
-      newUser.setUsername(user.getUsername());
+      // newUser.setUsername(user.getUsername());
       newUser.setFirstName(user.getFirstName());
       newUser.setLastName(user.getLastName());
     } else {
