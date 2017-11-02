@@ -206,7 +206,7 @@ function enableCGIARFields(state) {
     $(".userPassword").attr('placeholder', "Outlook password");
   }else{
     if (addingNewUser){
-      $(".userPassword").attr('placeholder', "A random password will generated").attr("readonly", true);
+      $(".userPassword").attr('placeholder', "Random password will generated").attr("readonly", true);
       $(".userUsername").attr("readonly", true);
     }else{
       $(".userPassword").attr('placeholder', "Change password");
