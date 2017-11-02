@@ -72,7 +72,6 @@ function init() {
    * Add New User
    */
   $('#addNewUser').on('click', function(){
-    
     updateData({
       "lastName":"",
       "autosave":true,
@@ -127,7 +126,14 @@ function attachEvents() {
   $('#is_CGIAR_user input[type="radio"]').on('change', function(){
     enableCGIARFields(($(this).val() === "true"));
   });
+  
+  // Change user email
+  $('input.userEmail').on('keyup change', changeUserEmail);
 
+}
+
+function changeUserEmail(){
+  console.log(this.value);
 }
 
 function searchUserByEmail(email) {
@@ -147,8 +153,6 @@ function searchUserByEmail(email) {
         // Update CRPs
         updateCrps(m.crpUserFound);
         $(".crpSelect").attr("disabled", false);
-         
-        
       }
   });
 }
@@ -170,6 +174,7 @@ function updateData(user) {
   // Hide/Enable fields
   enableCGIARFields(user.cgiar);
   $(".userEmail").attr("readonly", !user.newUser);
+  $(".userEmail").trigger('change');
 
 }
 
@@ -275,6 +280,10 @@ function validateEmail(email) {
   var re =
       /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
   return re.test(email);
+}
+
+function validateCGIAREmail(email){
+  
 }
 
 function saveUser(e) {
