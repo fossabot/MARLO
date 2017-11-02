@@ -535,7 +535,6 @@ public class ManageUsersAction extends BaseAction {
    */
 
   public String manageUserWithPrivileges() throws Exception {
-    User newUser;
     long newUserID;
     boolean existsUser = false;
 
@@ -554,7 +553,12 @@ public class ManageUsersAction extends BaseAction {
       newUser.setModificationJustification(" ");
       newUser.setModifiedBy(this.getCurrentUser());
       newUser.setCreatedBy(this.getCurrentUser());
-      existsUser = userManager.getUserByUsername(newUser.getUsername()) == null ? false : true;
+      if (!newUser.getUsername().isEmpty()) {
+        existsUser = userManager.getUserByUsername(newUser.getUsername()) == null ? false : true;
+      } else {
+        newUser.setUsername(null);
+      }
+
 
       if (!user.isCgiarUser()) {
         if (!user.getPassword().isEmpty()) {
@@ -565,6 +569,8 @@ public class ManageUsersAction extends BaseAction {
           newUser.setPassword(password);
           this.userPassword = password;
         }
+
+        newUser.setKeepPassword(false);
       }
 
     } else {
@@ -574,15 +580,21 @@ public class ManageUsersAction extends BaseAction {
       newUser.setAutoSave(user.isAutoSave());
       newUser.setModificationJustification(" ");
       newUser.setModifiedBy(this.getCurrentUser());
+
+      if (!user.isCgiarUser()) {
+        if (!user.getPassword().isEmpty()) {
+          newUser.setPassword(user.getPassword());
+          newUser.setKeepPassword(false);
+        } else {
+          newUser.setKeepPassword(true);
+        }
+      }
+
+
     }
 
     // check if it's a cgiar user
     if (!user.isCgiarUser()) {
-      if (!user.getPassword().isEmpty()) {
-        newUser.setKeepPassword(false);
-      } else {
-        newUser.setKeepPassword(true);
-      }
       newUser.setUsername(user.getUsername());
       newUser.setFirstName(user.getFirstName());
       newUser.setLastName(user.getLastName());
@@ -593,6 +605,7 @@ public class ManageUsersAction extends BaseAction {
         newUser.setFirstName(usrTmp.getFirstName());
         newUser.setLastName(usrTmp.getLastName());
         newUser.setUsername(usrTmp.getUsername());
+        newUser.setKeepPassword(true);
       } else {
         message = this.getText("guestusers.email.invalid");
         return SUCCESS;
@@ -942,6 +955,7 @@ public class ManageUsersAction extends BaseAction {
         return newUser;
       }
     } catch (Exception e) {
+      e.printStackTrace();
       LOG.error(this.getText("guestusers.email.invalid"));
     }
 
