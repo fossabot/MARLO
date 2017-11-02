@@ -87,7 +87,7 @@
                         [@customForm.input name="user.username" i18nkey="Username" value="" className="userUsername" type="text"   editable=true /]
                       </div>
                       <div class="col-md-6">
-                        [@customForm.input name="user.password" i18nkey="Password" value="" className="userPassword" placeholder="Change password" type="password"  required=false  editable=true /]
+                        [@customForm.input name="user.password" i18nkey="Password" value="" className="userPassword" placeholder="" type="password"  required=false  editable=true /]
                       </div>
                       <div class="col-md-6 ">
                         [@customForm.input name="user.firstName" i18nkey="First name" value="" className="userFirstName" type="text"  required=true  editable=true /]
@@ -101,7 +101,7 @@
                   [#-- User Settings --]
                   <div class="col-md-3">
                     <h4 class="sectionTitle">User Settings</h4>
-                    <div class="form-group">[@radioComponent id="is_CGIAR_user" label="CGIAR user" name="user.cgiarUser" /]<hr /></div>
+                    <div class="form-group">[@radioComponent id="is_CGIAR_user" label="Outlook Authentication" name="user.cgiarUser" /]<hr /></div>
                     <div class="form-group">[@radioComponent id="is_active_User" label="Is active" name="user.active" /]<hr /></div>
                     <div class="form-group">[@radioComponent id="is_autosave_active" label="Autosave" name="user.autoSave" /]</div>
                   </div>

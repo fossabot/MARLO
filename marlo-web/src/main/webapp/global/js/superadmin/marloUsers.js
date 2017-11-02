@@ -127,7 +127,8 @@ function attachEvents() {
   
   // Change CGIAR state
   $('#is_CGIAR_user input[type="radio"]').on('change', function(){
-    enableCGIARFields(($(this).val() === "true"));
+    var isCgiarSelected = ($(this).val() === "true");
+    enableCGIARFields(isCgiarSelected);
   });
   
   // Change user email
@@ -177,12 +178,13 @@ function searchUserByEmail(email) {
 function updateData(user) {
   // User data
   $(".isNewUser").val(user.newUser);
-  $(".userEmail").val(user.email);
+  $(".userEmail").val(user.email).attr('autocomplete','off');
   $(".userId").val(user.id);
   $(".userFirstName").val(user.name);
   $(".userLastName").val(user.lastName);
   $(".userUsername").val(user.username);
   $(".userPassword").val("");
+  $(".userPassword").attr('readonly', (user.newUser && !(user.cgiar)));
   // Configuration
   $('#is_CGIAR_user input[type="radio"][value="'+user.cgiar+'"]').prop('checked',true);
   $('#is_active_User input[type="radio"][value="'+user.active+'"]').prop('checked',true);
@@ -200,6 +202,16 @@ function enableCGIARFields(state) {
   $(".userFirstName").attr("readonly", state);
   $(".userLastName").attr("readonly", state);
   $(".userPassword").attr("readonly", state);
+  if(state){
+    $(".userPassword").attr('placeholder', "Outlook password");
+  }else{
+    if (addingNewUser){
+      $(".userPassword").attr('placeholder', "A random password will generated").attr("readonly", true);
+      $(".userUsername").attr("readonly", true);
+    }else{
+      $(".userPassword").attr('placeholder', "Change password");
+    }
+  }
 }
 
 function updateCrpSelect() {
