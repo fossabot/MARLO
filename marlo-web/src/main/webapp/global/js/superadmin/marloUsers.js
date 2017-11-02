@@ -1,6 +1,8 @@
-var crpList = [];
-var $modal;
-var $marloUsersTable;
+var crpList = [],
+    $modal,
+    $marloUsersTable,
+    addingNewUser,
+    timeoutEmail;
 $(document).ready(init);
 
 function init() {
@@ -72,6 +74,7 @@ function init() {
    * Add New User
    */
   $('#addNewUser').on('click', function(){
+    addingNewUser = true;
     updateData({
       "lastName":"",
       "autosave":true,
@@ -133,7 +136,19 @@ function attachEvents() {
 }
 
 function changeUserEmail(){
-  console.log(this.value);
+  var email = this.value;
+  if (addingNewUser){
+    if(timeoutEmail) {
+      clearTimeout(timeoutEmail);
+    }
+    // Start a timer that will execute the email validation
+    timeoutEmail = setTimeout(function() {
+      var isCgiar = isValidCGIAREmail(email);
+      enableCGIARFields(isCgiar);
+      $('#is_CGIAR_user input[type="radio"][value="'+isCgiar+'"]').prop('checked',true);
+    }, 500);
+    
+  }
 }
 
 function searchUserByEmail(email) {
@@ -149,6 +164,7 @@ function searchUserByEmail(email) {
       success: function(m) {
         console.log(m);
         // Update User Info
+        addingNewUser = false;
         updateData(m.userFound);
         // Update CRPs
         updateCrps(m.crpUserFound);
@@ -282,8 +298,8 @@ function validateEmail(email) {
   return re.test(email);
 }
 
-function validateCGIAREmail(email){
-  
+function isValidCGIAREmail(email){
+  return (email.indexOf("@cgiar.org") != -1);
 }
 
 function saveUser(e) {
