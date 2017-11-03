@@ -317,9 +317,10 @@ function isValidCGIAREmail(email){
 function saveUser(e) {
   e.preventDefault();
   var user = $('form').serializeObject();
+  var userEmail = $.trim(user["user.email"]);
   
   // Validate Email
-  if( (!((user["user.email"]).length > 0)) || (!(validateEmail(user["user.email"]))) ) {
+  if( (!(userEmail.length > 0)) || (!(validateEmail(userEmail))) ) {
     showMessage("Invalid Email");
     return
   }
@@ -331,7 +332,6 @@ function saveUser(e) {
       return
     }
   }  
-  
     
   // Execute save
   $.ajax({
