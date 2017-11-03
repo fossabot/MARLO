@@ -57,6 +57,13 @@ public class ClusterByFPsAction extends BaseAction {
     clusters = new ArrayList<Map<String, Object>>();
     Map<String, Object> flagShip;
 
+    /**
+     * Return if flagshipID is null
+     */
+    if (StringUtils.isEmpty(flagshipID)) {
+      return SUCCESS;
+    }
+
     String flagships[] = flagshipID.split(",");
 
     for (String string : flagships) {
