@@ -131,7 +131,7 @@
 			<column name="file_workplan" not-null="false" />
 		</many-to-one>
 		<set name="projectFocuses" table="project_focuses" order-by="id"
-			inverse="true" lazy="true" fetch="select">
+			inverse="true" lazy="true" fetch="select" cascade="save-update">
 			<key>
 				<column name="project_id" not-null="true" />
 			</key>
@@ -166,7 +166,7 @@
 			<one-to-many class="org.cgiar.ccafs.marlo.data.model.Deliverable" />
 		</set>
 		<set name="projectScopes" table="project_scopes" inverse="true"
-			lazy="true" fetch="select">
+			lazy="true" fetch="select" cascade="save-update">
 			<key>
 				<column name="project_id" not-null="true" />
 			</key>
@@ -199,7 +199,7 @@
 				class="org.cgiar.ccafs.marlo.data.model.ProjectLocationElementType" />
 		</set>
 		<set name="projectClusterActivities" order-by="id"
-			table="project_cluster_activities" inverse="true" lazy="true" fetch="select">
+			table="project_cluster_activities" inverse="true" lazy="true" fetch="select" cascade="save-update">
 			<key>
 				<column name="project_id" not-null="true" />
 			</key>

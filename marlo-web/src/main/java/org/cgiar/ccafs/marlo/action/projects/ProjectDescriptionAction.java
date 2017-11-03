@@ -705,38 +705,42 @@ public class ProjectDescriptionAction extends BaseAction {
       Project projectDB = projectManager.getProjectById(project.getId());
       // Load basic info project to be saved
 
-      project.setActive(true);
-      project.setCreatedBy(projectDB.getCreatedBy());
-      project.setModifiedBy(this.getCurrentUser());
-      project.setModificationJustification("");
-      project.setActiveSince(projectDB.getActiveSince());
-      project.setCreateDate(projectDB.getCreateDate());
-      project.setPresetDate(projectDB.getPresetDate());
+      projectDB.setActive(true);
+
+      projectDB.setModifiedBy(this.getCurrentUser());
+      projectDB.setModificationJustification("");
 
       // Validations to fill the checkbox fields
 
       if (project.isNoRegional() == null) {
-        project.setNoRegional(false);
+        projectDB.setNoRegional(false);
       }
       if (project.getCrossCuttingCapacity() == null) {
-        project.setCrossCuttingCapacity(false);
+        projectDB.setCrossCuttingCapacity(false);
       }
       if (project.getCrossCuttingNa() == null) {
-        project.setCrossCuttingNa(false);
+        projectDB.setCrossCuttingNa(false);
       }
       if (project.getCrossCuttingGender() == null) {
-        project.setCrossCuttingGender(false);
+        projectDB.setCrossCuttingGender(false);
       }
       if (project.getCrossCuttingYouth() == null) {
-        project.setCrossCuttingYouth(false);
+        projectDB.setCrossCuttingYouth(false);
       }
-      project.setStatus(projectDB.getStatus());
+      projectDB.setStatus(project.getStatus());
+
+      projectDB.setEndDate(project.getEndDate());
+      projectDB.setStartDate(project.getStartDate());
+      projectDB.setSummary(project.getSummary());
+      projectDB.setTitle(project.getTitle());
+
+
       if (this.isReportingActive()) {
 
-        project.setCrossCuttingCapacity(projectDB.getCrossCuttingCapacity());
-        project.setCrossCuttingNa(projectDB.getCrossCuttingNa());
-        project.setCrossCuttingGender(projectDB.getCrossCuttingGender());
-        project.setCrossCuttingYouth(projectDB.getCrossCuttingYouth());
+        // projectDB.setCrossCuttingCapacity(project.getCrossCuttingCapacity());
+        // projectDB.setCrossCuttingNa(project.getCrossCuttingNa());
+        // projectDB.setCrossCuttingGender(project.getCrossCuttingGender());
+        // projectDB.setCrossCuttingYouth(project.getCrossCuttingYouth());
 
 
       }
@@ -745,44 +749,49 @@ public class ProjectDescriptionAction extends BaseAction {
       // no liaison institution selected
       if (project.getLiaisonInstitution() != null) {
         if (project.getLiaisonInstitution().getId() == -1) {
-          project.setLiaisonInstitution(null);
+          projectDB.setLiaisonInstitution(null);
         }
       }
       // no liaison user selected
       if (project.getLiaisonUser() != null) {
         if (project.getLiaisonUser().getId() == -1) {
-          project.setLiaisonUser(null);
+          projectDB.setLiaisonUser(null);
         }
       }
       // Saving the flaghsips
 
       if (project.getFlagshipValue() != null && project.getFlagshipValue().length() > 0) {
 
-        for (ProjectFocus projectFocus : projectDB.getProjectFocuses().stream()
+        for (ProjectFocus projectFocusDB : projectDB.getProjectFocuses().stream()
           .filter(
             c -> c.isActive() && c.getCrpProgram().getProgramType() == ProgramType.FLAGSHIP_PROGRAM_TYPE.getValue())
           .collect(Collectors.toList())) {
 
-          if (!project.getFlagshipValue().contains(projectFocus.getCrpProgram().getId().toString())) {
-            projectFocusManager.deleteProjectFocus(projectFocus.getId());
+          if (!project.getFlagshipValue().contains(projectFocusDB.getCrpProgram().getId().toString())) {
+            projectFocusManager.deleteProjectFocus(projectFocusDB.getId());
 
           }
         }
         for (String programID : project.getFlagshipValue().trim().split(",")) {
           if (programID.length() > 0) {
-            CrpProgram program = programManager.getCrpProgramById(Long.parseLong(programID.trim()));
-            ProjectFocus projectFocus = new ProjectFocus();
-            projectFocus.setCrpProgram(program);
-            projectFocus.setProject(project);
+            CrpProgram programDB = programManager.getCrpProgramById(Long.parseLong(programID.trim()));
+            ProjectFocus projectFocusDB = new ProjectFocus();
+            projectFocusDB.setCrpProgram(programDB);
+            projectFocusDB.setProject(projectDB);
             if (projectDB.getProjectFocuses().stream()
-              .filter(c -> c.isActive() && c.getCrpProgram().getId().longValue() == program.getId().longValue())
+              .filter(c -> c.isActive() && c.getCrpProgram().getId().longValue() == programDB.getId().longValue())
               .collect(Collectors.toList()).isEmpty()) {
-              projectFocus.setActive(true);
-              projectFocus.setActiveSince(new Date());
-              projectFocus.setCreatedBy(this.getCurrentUser());
-              projectFocus.setModifiedBy(this.getCurrentUser());
-              projectFocus.setModificationJustification("");
-              projectFocusManager.saveProjectFocus(projectFocus);
+              projectFocusDB.setActive(true);
+              projectFocusDB.setActiveSince(new Date());
+              projectFocusDB.setCreatedBy(this.getCurrentUser());
+              projectFocusDB.setModifiedBy(this.getCurrentUser());
+              projectFocusDB.setModificationJustification("");
+              /**
+               * We no longer save the child entity but instead use cascade save-update to persist the child collection.
+               */
+              // projectFocusDB = projectFocusManager.saveProjectFocus(projectFocusDB);
+              // Add the projectFocus to the projectFocuses collection to ensure the AuditLog functionality works.
+              projectDB.getProjectFocuses().add(projectFocusDB);
             }
           }
 
@@ -802,19 +811,23 @@ public class ProjectDescriptionAction extends BaseAction {
         for (String programID : project.getRegionsValue().trim().split(",")) {
           if (programID.length() > 0) {
             CrpProgram program = programManager.getCrpProgramById(Long.parseLong(programID.trim()));
-            ProjectFocus projectFocus = new ProjectFocus();
-            projectFocus.setCrpProgram(program);
-            projectFocus.setProject(project);
+            ProjectFocus projectFocusDB = new ProjectFocus();
+            projectFocusDB.setCrpProgram(program);
+            projectFocusDB.setProject(projectDB);
 
             if (projectDB.getProjectFocuses().stream()
               .filter(c -> c.isActive() && c.getCrpProgram().getId().longValue() == program.getId().longValue())
               .collect(Collectors.toList()).isEmpty()) {
-              projectFocus.setActive(true);
-              projectFocus.setActiveSince(new Date());
-              projectFocus.setCreatedBy(this.getCurrentUser());
-              projectFocus.setModifiedBy(this.getCurrentUser());
-              projectFocus.setModificationJustification("");
-              projectFocusManager.saveProjectFocus(projectFocus);
+              projectFocusDB.setActive(true);
+              projectFocusDB.setActiveSince(new Date());
+              projectFocusDB.setCreatedBy(this.getCurrentUser());
+              projectFocusDB.setModifiedBy(this.getCurrentUser());
+              projectFocusDB.setModificationJustification("");
+              /**
+               * We no longer save the child entity but instead use cascade save-update to persist the child collection.
+               */
+              // projectFocusDB = projectFocusManager.saveProjectFocus(projectFocusDB);
+              projectDB.getProjectFocuses().add(projectFocusDB);
             }
           }
 
@@ -826,18 +839,18 @@ public class ProjectDescriptionAction extends BaseAction {
       if (this.isPlanningActive()) {
 
         // Removing Project Cluster Activities
-        for (ProjectClusterActivity projectClusterActivity : projectDB.getProjectClusterActivities().stream()
+        for (ProjectClusterActivity projectClusterActivityDB : projectDB.getProjectClusterActivities().stream()
           .filter(c -> c.isActive()).collect(Collectors.toList())) {
 
           if (project.getClusterActivities() == null) {
-            project.setClusterActivities(new ArrayList<>());
+            projectDB.setClusterActivities(new ArrayList<>());
           }
-          if (!project.getClusterActivities().contains(projectClusterActivity)) {
-            projectClusterActivityManager.deleteProjectClusterActivity(projectClusterActivity.getId());
+          if (!project.getClusterActivities().contains(projectClusterActivityDB)) {
+            projectClusterActivityManager.deleteProjectClusterActivity(projectClusterActivityDB.getId());
 
             // Issue #1142 Might need to remove ProjectBudgetsCluserActvity (if any) that reference this CoA.
 
-            for (ProjectBudgetsCluserActvity projectBudgetsCluserActvity : projectClusterActivity
+            for (ProjectBudgetsCluserActvity projectBudgetsCluserActvity : projectClusterActivityDB
               .getCrpClusterOfActivity().getProjectBudgetsCluserActvities().stream().filter(c -> c.isActive())
               .collect(Collectors.toList())) {
               projectBudgetsCluserActvityManager.deleteProjectBudgetsCluserActvity(projectBudgetsCluserActvity.getId());
@@ -847,25 +860,29 @@ public class ProjectDescriptionAction extends BaseAction {
         // Add Project Cluster Activities
 
         if (project.getClusterActivities() != null) {
-          for (ProjectClusterActivity projectClusterActivity : project.getClusterActivities()) {
-            if (projectClusterActivity.getId() == null) {
-              projectClusterActivity.setCreatedBy(this.getCurrentUser());
+          for (ProjectClusterActivity projectClusterActivityClient : project.getClusterActivities()) {
+            if (projectClusterActivityClient.getId() == null) {
+              projectClusterActivityClient.setCreatedBy(this.getCurrentUser());
 
-              projectClusterActivity.setActiveSince(new Date());
-              projectClusterActivity.setActive(true);
-              projectClusterActivity.setProject(project);
-              projectClusterActivity.setModifiedBy(this.getCurrentUser());
-              projectClusterActivity.setModificationJustification("");
-              projectClusterActivityManager.saveProjectClusterActivity(projectClusterActivity);
+              projectClusterActivityClient.setActiveSince(new Date());
+              projectClusterActivityClient.setActive(true);
+              projectClusterActivityClient.setProject(projectDB);
+              projectClusterActivityClient.setModifiedBy(this.getCurrentUser());
+              projectClusterActivityClient.setModificationJustification("");
+              /**
+               * We no longer save the child entity but instead use cascade save-update to persist the child collection.
+               */
+              // projectClusterActivityClient =
+              // projectClusterActivityManager.saveProjectClusterActivity(projectClusterActivityClient);
+              projectDB.getProjectClusterActivities().add(projectClusterActivityClient);
             }
 
           }
         }
 
         // delete the section stust for budgets by coA when there is one Coa selectd to the project
-        Project projectCluster = projectManager.getProjectById(projectID);
         List<ProjectClusterActivity> currentClusters =
-          projectCluster.getProjectClusterActivities().stream().filter(c -> c.isActive()).collect(Collectors.toList());
+          projectDB.getProjectClusterActivities().stream().filter(c -> c.isActive()).collect(Collectors.toList());
         if (currentClusters.isEmpty() || currentClusters.size() == 1) {
           SectionStatus sectionStatus = sectionStatusManager.getSectionStatusByProject(projectID,
             this.getCurrentCycle(), this.getCurrentCycleYear(), ProjectSectionStatusEnum.BUDGETBYCOA.getStatus());
@@ -877,40 +894,43 @@ public class ProjectDescriptionAction extends BaseAction {
       }
       // Removing Project Scopes
 
-      for (ProjectScope projectLocation : projectDB.getProjectScopes().stream().filter(c -> c.isActive())
+      for (ProjectScope projectScopeDB : projectDB.getProjectScopes().stream().filter(c -> c.isActive())
         .collect(Collectors.toList())) {
 
         if (project.getScopes() == null) {
-          project.setScopes(new ArrayList<>());
+          projectDB.setScopes(new ArrayList<>());
         }
-        if (!project.getScopes().contains(projectLocation)) {
-          projectScopeManager.deleteProjectScope(projectLocation.getId());
+        if (!project.getScopes().contains(projectScopeDB)) {
+          projectScopeManager.deleteProjectScope(projectScopeDB.getId());
 
         }
       }
       // Add Project Scopes
 
       if (project.getScopes() != null) {
-        for (ProjectScope projectLocation : project.getScopes()) {
-          if (projectLocation.getId() == null) {
-            projectLocation.setCreatedBy(this.getCurrentUser());
+        for (ProjectScope projectScopeClient : project.getScopes()) {
+          if (projectScopeClient.getId() == null) {
+            projectScopeClient.setCreatedBy(this.getCurrentUser());
 
-            projectLocation.setActiveSince(new Date());
-            projectLocation.setActive(true);
-            projectLocation.setProject(project);
-            projectLocation.setModifiedBy(this.getCurrentUser());
-            projectLocation.setModificationJustification("");
-            projectScopeManager.saveProjectScope(projectLocation);
+            projectScopeClient.setActiveSince(new Date());
+            projectScopeClient.setActive(true);
+            projectScopeClient.setProject(projectDB);
+            projectScopeClient.setModifiedBy(this.getCurrentUser());
+            projectScopeClient.setModificationJustification("");
+            /**
+             * We no longer save the child entity but instead use cascade save-update to persist the child collection.
+             */
+            // projectScopeClient = projectScopeManager.saveProjectScope(projectScopeClient);
+            projectDB.getProjectScopes().add(projectScopeClient);
           }
 
         }
       }
 
       // load basic info to project
-      project.setCrp(loggedCrp);
-      project.setCofinancing(projectDB.isCofinancing());
+      // projectDB.setCrp(loggedCrp);
+      // projectDB.setCofinancing(project.isCofinancing());
       // project.setGlobal(projectDB.isGlobal());
-
 
       // Saving project and add relations we want to save on the history
 
@@ -918,11 +938,12 @@ public class ProjectDescriptionAction extends BaseAction {
       relationsName.add(APConstants.PROJECT_FOCUSES_RELATION);
       relationsName.add(APConstants.PROJECT_CLUSTER_ACTIVITIES_RELATION);
       relationsName.add(APConstants.PROJECT_SCOPES_RELATION);
-      project.setActiveSince(new Date());
-      project.setReporting(projectDB.getReporting());
-      project.setAdministrative(projectDB.getAdministrative());
-      project.setModificationJustification(this.getJustification());
-      projectManager.saveProject(project, this.getActionName(), relationsName);
+      projectDB.setActiveSince(new Date());
+      // project.setReporting(projectDB.getReporting());
+      // project.setAdministrative(projectDB.getAdministrative());
+      projectDB.setModificationJustification(this.getJustification());
+
+      projectDB = projectManager.saveProject(projectDB, this.getActionName(), relationsName);
       Path path = this.getAutoSaveFilePath();
       // delete the draft file if exists
       if (path.toFile().exists()) {
