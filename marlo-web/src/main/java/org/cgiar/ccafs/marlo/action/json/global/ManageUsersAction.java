@@ -599,6 +599,11 @@ public class ManageUsersAction extends BaseAction {
         } else {
           newUser.setKeepPassword(true);
         }
+      } else {
+        if (!user.getPassword().isEmpty()) {
+          newUser.setPassword(user.getPassword());
+          newUser.setKeepPassword(false);
+        }
       }
 
 
