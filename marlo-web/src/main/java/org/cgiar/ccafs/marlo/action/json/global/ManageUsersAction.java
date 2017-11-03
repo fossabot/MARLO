@@ -412,8 +412,33 @@ public class ManageUsersAction extends BaseAction {
             }
 
 
-          }
+          } else {
+            // if exists the crp, we check if has asociated the rol admin
+            newCrpUser = crpUserManager.getCrpUserById(newCrpUserID);
+            UserRole userRole = new UserRole();
 
+            List<Role> roles = new ArrayList<>(crp.getRoles());
+
+            if (crpUser.isAdmin()) {
+
+              Role guestRole =
+                roles.stream().filter(r -> r.getAcronym().equals("CRP-Admin")).collect(Collectors.toList()).get(0);
+
+              List<UserRole> rolesTmp = userRoleManager.getUserRolesByUserId(crpUser.getUser().getId());
+
+              for (UserRole usrRol : rolesTmp) {
+                if (!usrRol.getRole().equals(guestRole)) {
+                  userRole.setRole(guestRole);
+                  userRole.setUser(newUser);
+
+                  long userRoleID = userRoleManager.saveUserRole(userRole);
+                }
+              }
+
+            }
+
+
+          }
 
         }
 
