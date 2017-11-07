@@ -340,6 +340,12 @@ public class ManageUsersAction extends BaseAction {
    * @param newUser
    */
   public void checkNewCRPs(User user, User newUser) {
+
+
+    long newCrpUserID;
+    CrpUser newCrpUser;
+    boolean roleExists = false;
+
     // check if the user has crp's associated
     if (user.getCrpUser() != null) {
 
@@ -352,7 +358,7 @@ public class ManageUsersAction extends BaseAction {
           // search the crp with it's id
           Crp crp = crpManager.getCrpById(crpUser.getCrp().getId());
 
-          CrpUser newCrpUser = new CrpUser();
+          newCrpUser = new CrpUser();
           newCrpUser.setCrp(crp);
           newCrpUser.setUser(newUser);
           newCrpUser.setActiveSince(new Date());
@@ -362,7 +368,7 @@ public class ManageUsersAction extends BaseAction {
           newCrpUser.setActive(true);
 
           // assign the user in the crp
-          long newCrpUserID = crpUserManager.saveCrpUser(newCrpUser);
+          newCrpUserID = crpUserManager.saveCrpUser(newCrpUser);
 
           // if the crp-user association saved without errors
           if (newCrpUserID != -1) {
@@ -412,39 +418,55 @@ public class ManageUsersAction extends BaseAction {
             }
 
 
-          } else {
-            // if exists the crp, we check if has asociated the rol admin
-            newCrpUser = crpUserManager.getCrpUserById(newCrpUserID);
-            UserRole userRole = new UserRole();
+          }
 
-            List<Role> roles = new ArrayList<>(crp.getRoles());
 
-            if (crpUser.isAdmin()) {
+        } else {
 
-              Role guestRole =
-                roles.stream().filter(r -> r.getAcronym().equals("CRP-Admin")).collect(Collectors.toList()).get(0);
+          // search the crp with it's id
+          Crp crp = crpManager.getCrpById(crpUser.getCrp().getId());
+          newCrpUserID = crpUser.getId();
+          newCrpUser = crpUserManager.getCrpUserById(newCrpUserID);
 
-              List<UserRole> rolesTmp = userRoleManager.getUserRolesByUserId(crpUser.getUser().getId());
+          UserRole userRole = new UserRole();
 
-              for (UserRole usrRol : rolesTmp) {
-                if (!usrRol.getRole().equals(guestRole)) {
-                  userRole.setRole(guestRole);
-                  userRole.setUser(newUser);
+          List<Role> roles = new ArrayList<>(crp.getRoles());
 
-                  long userRoleID = userRoleManager.saveUserRole(userRole);
-                }
+          // search for the roles that the user already has
+          List<UserRole> userRoles = userRoleManager.getUserRolesByUserId(newUser.getId());
+
+
+          if (crpUser.isAdmin()) {
+
+            Role adminRole =
+              roles.stream().filter(r -> r.getAcronym().equals("CRP-Admin")).collect(Collectors.toList()).get(0);
+
+            for (UserRole userRoleTmp : userRoles) {
+              if (userRoleTmp.getRole().getId() == adminRole.getId()) {
+                roleExists = true;
+                break;
               }
+            }
 
+            if (!roleExists) {
+              userRole.setRole(adminRole);
+              userRole.setUser(newUser);
+
+              userRoleManager.saveUserRole(userRole);
             }
 
 
           }
 
-        }
 
+        }
       }
+
     }
+
+
   }
+
 
   /**
    * Create a new user in the system.
@@ -616,13 +638,21 @@ public class ManageUsersAction extends BaseAction {
       newUser.setAutoSave(user.isAutoSave());
       newUser.setModificationJustification(" ");
       newUser.setModifiedBy(this.getCurrentUser());
+      newUser.setCgiarUser(user.isCgiarUser());
 
       if (!user.isCgiarUser()) {
         if (!user.getPassword().isEmpty()) {
           newUser.setPassword(user.getPassword());
           newUser.setKeepPassword(false);
         } else {
-          newUser.setKeepPassword(true);
+
+          if (newUser.getPassword().isEmpty()) {
+            message = this.getText("guestusers.emptyPassword");
+            newUser = null;
+            return SUCCESS;
+          } else {
+            newUser.setKeepPassword(true);
+          }
         }
       } else {
         if (!user.getPassword().isEmpty()) {
