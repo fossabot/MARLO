@@ -267,7 +267,7 @@
             <label for="">[@s.text name="projectCofunded.directDonor" /]:[@customForm.req required=editable /] </label>
             <span class="description"><i>([@s.text name="projectCofunded.directDonor.helpText" /])</i></span>
             [@customForm.select name="fundingSource.directDonor.id" i18nkey="projectCofunded.directDonor" className="donor" showTitle=false listName="institutionsDonors" keyFieldName="id"  displayFieldName="composedNameLoc" editable=editable /]
-            <span class="text-warning metadataSuggested">Suggested: ${(theAgreement.directDonor.name)!}</span> 
+            <span class="text-warning metadataSuggested">[#if isSynced]Suggested: ${(theAgreement.directDonor.name)!}[#/if]</span> 
           </div>
         </div>
 
@@ -277,7 +277,7 @@
             <label for="">[@s.text name="projectCofunded.donor" /]:</label>
             <span class="description"><i>([@s.text name="projectCofunded.donor.helpText" /])</i></span>
             [@customForm.select name="fundingSource.institution.id" i18nkey="projectCofunded.donor" className="donor" showTitle=false  listName="institutionsDonors" keyFieldName="id"  displayFieldName="composedNameLoc" editable=editable /]
-            <span class="text-warning metadataSuggested">Suggested: ${(theAgreement.originalDonor.name)!}</span> 
+            <span class="text-warning metadataSuggested">[#if isSynced]Suggested: ${(theAgreement.originalDonor.name)!}[#/if]</span> 
           </div>
         </div>
 
