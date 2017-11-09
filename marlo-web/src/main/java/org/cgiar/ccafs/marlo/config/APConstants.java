@@ -362,6 +362,10 @@ public final class APConstants {
 
   public static final String YEAR_REQUEST = "year";
 
+
+  public static final String CRP_ADMIN_ACRONYM = "CRP-Admin";
+  public static final String CRP_GUEST_ACRONYM = "G";
+
   /**
    * -------------------------------------------------------------------------------
    * *******************************************************************************

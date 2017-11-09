@@ -220,8 +220,8 @@ public class ManageUsersAction extends BaseAction {
             if (crpUserDelete.isAdmin()) {
 
               // admin role
-              Role adminRole =
-                roles.stream().filter(r -> r.getAcronym().equals("CRP-Admin")).collect(Collectors.toList()).get(0);
+              Role adminRole = roles.stream().filter(r -> r.getAcronym().equals(APConstants.CRP_ADMIN_ACRONYM))
+                .collect(Collectors.toList()).get(0);
 
               userRole.setRole(adminRole);
               userRole.setUser(newUser);
@@ -243,8 +243,8 @@ public class ManageUsersAction extends BaseAction {
             } else {
 
               // guest role
-              Role guestRole =
-                roles.stream().filter(r -> r.getAcronym().equals("G")).collect(Collectors.toList()).get(0);
+              Role guestRole = roles.stream().filter(r -> r.getAcronym().equals(APConstants.CRP_GUEST_ACRONYM))
+                .collect(Collectors.toList()).get(0);
 
               userRole.setRole(guestRole);
               userRole.setUser(newUser);
@@ -284,8 +284,8 @@ public class ManageUsersAction extends BaseAction {
 
         if (crpUserDelete.isAdmin()) {
           // admin role
-          Role adminRole =
-            roles.stream().filter(r -> r.getAcronym().equals("CRP-Admin")).collect(Collectors.toList()).get(0);
+          Role adminRole = roles.stream().filter(r -> r.getAcronym().equals(APConstants.CRP_ADMIN_ACRONYM))
+            .collect(Collectors.toList()).get(0);
 
           userRole.setRole(adminRole);
           userRole.setUser(newUser);
@@ -305,7 +305,8 @@ public class ManageUsersAction extends BaseAction {
           crpUserManager.deleteCrpUser(crpUserDelete.getId());
         } else {
           // guest role
-          Role guestRole = roles.stream().filter(r -> r.getAcronym().equals("G")).collect(Collectors.toList()).get(0);
+          Role guestRole = roles.stream().filter(r -> r.getAcronym().equals(APConstants.CRP_GUEST_ACRONYM))
+            .collect(Collectors.toList()).get(0);
 
           userRole.setRole(guestRole);
           userRole.setUser(newUser);
@@ -382,8 +383,8 @@ public class ManageUsersAction extends BaseAction {
 
             if (crpUser.isAdmin()) {
 
-              Role guestRole =
-                roles.stream().filter(r -> r.getAcronym().equals("CRP-Admin")).collect(Collectors.toList()).get(0);
+              Role guestRole = roles.stream().filter(r -> r.getAcronym().equals(APConstants.CRP_ADMIN_ACRONYM))
+                .collect(Collectors.toList()).get(0);
 
               userRole.setRole(guestRole);
               userRole.setUser(newUser);
@@ -399,8 +400,8 @@ public class ManageUsersAction extends BaseAction {
 
             } else {
 
-              Role guestRole =
-                roles.stream().filter(r -> r.getAcronym().equals("G")).collect(Collectors.toList()).get(0);
+              Role guestRole = roles.stream().filter(r -> r.getAcronym().equals(APConstants.CRP_GUEST_ACRONYM))
+                .collect(Collectors.toList()).get(0);
 
               userRole.setRole(guestRole);
               userRole.setUser(newUser);
@@ -438,8 +439,8 @@ public class ManageUsersAction extends BaseAction {
 
           if (crpUser.isAdmin()) {
 
-            Role adminRole =
-              roles.stream().filter(r -> r.getAcronym().equals("CRP-Admin")).collect(Collectors.toList()).get(0);
+            Role adminRole = roles.stream().filter(r -> r.getAcronym().equals(APConstants.CRP_ADMIN_ACRONYM))
+              .collect(Collectors.toList()).get(0);
 
             for (UserRole userRoleTmp : userRoles) {
               if (userRoleTmp.getRole().getId() == adminRole.getId()) {
