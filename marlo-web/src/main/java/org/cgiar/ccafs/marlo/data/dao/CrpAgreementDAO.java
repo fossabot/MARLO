@@ -66,7 +66,7 @@ public interface CrpAgreementDAO {
    * @param crp - a crp agreement object to save
    * @return - the id of the new agreement
    */
-  public String save(CrpAgreement crp);
+  public CrpAgreement save(CrpAgreement crp);
 
 
   /**
@@ -77,6 +77,6 @@ public interface CrpAgreementDAO {
    * @param crp - a object to update
    * @return - the id of the updated object
    */
-  public String update(CrpAgreement crp);
+  public CrpAgreement update(CrpAgreement crp);
 
 }

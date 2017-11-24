@@ -25,15 +25,15 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.inject.Inject;
+import org.hibernate.SessionFactory;
 
 
-public class PlaAgreementMySQLDAO implements PlaAgreementDAO {
+public class PlaAgreementMySQLDAO extends AbstractMarloDAO<PlaAgreement, Long> implements PlaAgreementDAO {
 
-  private StandardDAO dao;
 
   @Inject
-  public PlaAgreementMySQLDAO(StandardDAO dao) {
-    this.dao = dao;
+  public PlaAgreementMySQLDAO(SessionFactory sessionFactory) {
+    super(sessionFactory);
   }
 
   /**
@@ -46,7 +46,7 @@ public class PlaAgreementMySQLDAO implements PlaAgreementDAO {
    */
   @Override
   public PlaAgreement find(String id) {
-    return dao.find(PlaAgreement.class, id);
+    return super.find(PlaAgreement.class, Long.valueOf(id));
   }
 
   /**
@@ -64,7 +64,7 @@ public class PlaAgreementMySQLDAO implements PlaAgreementDAO {
     String query =
       "select pa.id,pa.agreement_id,pa.pla_id,pa.description,pa.ammount from plas_agreement pa where pa.pla_id='"
         + plaId + "' and pa.agreement_id='" + agreement + "'";
-    List<Map<String, Object>> list = dao.findCustomQuery(query);
+    List<Map<String, Object>> list = super.findCustomQuery(query);
     if (list.size() > 0) {
       thePla = new PlaAgreement();
       Iterator iterPla = list.iterator();
@@ -115,7 +115,7 @@ public class PlaAgreementMySQLDAO implements PlaAgreementDAO {
   @Override
   public List<PlaAgreement> getPlasByAgreement(String codAgreement) {
     String query = "from " + PlaAgreement.class.getName() + " agreements.id =" + codAgreement;
-    List<PlaAgreement> list = dao.findAll(query);
+    List<PlaAgreement> list = super.findAll(query);
     if (list.size() > 0) {
       return list;
     }
@@ -131,9 +131,8 @@ public class PlaAgreementMySQLDAO implements PlaAgreementDAO {
    * @return - the id of the agreement
    */
   @Override
-  public String save(PlaAgreement pla) {
-    dao.save(pla);
-    return String.valueOf(pla.getId());
+  public PlaAgreement save(PlaAgreement pla) {
+    return super.saveEntity(pla);
   }
 
   /**
@@ -145,9 +144,8 @@ public class PlaAgreementMySQLDAO implements PlaAgreementDAO {
    * @return - the id of the updated pla agreement
    */
   @Override
-  public String update(PlaAgreement pla) {
-    dao.update(pla);
-    return String.valueOf(pla.getId());
+  public PlaAgreement update(PlaAgreement pla) {
+    return super.update(pla);
   }
 
 }

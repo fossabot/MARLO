@@ -20,15 +20,16 @@ import org.cgiar.ccafs.marlo.data.dao.FundingSourceAgreementDAO;
 import org.cgiar.ccafs.marlo.data.model.FundingSourceAgreement;
 
 import com.google.inject.Inject;
+import org.hibernate.SessionFactory;
 
 
-public class FundingSourceAgreementMySQLDAO implements FundingSourceAgreementDAO {
+public class FundingSourceAgreementMySQLDAO extends AbstractMarloDAO<FundingSourceAgreement, Long>
+  implements FundingSourceAgreementDAO {
 
-  private StandardDAO dao;
 
   @Inject
-  public FundingSourceAgreementMySQLDAO(StandardDAO dao) {
-    this.dao = dao;
+  public FundingSourceAgreementMySQLDAO(SessionFactory sessionFactory) {
+    super(sessionFactory);
   }
 
 
@@ -36,19 +37,17 @@ public class FundingSourceAgreementMySQLDAO implements FundingSourceAgreementDAO
   public FundingSourceAgreement find(String codAgreement, String idFunding) {
     String query = "from " + FundingSourceAgreement.class.getName() + "agreements.id =" + codAgreement
       + " and fundingSourceId=" + idFunding;
-    return (FundingSourceAgreement) dao.findSingleResult(FundingSourceAgreement.class, query);
+    return super.findSingleResult(FundingSourceAgreement.class, query);
   }
 
   @Override
-  public String save(FundingSourceAgreement fsAgreement) {
-    dao.save(fsAgreement);
-    return String.valueOf(fsAgreement.getId());
+  public FundingSourceAgreement save(FundingSourceAgreement fsAgreement) {
+    return super.saveEntity(fsAgreement);
   }
 
   @Override
-  public String update(FundingSourceAgreement fsAgreement) {
-    dao.update(fsAgreement);
-    return String.valueOf(fsAgreement.getId());
+  public FundingSourceAgreement update(FundingSourceAgreement fsAgreement) {
+    return super.update(fsAgreement);
   }
 
 }

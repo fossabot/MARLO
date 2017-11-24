@@ -88,12 +88,12 @@ public class AgreementManagerImpl implements AgreementManager {
    */
   @Override
   public String saveAgreement(AgreementOCS agreement) {
-    String codAgreement = null;
+    Agreement theAgreement = null;
 
     Agreement agreementDB = AgreementMapper.INSTANCE.agreementDTOToAgreement(agreement);
     // save or update the agreement
     if (agreement.isNew()) {
-      codAgreement = this.agreementDAO.save(agreementDB);
+      theAgreement = this.agreementDAO.save(agreementDB);
     } else {
       /**
        * this is necessary because the mapper don't map the list, and when the object
@@ -104,7 +104,7 @@ public class AgreementManagerImpl implements AgreementManager {
       agreementDB.setCountriesAgreements(null);
       agreementDB.setPlasAgreements(null);
       agreementDB.setCrpsAgreements(null);
-      codAgreement = this.agreementDAO.update(agreementDB);
+      theAgreement = this.agreementDAO.update(agreementDB);
     }
 
 
@@ -154,7 +154,7 @@ public class AgreementManagerImpl implements AgreementManager {
 
     }
 
-    return codAgreement;
+    return theAgreement.getId();
 
   }
 

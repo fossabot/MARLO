@@ -25,15 +25,15 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.inject.Inject;
+import org.hibernate.SessionFactory;
 
 
-public class CrpAgreementMySQLDAO implements CrpAgreementDAO {
+public class CrpAgreementMySQLDAO extends AbstractMarloDAO<CrpAgreement, Long> implements CrpAgreementDAO {
 
-  private StandardDAO dao;
 
   @Inject
-  public CrpAgreementMySQLDAO(StandardDAO dao) {
-    this.dao = dao;
+  public CrpAgreementMySQLDAO(SessionFactory sessionFactory) {
+    super(sessionFactory);
   }
 
   /**
@@ -46,7 +46,7 @@ public class CrpAgreementMySQLDAO implements CrpAgreementDAO {
    */
   @Override
   public CrpAgreement find(String id) {
-    return dao.find(CrpAgreement.class, id);
+    return super.find(CrpAgreement.class, Long.valueOf(id));
   }
 
   /**
@@ -64,7 +64,7 @@ public class CrpAgreementMySQLDAO implements CrpAgreementDAO {
     String query =
       "select cp.id,cp.agreement_id,cp.crp_id,cp.description,cp.percentage from crps_agreement cp where cp.agreement_id='"
         + agreement + "' and cp.crp_id=" + crpId;
-    List<Map<String, Object>> list = dao.findCustomQuery(query);
+    List<Map<String, Object>> list = super.findCustomQuery(query);
     if (list.size() > 0) {
       theCrp = new CrpAgreement();
       Iterator iterCrp = list.iterator();
@@ -117,7 +117,7 @@ public class CrpAgreementMySQLDAO implements CrpAgreementDAO {
   @Override
   public List<CrpAgreement> getCrpsByAgreement(String codAgreement) {
     String query = "from " + CrpAgreement.class.getName() + " agreements.id =" + codAgreement;
-    List<CrpAgreement> list = dao.findAll(query);
+    List<CrpAgreement> list = super.findAll(query);
     if (list.size() > 0) {
       return list;
     }
@@ -130,12 +130,11 @@ public class CrpAgreementMySQLDAO implements CrpAgreementDAO {
    * @author JULIANRODRIGUEZ
    * @since 20171023
    * @param crp - a crp agreement object to save
-   * @return - the id of the new agreement
+   * @return - the object
    */
   @Override
-  public String save(CrpAgreement crp) {
-    dao.save(crp);
-    return String.valueOf(crp.getId());
+  public CrpAgreement save(CrpAgreement crp) {
+    return super.saveEntity(crp);
   }
 
   /**
@@ -144,12 +143,11 @@ public class CrpAgreementMySQLDAO implements CrpAgreementDAO {
    * @author JULIANRODRIGUEZ
    * @since 20171023
    * @param crp - a object to update
-   * @return - the id of the updated object
+   * @return - the object
    */
   @Override
-  public String update(CrpAgreement crp) {
-    dao.update(crp);
-    return String.valueOf(crp.getId());
+  public CrpAgreement update(CrpAgreement crp) {
+    return super.update(crp);
   }
 
 }

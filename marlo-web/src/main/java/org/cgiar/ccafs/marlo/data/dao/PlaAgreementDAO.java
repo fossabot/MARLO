@@ -66,9 +66,9 @@ public interface PlaAgreementDAO {
    * @author JULIANRODRIGUEZ\
    * @since 20171023
    * @param pla - the pla agreement object
-   * @return - the id of the agreement
+   * @return - the object
    */
-  public String save(PlaAgreement pla);
+  public PlaAgreement save(PlaAgreement pla);
 
   /**
    * update a pla agreement
@@ -76,8 +76,8 @@ public interface PlaAgreementDAO {
    * @author JULIANRODRIGUEZ\
    * @since 20171023
    * @param pla - the pla agreement object
-   * @return - the id of the updated pla agreement
+   * @return - the object
    */
-  public String update(PlaAgreement pla);
+  public PlaAgreement update(PlaAgreement pla);
 
 }

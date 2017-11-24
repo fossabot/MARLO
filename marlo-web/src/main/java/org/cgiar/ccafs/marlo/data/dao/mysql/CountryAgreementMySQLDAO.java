@@ -25,15 +25,15 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.inject.Inject;
+import org.hibernate.SessionFactory;
 
 
-public class CountryAgreementMySQLDAO implements CountryAgreementDAO {
+public class CountryAgreementMySQLDAO extends AbstractMarloDAO<CountryAgreement, Long> implements CountryAgreementDAO {
 
-  private StandardDAO dao;
 
   @Inject
-  public CountryAgreementMySQLDAO(StandardDAO dao) {
-    this.dao = dao;
+  public CountryAgreementMySQLDAO(SessionFactory sessionFactory) {
+    super(sessionFactory);
   }
 
   /**
@@ -46,7 +46,7 @@ public class CountryAgreementMySQLDAO implements CountryAgreementDAO {
    */
   @Override
   public CountryAgreement find(String id) {
-    return dao.find(CountryAgreement.class, id);
+    return super.find(CountryAgreement.class, Long.valueOf(id));
   }
 
   /**
@@ -65,7 +65,7 @@ public class CountryAgreementMySQLDAO implements CountryAgreementDAO {
     String query =
       "select ca.id,ca.agreement_id,ca.code,ca.description,ca.percentage from countries_agreement ca where ca.code='"
         + code + "' and ca.agreement_id='" + agreement + "'";
-    List<Map<String, Object>> list = dao.findCustomQuery(query);
+    List<Map<String, Object>> list = super.findCustomQuery(query);
     if (list.size() > 0) {
       theCountry = new CountryAgreement();
       Iterator iterCountry = list.iterator();
@@ -120,7 +120,7 @@ public class CountryAgreementMySQLDAO implements CountryAgreementDAO {
   public List<CountryAgreement> getCountriesByAgreement(String codAgreement) {
 
     String query = "from " + CountryAgreement.class.getName() + " agreements.id =" + codAgreement;
-    List<CountryAgreement> list = dao.findAll(query);
+    List<CountryAgreement> list = super.findAll(query);
     if (list.size() > 0) {
       return list;
     }
@@ -137,9 +137,8 @@ public class CountryAgreementMySQLDAO implements CountryAgreementDAO {
    * @return - the code of the new agreement
    */
   @Override
-  public String save(CountryAgreement country) {
-    dao.save(country);
-    return String.valueOf(country.getId());
+  public CountryAgreement save(CountryAgreement country) {
+    return super.saveEntity(country);
   }
 
 
@@ -152,9 +151,8 @@ public class CountryAgreementMySQLDAO implements CountryAgreementDAO {
    * @return - the code of the updated agreement
    */
   @Override
-  public String update(CountryAgreement country) {
-    dao.update(country);
-    return String.valueOf(country.getId());
+  public CountryAgreement update(CountryAgreement country) {
+    return super.update(country);
   }
 
 }

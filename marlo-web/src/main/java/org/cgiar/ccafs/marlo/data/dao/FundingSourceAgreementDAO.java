@@ -20,10 +20,30 @@ import org.cgiar.ccafs.marlo.data.model.FundingSourceAgreement;
 
 public interface FundingSourceAgreementDAO {
 
+  /**
+   * find a FundingSourceAgreement by code and idFunding
+   * 
+   * @param codAgreement
+   * @param idFunding
+   * @return the FundingSourceAgreement object
+   */
   public FundingSourceAgreement find(String codAgreement, String idFunding);
 
-  public String save(FundingSourceAgreement fsAgreement);
 
-  public String update(FundingSourceAgreement fsAgreement);
+  /**
+   * save a new fundingSourceAgreement object
+   * 
+   * @param fsAgreement
+   * @return the object
+   */
+  public FundingSourceAgreement save(FundingSourceAgreement fsAgreement);
+
+  /**
+   * update a existing FundingSourceAgreement
+   * 
+   * @param fsAgreement
+   * @return the object
+   */
+  public FundingSourceAgreement update(FundingSourceAgreement fsAgreement);
 
 }

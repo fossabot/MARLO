@@ -65,9 +65,9 @@ public interface CountryAgreementDAO {
    * @author Julián Rodríguez Calderón
    * @since 20171023
    * @param country - the country agreement object
-   * @return - the code of the new agreement
+   * @return - the the country agreement object
    */
-  public String save(CountryAgreement country);
+  public CountryAgreement save(CountryAgreement country);
 
 
   /**
@@ -76,8 +76,8 @@ public interface CountryAgreementDAO {
    * @author Julián Rodríguez Calderón
    * @since 20171023
    * @param country - the country agreement object
-   * @return - the code of the updated agreement
+   * @return - the country agreement object
    */
-  public String update(CountryAgreement country);
+  public CountryAgreement update(CountryAgreement country);
 
 }
