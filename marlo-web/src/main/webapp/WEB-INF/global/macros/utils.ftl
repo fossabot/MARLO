@@ -17,6 +17,20 @@
   [/#if]
 [/#macro]
 
+[#macro helpBox name="" param=""]
+  <div class="container helpText viewMore-block">
+    <div class="helpMessage infoText">
+      <img class="col-md-2" src="${baseUrl}/global/images/icon-help.jpg" />
+      [#if param?has_content]
+        <p class="col-md-10">[@s.text name=name][@s.param]${param}[/@s.param][/@s.text] </p>
+      [#else]
+        [@s.text name=name /]
+      [/#if]
+    </div> 
+    <div style="display:none" class="viewMore closed"></div>
+  </div>
+[/#macro]
+
 [#macro helpInfos hlpInfo]
   [#-- Help Text to be used in Research Impacts, Research Topics, Research Outcomes and Research Outputs. 
   Specify the appropriate value for hlpInfo parameter in the corresponding ftl file. --] 
@@ -28,3 +42,4 @@
   <div style="display:none" class="viewMore closed"></div>
 </div>
 [/#macro]
+

@@ -41,7 +41,7 @@
                 <a href="[@s.url namespace="/" action="${crp.acronym?lower_case}/crpDashboard" ][@s.param name="edit" value="true"/][/@s.url]" title="">${crp.acronym}</a>
               </li>
               [/#if]
-            [/#list]              
+            [/#list]
           [/#if]
           [#if centersList?has_content]
             <li text-align:center> -- Centers -- </li>
@@ -51,10 +51,10 @@
                 <a href="[@s.url namespace="/" action="${center.acronym?lower_case}/centerDashboard" ][@s.param name="edit" value="true"/][/@s.url]">${center.name}</a>
               </li>
               [/#if]
-            [/#list]              
+            [/#list]
           [/#if]
-          </ul>          
-        </li>         
+          </ul>
+        </li>
          [/#if]
          <li class="pull-left"><span class="glyphicon glyphicon-th-list"></span> MARLO Admin Menu</li>
         <div class="clearfix"></div>
