@@ -34,8 +34,12 @@ public class UserRole implements java.io.Serializable {
   @Expose
   private User user;
 
+  private boolean sendEmailActive;
+
+
   public UserRole() {
   }
+
 
   public UserRole(Role roles, User users) {
     this.role = roles;
@@ -90,6 +94,10 @@ public class UserRole implements java.io.Serializable {
     return result;
   }
 
+  public boolean isSendEmailActive() {
+    return sendEmailActive;
+  }
+
   public void setId(Long id) {
     this.id = id;
   }
@@ -98,13 +106,17 @@ public class UserRole implements java.io.Serializable {
     this.role = roles;
   }
 
+  public void setSendEmailActive(boolean sendEmailActive) {
+    this.sendEmailActive = sendEmailActive;
+  }
+
   public void setUser(User users) {
     this.user = users;
   }
 
   @Override
   public String toString() {
-    return "UserRole [id=" + id + ", role=" + role + ", user=" + user + "]";
+    return "UserRole [id=" + id + ", role=" + role + ", user=" + user + ", sendEmailActive=" + sendEmailActive + "]";
   }
 }
 

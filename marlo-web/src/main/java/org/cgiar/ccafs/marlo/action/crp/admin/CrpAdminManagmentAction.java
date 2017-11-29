@@ -329,18 +329,21 @@ public class CrpAdminManagmentAction extends BaseAction {
     String crpAdminsEmail = "";
     long adminRol = Long.parseLong((String) this.getSession().get(APConstants.CRP_ADMIN_ROLE));
     Role roleAdmin = roleManager.getRoleById(adminRol);
+
+    // crpAdmins with send_email_active
     List<UserRole> userRoles = roleAdmin.getUserRoles().stream()
-      .filter(ur -> ur.getUser() != null && ur.getUser().isActive()).collect(Collectors.toList());
+      .filter(ur -> ur.getUser() != null && ur.getUser().isActive() && ur.isSendEmailActive())
+      .collect(Collectors.toList());
     for (UserRole userRole : userRoles) {
       if (crpAdmins.isEmpty()) {
         crpAdmins += userRole.getUser().getFirstName() + " (" + userRole.getUser().getEmail() + ")";
         crpAdminsEmail += userRole.getUser().getEmail();
-
       } else {
         crpAdmins += ", " + userRole.getUser().getFirstName() + " (" + userRole.getUser().getEmail() + ")";
         crpAdminsEmail += ", " + userRole.getUser().getEmail();
       }
     }
+
     if (!crpAdminsEmail.isEmpty()) {
       if (ccEmail.isEmpty()) {
         ccEmail += crpAdminsEmail;
@@ -408,8 +411,11 @@ public class CrpAdminManagmentAction extends BaseAction {
     String crpAdminsEmail = "";
     long adminRol = Long.parseLong((String) this.getSession().get(APConstants.CRP_ADMIN_ROLE));
     Role roleAdmin = roleManager.getRoleById(adminRol);
+
+    // crpAdmins with send_email_active
     List<UserRole> userRoles = roleAdmin.getUserRoles().stream()
-      .filter(ur -> ur.getUser() != null && ur.getUser().isActive()).collect(Collectors.toList());
+      .filter(ur -> ur.getUser() != null && ur.getUser().isActive() && ur.isSendEmailActive())
+      .collect(Collectors.toList());
     for (UserRole userRole : userRoles) {
       if (crpAdmins.isEmpty()) {
         crpAdmins += userRole.getUser().getFirstName() + " (" + userRole.getUser().getEmail() + ")";
@@ -489,13 +495,16 @@ public class CrpAdminManagmentAction extends BaseAction {
       }
     }
 
-    // get CRPAdmin contacts
+    // CC will be also the CRP Admins
     String crpAdmins = "";
     String crpAdminsEmail = "";
     long adminRol = Long.parseLong((String) this.getSession().get(APConstants.CRP_ADMIN_ROLE));
     Role roleAdmin = roleManager.getRoleById(adminRol);
+
+    // crpAdmins with send_email_active
     List<UserRole> userRoles = roleAdmin.getUserRoles().stream()
-      .filter(ur -> ur.getUser() != null && ur.getUser().isActive()).collect(Collectors.toList());
+      .filter(ur -> ur.getUser() != null && ur.getUser().isActive() && ur.isSendEmailActive())
+      .collect(Collectors.toList());
     for (UserRole userRole : userRoles) {
       if (crpAdmins.isEmpty()) {
         crpAdmins += userRole.getUser().getFirstName() + " (" + userRole.getUser().getEmail() + ")";
@@ -570,13 +579,16 @@ public class CrpAdminManagmentAction extends BaseAction {
         ccEmail += ", " + crpProgramLeader.getUser().getEmail();
       }
     }
-    // get CRPAdmin contacts
+    // CC will be also the CRP Admins
     String crpAdmins = "";
     String crpAdminsEmail = "";
     long adminRol = Long.parseLong((String) this.getSession().get(APConstants.CRP_ADMIN_ROLE));
     Role roleAdmin = roleManager.getRoleById(adminRol);
+
+    // crpAdmins with send_email_active
     List<UserRole> userRoles = roleAdmin.getUserRoles().stream()
-      .filter(ur -> ur.getUser() != null && ur.getUser().isActive()).collect(Collectors.toList());
+      .filter(ur -> ur.getUser() != null && ur.getUser().isActive() && ur.isSendEmailActive())
+      .collect(Collectors.toList());
     for (UserRole userRole : userRoles) {
       if (crpAdmins.isEmpty()) {
         crpAdmins += userRole.getUser().getFirstName() + " (" + userRole.getUser().getEmail() + ")";
@@ -627,13 +639,16 @@ public class CrpAdminManagmentAction extends BaseAction {
   private void notifyRoleProgramManagementAssigned(User userAssigned, Role role) {
     // Email send to the user assigned
     String toEmail = userAssigned.getEmail();
-    // get CRPAdmin contacts
+    // CC will be also the CRP Admins
     String crpAdmins = "";
     String crpAdminsEmail = "";
     long adminRol = Long.parseLong((String) this.getSession().get(APConstants.CRP_ADMIN_ROLE));
     Role roleAdmin = roleManager.getRoleById(adminRol);
+
+    // crpAdmins with send_email_active
     List<UserRole> userRoles = roleAdmin.getUserRoles().stream()
-      .filter(ur -> ur.getUser() != null && ur.getUser().isActive()).collect(Collectors.toList());
+      .filter(ur -> ur.getUser() != null && ur.getUser().isActive() && ur.isSendEmailActive())
+      .collect(Collectors.toList());
     for (UserRole userRole : userRoles) {
       if (crpAdmins.isEmpty()) {
         crpAdmins += userRole.getUser().getFirstName() + " (" + userRole.getUser().getEmail() + ")";
@@ -683,13 +698,16 @@ public class CrpAdminManagmentAction extends BaseAction {
   private void notifyRoleProgramManagementUnassigned(User userAssigned, Role role) {
     // Email send to nobody
     String toEmail = null;
-    // get CRPAdmin contacts
+    // CC will be also the CRP Admins
     String crpAdmins = "";
     String crpAdminsEmail = "";
     long adminRol = Long.parseLong((String) this.getSession().get(APConstants.CRP_ADMIN_ROLE));
     Role roleAdmin = roleManager.getRoleById(adminRol);
+
+    // crpAdmins with send_email_active
     List<UserRole> userRoles = roleAdmin.getUserRoles().stream()
-      .filter(ur -> ur.getUser() != null && ur.getUser().isActive()).collect(Collectors.toList());
+      .filter(ur -> ur.getUser() != null && ur.getUser().isActive() && ur.isSendEmailActive())
+      .collect(Collectors.toList());
     for (UserRole userRole : userRoles) {
       if (crpAdmins.isEmpty()) {
         crpAdmins += userRole.getUser().getFirstName() + " (" + userRole.getUser().getEmail() + ")";

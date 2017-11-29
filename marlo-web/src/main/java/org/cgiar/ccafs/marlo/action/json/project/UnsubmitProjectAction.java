@@ -189,7 +189,8 @@ public class UnsubmitProjectAction extends BaseAction {
     long adminRol = Long.parseLong((String) this.getSession().get(APConstants.CRP_ADMIN_ROLE));
     Role roleAdmin = roleManager.getRoleById(adminRol);
     List<UserRole> userRoles = roleAdmin.getUserRoles().stream()
-      .filter(ur -> ur.getUser() != null && ur.getUser().isActive()).collect(Collectors.toList());
+      .filter(ur -> ur.getUser() != null && ur.getUser().isActive() && ur.isSendEmailActive())
+      .collect(Collectors.toList());
     for (UserRole userRole : userRoles) {
       ccEmails.append(userRole.getUser().getEmail());
       ccEmails.append(", ");
