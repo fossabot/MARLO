@@ -6,7 +6,7 @@
   { 'slug': 'projects',       'name': 'menu.projects',      'namespace': '/projects',       'action': '${(crpSession)!}/projectsList',                      'visible': logged, 'active': true },
   { 'slug': 'fundingSources', 'name': 'menu.fundingSources',      'namespace': '/fundingSources',       'action': '${(crpSession)!}/fundingSourcesList',    'visible': logged, 'active': true },
   { 'slug': 'publications', 'name': 'menu.publications',      'namespace': '/publications',       'action': '${(crpSession)!}/publicationsList',    'visible': logged && reportingActiveMenu, 'active': action.canAcessPublications() , 'help': true },
-  { 'slug': 'synthesis', 'name': 'menu.synthesis',      'namespace': '/synthesis',       'action': '${(crpSession)!}/crpIndicators',    'visible': logged, 'active': action.canAcessCrp() || action.canAcessSynthesisMog(),
+  { 'slug': 'synthesis', 'name': 'menu.synthesis',      'namespace': '/synthesis',       'action': '${(crpSession)!}/crpIndicators',    'visible': false, 'active': action.canAcessCrp() || action.canAcessSynthesisMog(),
     'subItems' : [
       { 'slug': 'crpIndicators', 'name': 'menu.synthesis.crpIndicators', 'namespace': '/synthesis',  'action': '${(crpSession)!}/crpIndicators',  'visible': logged && reportingActiveMenu, 'active': action.canAcessCrp()},
       [#-- PHASE 1 --]
