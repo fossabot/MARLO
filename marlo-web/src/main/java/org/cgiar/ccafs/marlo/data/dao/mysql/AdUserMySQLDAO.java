@@ -21,7 +21,8 @@ import org.cgiar.ccafs.marlo.data.model.AdUser;
 
 import java.util.List;
 
-import com.google.inject.Inject;
+import javax.inject.Inject;
+
 import org.hibernate.SessionFactory;
 
 public class AdUserMySQLDAO extends AbstractMarloDAO<AdUser, Long> implements AdUserDAO {

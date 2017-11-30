@@ -13,47 +13,28 @@
  * along with MARLO. If not, see <http://www.gnu.org/licenses/>.
  *****************************************************************/
 
+package org.cgiar.ccafs.marlo;
 
-package org.cgiar.ccafs.marlo.rules.project;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 
-import org.cgiar.ccafs.marlo.data.model.Project;
-
-import org.easyrules.annotation.Action;
-import org.easyrules.annotation.Condition;
-import org.easyrules.annotation.Rule;
-
-@Rule(name = "PIMProjectRule", description = "PIMProjectRule")
-public class PIMProjectRule {
-
-  private Project project;
+/**
+ * This configuration file is now for properties but can contain other base level beans as well.  Note that these
+ * beans get loaded first.
+ */
+@Configuration
+@PropertySource("classpath:marlo.properties")
+@ComponentScan("org.cgiar.ccafs.marlo")
+public class ApplicationContextConfig {
 
 
-  private final long crpID = 3;
-
-  public PIMProjectRule(Project project) {
-    super();
-    this.project = project;
-  }
-
-  @Action
-  public void calculateCustomID() throws Exception {
-    project.setCustomID("PIM" + project.getId());
-
-  }
-
-  @Condition
-  public boolean checkCRP() {
-
-    boolean condiction = project.getCrp().getId().longValue() == crpID;
-    return condiction;
-  }
-
-  public Project getProject() {
-    return project;
+  @Bean
+  public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
+    return new PropertySourcesPlaceholderConfigurer();
   }
 
 
-  public void setProject(Project project) {
-    this.project = project;
-  }
 }

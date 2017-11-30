@@ -20,7 +20,6 @@ import org.cgiar.ccafs.marlo.quartz.ADUsersJob;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
-import com.google.inject.Injector;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.JobBuilder;
 import org.quartz.JobDetail;
@@ -44,7 +43,7 @@ public class ADUsersListener implements ServletContextListener {
     JobDetail job = JobBuilder.newJob(ADUsersJob.class).withIdentity("anyJobName", "group1").build();
 
     try {
-      Trigger trigger = TriggerBuilder.newTrigger().withIdentity("anyTriggerName", "group1")
+      Trigger trigger = TriggerBuilder.newTrigger().withIdent ity("anyTriggerName", "group1")
         .withSchedule(CronScheduleBuilder.cronSchedule("0 30 01 * * ?")).build();
 
       Scheduler scheduler = new StdSchedulerFactory().getScheduler();
