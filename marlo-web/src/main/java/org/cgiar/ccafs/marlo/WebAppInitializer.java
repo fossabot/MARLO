@@ -31,15 +31,15 @@ import org.springframework.web.context.support.AnnotationConfigWebApplicationCon
 import org.springframework.web.filter.DelegatingFilterProxy;
 
 /**
- * This is the servlet 3.0 way to load a web context wihtout (or combined with) a web.xml file.  
+ * This is the servlet 3.0 way to load a web context wihtout (or combined with) a web.xml file.
  */
 public class WebAppInitializer implements WebApplicationInitializer {
 
   @Override
   public void onStartup(ServletContext servletContext) throws ServletException {
     AnnotationConfigWebApplicationContext appContext = new AnnotationConfigWebApplicationContext();
-    appContext.register(ApplicationContextConfig.class, MarloDatabaseConfiguration.class,
-      MarloShiroConfiguration.class);
+    appContext.register(ApplicationContextConfig.class, MarloDatabaseConfiguration.class, MarloShiroConfiguration.class,
+      MarloQuartzConfiguration.class);
 
     ContextLoaderListener contextLoaderListener = new ContextLoaderListener(appContext);
     servletContext.addListener(contextLoaderListener);

@@ -21,11 +21,13 @@ import org.cgiar.ccafs.marlo.data.model.CapdevSuppDocsDocuments;
 
 import java.util.List;
 
-import com.google.inject.Inject;
+import javax.inject.Inject;
+import javax.inject.Named;
 
 /**
  * @author Christian Garcia
  */
+@Named
 public class CapdevSuppDocsDocumentsManagerImpl implements CapdevSuppDocsDocumentsManager {
 
 
