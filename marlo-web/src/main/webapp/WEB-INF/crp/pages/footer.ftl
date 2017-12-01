@@ -5,6 +5,11 @@
       <div class="container">
         [#-- Importing footer information --]
         [#include "/WEB-INF/global/pages/footer-info.ftl" /]
+        <div class="newsButton">
+          <a href="https://marlo-news.blogspot.com" target="__blank">
+             <b> [@s.text name="footer.checkBlog" /] </b> <span class="fa fa-external-link-square"></span>
+          </a>
+        </div>
       </div>
     </footer>
     
