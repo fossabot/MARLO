@@ -387,6 +387,9 @@
 		<action name="legalInformation" class="org.cgiar.ccafs.marlo.action.BaseAction">
       <result name="input">/WEB-INF/global/pages/legalInformation.ftl</result>
     </action>
+    <action name="oneStopShop" class="org.cgiar.ccafs.marlo.action.BaseAction">
+      <result name="input">/WEB-INF/global/pages/oneStopShop.ftl</result>
+    </action>
 	</package>
 
 	<include file="struts-json.xml" />
