@@ -1,5 +1,5 @@
 /*****************************************************************
- * This file is part of Managing Agricultural Research for Learning &
+ * i * This file is part of Managing Agricultural Research for Learning &
  * Outcomes Platform (MARLO).
  * MARLO is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -55,6 +55,8 @@ public class CrpProgramOutcome implements java.io.Serializable, IAuditLog {
   private String indicator;
   @Expose
   private Integer year;
+  @Expose
+  private FileDB file;
 
 
   @Expose
@@ -65,34 +67,40 @@ public class CrpProgramOutcome implements java.io.Serializable, IAuditLog {
 
   private Set<CrpMilestone> crpMilestones = new HashSet<CrpMilestone>(0);
 
+
   private Set<ProjectOutcome> projectOutcomes = new HashSet<ProjectOutcome>(0);
+
   private Set<Deliverable> deliverables = new HashSet<Deliverable>(0);
 
   private Set<CrpClusterKeyOutputOutcome> crpClusterKeyOutputOutcomes = new HashSet<CrpClusterKeyOutputOutcome>(0);
-
   private Set<ProjectFurtherContribution> projectFurtherContributions = new HashSet<ProjectFurtherContribution>(0);
+  private Set<CrpProgramOutcomeIndicator> crpProgramOutcomeIndicators = new HashSet<CrpProgramOutcomeIndicator>(0);
+
 
   @Expose
   private boolean active;
 
+
   @Expose
   private User createdBy;
+
   @Expose
   private Date activeSince;
+
   @Expose
   private User modifiedBy;
-
 
   @Expose
   private String modificationJustification;
 
-
   private List<CrpMilestone> milestones;
-
   private List<CrpOutcomeSubIdo> subIdos;
+  private List<CrpProgramOutcomeIndicator> indicators;
+
 
   public CrpProgramOutcome() {
   }
+
 
   public CrpProgramOutcome(CrpProgram crpProgram, SrfTargetUnit srfTargetUnit, String description, Integer year,
     BigDecimal value) {
@@ -102,6 +110,7 @@ public class CrpProgramOutcome implements java.io.Serializable, IAuditLog {
     this.year = year;
     this.value = value;
   }
+
 
   public CrpProgramOutcome(CrpProgram crpProgram, SrfTargetUnit srfTargetUnit, String description, Integer year,
     BigDecimal value, Set<CrpOutcomeSubIdo> crpOutcomeSubIdos, Set<CrpMilestone> crpMilestones,
@@ -137,10 +146,10 @@ public class CrpProgramOutcome implements java.io.Serializable, IAuditLog {
     return true;
   }
 
+
   public Date getActiveSince() {
     return activeSince;
   }
-
 
   public String getComposedName() {
     return this.getCrpProgram().getAcronym() + " Outcome :  " + description;
@@ -158,12 +167,18 @@ public class CrpProgramOutcome implements java.io.Serializable, IAuditLog {
     return this.crpMilestones;
   }
 
+
   public Set<CrpOutcomeSubIdo> getCrpOutcomeSubIdos() {
     return this.crpOutcomeSubIdos;
   }
 
   public CrpProgram getCrpProgram() {
     return this.crpProgram;
+  }
+
+
+  public Set<CrpProgramOutcomeIndicator> getCrpProgramOutcomeIndicators() {
+    return crpProgramOutcomeIndicators;
   }
 
   public Set<Deliverable> getDeliverables() {
@@ -174,17 +189,22 @@ public class CrpProgramOutcome implements java.io.Serializable, IAuditLog {
     return this.description;
   }
 
+  public FileDB getFile() {
+    return file;
+  }
 
   @Override
   public Long getId() {
     return this.id;
   }
 
-
   public String getIndicator() {
     return indicator;
   }
 
+  public List<CrpProgramOutcomeIndicator> getIndicators() {
+    return indicators;
+  }
 
   @Override
   public String getLogDeatil() {
@@ -198,15 +218,18 @@ public class CrpProgramOutcome implements java.io.Serializable, IAuditLog {
     return milestones;
   }
 
+
   @Override
   public String getModificationJustification() {
     return modificationJustification;
   }
 
+
   @Override
   public User getModifiedBy() {
     return modifiedBy;
   }
+
 
   public Set<ProjectFurtherContribution> getProjectFurtherContributions() {
     return projectFurtherContributions;
@@ -249,11 +272,9 @@ public class CrpProgramOutcome implements java.io.Serializable, IAuditLog {
     this.createdBy = createdBy;
   }
 
-
   public void setCrpClusterKeyOutputOutcomes(Set<CrpClusterKeyOutputOutcome> crpClusterKeyOutputOutcomes) {
     this.crpClusterKeyOutputOutcomes = crpClusterKeyOutputOutcomes;
   }
-
 
   public void setCrpMilestones(Set<CrpMilestone> crpMilestones) {
     this.crpMilestones = crpMilestones;
@@ -263,8 +284,14 @@ public class CrpProgramOutcome implements java.io.Serializable, IAuditLog {
     this.crpOutcomeSubIdos = crpOutcomeSubIdos;
   }
 
+
   public void setCrpProgram(CrpProgram crpProgram) {
     this.crpProgram = crpProgram;
+  }
+
+
+  public void setCrpProgramOutcomeIndicators(Set<CrpProgramOutcomeIndicator> crpProgramOutcomeIndicators) {
+    this.crpProgramOutcomeIndicators = crpProgramOutcomeIndicators;
   }
 
   public void setDeliverables(Set<Deliverable> deliverables) {
@@ -275,12 +302,20 @@ public class CrpProgramOutcome implements java.io.Serializable, IAuditLog {
     this.description = description;
   }
 
+  public void setFile(FileDB file) {
+    this.file = file;
+  }
+
   public void setId(Long id) {
     this.id = id;
   }
 
   public void setIndicator(String indicator) {
     this.indicator = indicator;
+  }
+
+  public void setIndicators(List<CrpProgramOutcomeIndicator> indicators) {
+    this.indicators = indicators;
   }
 
   public void setMilestones(List<CrpMilestone> milestones) {

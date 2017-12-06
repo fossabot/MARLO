@@ -1,7 +1,7 @@
 [#ftl]
 [#assign title = "Impact Pathway - Outcomes" /]
 [#assign currentSectionString = "program-${actionName?replace('/','-')}-${crpProgramID}" /]
-[#assign pageLibs = ["select2","cytoscape","cytoscape-panzoom"] /]
+[#assign pageLibs = ["select2", "blueimp-file-upload", "cytoscape","cytoscape-panzoom"] /]
 [#assign customJS = [ 
   "${baseUrlMedia}/js/impactPathway/programSubmit.js", 
   "${baseUrlMedia}/js/impactPathway/outcomes.js", 
@@ -143,7 +143,7 @@
 [@assumptionMacro assumption={} name="outcomes[-1].subIdos[-1].assumptions" index=-1 isTemplate=true /]
 
 [#-- Baseline Indicator Template --]
-[@baselineIndicatorMacro indicator={} name="outcomes[-1].baselineIndicators" index=-1 isTemplate=true /]
+[@baselineIndicatorMacro indicator={} name="outcomes[-1].indicators" index=-1 isTemplate=true /]
 
 [#include "/WEB-INF/crp/pages/footer.ftl" /]
 
@@ -198,17 +198,13 @@
     [#if editable && targetUnitList?has_content]<div class="form-group note">[@s.text name = "outcomes.addNewTargetUnit" /]</div>[/#if]
     
     
-    [#assign baselineIndicators = [
-            {"title": "Total project area targeted (ha)."},
-            {"title": "Numbers of heads of livestock per species in the project area. "}
-          ] 
-        /]
+
     
     <!-- Nav tabs -->
     <ul class="nav nav-tabs" role="tablist">
       <li role="presentation" class="active"><a href="#subIdos-tab-${index}" aria-controls="home" role="tab" data-toggle="tab">Sub-IDOs <span class="badge">${(outcome.subIdos?size)!'0'}</span></a></li>
-      [#if action.hasSpecificities('crp_baseline_indicators') && (crpProgramID == 86)]
-      <li role="presentation"><a href="#baseline-tab-${index}" aria-controls="profile" role="tab" data-toggle="tab">Baseline Indicators <span class="badge">${(baselineIndicators?size)!'0'}</span></a></li>
+      [#if action.hasSpecificities('crp_baseline_indicators') && (selectedProgram.baseLine)!false]
+      <li role="presentation"><a href="#baseline-tab-${index}" aria-controls="profile" role="tab" data-toggle="tab">Baseline Indicators <span class="badge">${(outcome.indicators?size)!'0'}</span></a></li>
       [/#if]
       <li role="presentation"><a href="#milestones-tab-${index}" aria-controls="messages" role="tab" data-toggle="tab">Milestones <span class="badge">${(outcome.milestones?size)!'0'}</span></a></li>
     </ul>
@@ -237,34 +233,42 @@
       </div>
       
       [#-- Baseline indicators --]
-      [#if action.hasSpecificities('crp_baseline_indicators') && (crpProgramID == 86)]
+      [#if action.hasSpecificities('crp_baseline_indicators') && (selectedProgram.baseLine)!false]
       <div role="tabpanel" class="tab-pane fade" id="baseline-tab-${index}">
+        
         [#-- Upload a PDF with baseline instructions --]
         <div class="form-group fileUploadContainer">
           <label>[@customForm.text name="outcome.baselineInstructions" readText=!editable /]:</label>
-          [#local hasFile = outcome.baselineFile?? && outcome.baselineFile.id?? /]
-          <input id="fileID" type="hidden" name="${outcomeCustomName}.file.id" value="${(outcome.baselineFile.id)!}" />
-          [#-- Input File --]
-          [#if editable]
-          <div class="fileUpload" style="display:${hasFile?string('none','block')}"> <input class="upload" type="file" name="file" data-url="${baseUrl}/uploadBaselineInstructions.do"></div>
+          [#if !isTemplate]
+            [#local hasFile = outcome.file?? && outcome.file.id?? /]
+            <input class="fileID" type="hidden" name="${outcomeCustomName}.file.id" value="${(outcome.file.id)!}" />
+            [#-- Input File --]
+            [#if editable]
+            <div class="fileUpload" style="display:${hasFile?string('none','block')}"> <input class="upload" type="file" name="file" data-url="${baseUrl}/uploadBaseLine.do"></div>
+            
+            [/#if]
+            [#-- Uploaded File --]
+            <p class="fileUploaded textMessage checked" style="display:${hasFile?string('block','none')}">
+              <span class="contentResult">[#if outcome.file??]
+                <a target="_blank" href="${action.getBaseLineFileURL((outcome.id?string)!-1)}/${(outcome.file.fileName)!}">${(outcome.file.fileName)!('No file name')} </a>
+                [/#if]</span> 
+              [#if editable]<span class="removeIcon"> </span> [/#if]
+            </p> 
+          [#else]
+            <p><i>[@customForm.text name="outcome.baselineInstructionsUnavailbale" readText=!editable /] </i></p>
           [/#if]
-          [#-- Uploaded File --]
-          <p class="fileUploaded textMessage checked" style="display:${hasFile?string('block','none')}">
-            <span class="contentResult">[#if outcome.baselineFile??]${(outcome.baselineFile.fileName)!('No file name')} [/#if]</span> 
-            [#if editable]<span class="removeIcon"> </span> [/#if]
-          </p>
         </div>
-        
+        <br />
         [#-- Baseline indicators list --]
         <h5 class="sectionSubTitle">[@s.text name="outcome.baselineIndicators" /]:</h5>
         <div class="baselineIndicators-list"">
         
-        [#if baselineIndicators?has_content]
-          [#list baselineIndicators as baselineIndicator]
-            [@baselineIndicatorMacro indicator=baselineIndicator name="${outcomeCustomName}.baselineIndicators" index=baselineIndicator_index /]
+        [#if outcome.indicators?has_content]
+          [#list outcome.indicators as baselineIndicator]
+            [@baselineIndicatorMacro indicator=baselineIndicator name="${outcomeCustomName}.indicators" index=baselineIndicator_index /]
           [/#list]
         [#else]
-          [@baselineIndicatorMacro indicator={} name="${outcomeCustomName}.baselineIndicators" index=0 /]
+          [#-- @baselineIndicatorMacro indicator={} name="${outcomeCustomName}.indicators" index=0 / --]
         [/#if]
         </div>
         [#-- Add Baseline Indicator Button --]
@@ -431,12 +435,12 @@
     [#if editable]<div class="removeBaselineIndicator removeElement sm" title="Remove Indicators"></div>[/#if]
     [#-- Hidden inputs --]
     <input type="hidden" class="baselineIndicatorId" name="${customName}.id" value="${(indicator.id)!}"/>
-    [#if !editable] 
-      [#if indicator.description?has_content]
-        <div class="input"><p> <strong>${index+1}.</strong> ${(indicator.description)!}</p></div>
-      [/#if] 
+    [#if editable] 
+      [@customForm.input name="${customName}.indicator" value=indicator.title i18nkey="baselineIndicator.title" type="text" showTitle=true placeholder="" className="statement limitWords-50" required=true editable=editable /]
     [#else]
-      [@customForm.input name="${customName}.title" value=indicator.title i18nkey="baselineIndicator.title" type="text" showTitle=true placeholder="" className="statement limitWords-50" required=true editable=editable /]
+      [#if indicator.indicator?has_content]
+        <div class="input"><p>${(indicator.indicator)!}</p></div>
+      [/#if] 
     [/#if]
     <div class="clearfix"></div>
   </div>
