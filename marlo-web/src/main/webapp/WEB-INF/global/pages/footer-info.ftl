@@ -9,12 +9,13 @@
   </div>
   [#-- Legal Information--]
   <div class="col-md-4 infoLinks text-left">
-    <strong>Legal</strong><br />
+    [#--  <strong>Legal</strong><br />
     <ul>
       <li><a target="_blank" href="[@s.url namespace="/" action='legalInformation'][/@s.url]#privacyNotice">Privacy Notice </a></li>
       <li><a target="_blank" href="[@s.url namespace="/" action='legalInformation'][/@s.url]#termsConditions">Terms and Conditions</a></li>
       <li><a target="_blank" href="[@s.url namespace="/" action='legalInformation'][/@s.url]#copyRight">Copyright</a></li>
     </ul>
+    --]
   </div>
   [#-- Glossary --]
   <div class="col-md-4 glossary text-right">
@@ -27,4 +28,11 @@
   <hr />
   <span>  &#169; Copyright CIAT 2017 - Current version ${action.getVersion()}</span><br />
   <span> <a href="https://www.gnu.org/licenses/gpl-3.0.en.html">Some rights reserved</a></span>
+</div>
+
+[#-- MARLO Blog --]
+<div class="newsButton">
+  <a href="https://marlo-news.blogspot.com" target="__blank">
+     <b> [@s.text name="footer.checkBlog" /] </b> <span class="fa fa-external-link-square"></span>
+  </a>
 </div>
