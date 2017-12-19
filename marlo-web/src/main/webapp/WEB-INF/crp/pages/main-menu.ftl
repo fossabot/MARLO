@@ -24,6 +24,7 @@
     ]
   },
   { 'slug': 'summaries', 'name': 'menu.summaries',      'namespace': '/summaries',       'action': '${(crpSession)!}/summaries',    'visible': logged, 'active': true }
+  [#--  { 'slug': 'moduleBI', 'name': 'menu.moduleBI',      'namespace': '/bi',       'action': '${(crpSession)!}/dashboard',    'visible': logged, 'active': true }--]
 
 ]/]
 
