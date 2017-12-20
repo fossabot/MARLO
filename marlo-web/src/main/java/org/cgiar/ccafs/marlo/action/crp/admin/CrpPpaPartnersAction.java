@@ -1,5 +1,5 @@
 /*****************************************************************
- * This file is part of Managing Agricultural Research for Learning &
+ * \ * This file is part of Managing Agricultural Research for Learning &
  * Outcomes Platform (MARLO).
  * MARLO is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -51,7 +51,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
+import com.google.inject.Inject;
 import org.apache.commons.lang3.RandomStringUtils;
 
 /**
@@ -567,24 +567,26 @@ public class CrpPpaPartnersAction extends BaseAction {
             liaisonInstitution.setAcronym(partner.getInstitution().getAcronym());
             liaisonInstitutionManager.saveLiaisonInstitution(liaisonInstitution);
           }
-          for (LiaisonUser liaisonUser : partner.getContactPoints()) {
-            // new User?
-            if (liaisonUser.getId() == null || !partner.getContactPoints().contains(liaisonUser)) {
-              // Add liaisonUser
-              LiaisonUser liaisonUserSave =
-                new LiaisonUser(liaisonInstitution, userManager.getUser(liaisonUser.getUser().getId()));
-              liaisonUserSave.setCrp(loggedCrp);
-              liaisonUserSave.setActive(true);
-              liaisonUserManager.saveLiaisonUser(liaisonUserSave);
-              // If is new user active it
-              if (!liaisonUser.getUser().isActive()) {
-                this.notifyNewUserCreated(liaisonUser.getUser());
-              }
-              // add userRole
-              if (cpRole != null) {
-                UserRole userRole = new UserRole(cpRole, liaisonUserSave.getUser());
-                userRoleManager.saveUserRole(userRole);
-                this.notifyRoleContactPointAssigned(userRole, partner);
+          if (partner.getContactPoints() != null && partner.getContactPoints().size() > 0) {
+            for (LiaisonUser liaisonUser : partner.getContactPoints()) {
+              // new User?
+              if (liaisonUser.getId() == null || !partner.getContactPoints().contains(liaisonUser)) {
+                // Add liaisonUser
+                LiaisonUser liaisonUserSave =
+                  new LiaisonUser(liaisonInstitution, userManager.getUser(liaisonUser.getUser().getId()));
+                liaisonUserSave.setCrp(loggedCrp);
+                liaisonUserSave.setActive(true);
+                liaisonUserManager.saveLiaisonUser(liaisonUserSave);
+                // If is new user active it
+                if (!liaisonUser.getUser().isActive()) {
+                  this.notifyNewUserCreated(liaisonUser.getUser());
+                }
+                // add userRole
+                if (cpRole != null) {
+                  UserRole userRole = new UserRole(cpRole, liaisonUserSave.getUser());
+                  userRoleManager.saveUserRole(userRole);
+                  this.notifyRoleContactPointAssigned(userRole, partner);
+                }
               }
             }
           }

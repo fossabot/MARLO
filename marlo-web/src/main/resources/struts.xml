@@ -419,6 +419,7 @@
 	<include file="struts-powb.xml" />
 	<include file="struts-publications.xml" />
 	<include file="struts-rest.xml" />
+	<include file="struts-bi.xml" />
 
 	<include file="struts-center-home.xml" />
 	<include file="struts-center-impactPathway.xml" />

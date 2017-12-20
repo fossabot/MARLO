@@ -246,10 +246,14 @@ ul.fieldError {
   padding: 0;
 }
 
-ul.fieldError li {
+ul.fieldError li, a.fieldError {
   color: red;
   list-style-type: none;
   text-align: left;
+}
+
+span.badge.fieldError{
+  background-color:red;
 }
 
 .radios {
@@ -354,14 +358,14 @@ p.fieldChecked{
 }
 
 span.fieldError{
-  background-color: #F59898;
-  color: #fff !important;
-  padding: 1px 6px 1px 6px;
-  margin-right: 4px;
-  margin-top: 2px;
-  border-radius: 2px;
-  font-size: 0.85em;
-  float: left;
+  /* background-color: #F59898; */
+  /* color: #fff !important; */
+  /* padding: 1px 6px 1px 6px; */
+  /* margin-right: 4px; */
+  /* margin-top: 2px; */
+  /* border-radius: 2px; */
+  /* font-size: 0.85em; */
+  /* float: left; */
 }
 
 p.warning-info {
@@ -6575,3 +6579,32 @@ img#crpSelectedImage {
 }
 
 /* END Radio Flat*/
+
+/* Select2 show and hide animation in dropdowns*/
+.select2-results__option.loading-results,
+.select2-results__option.select2-results__option--load-more {
+  display: inline;
+  position: relative;
+  -webkit-animation: sk-scaleout 1.0s infinite ease-in-out;
+  animation: sk-scaleout 1.0s infinite ease-in-out;
+  border-style: none;
+}
+
+@-webkit-keyframes sk-scaleout {
+  0% { -webkit-transform: scale(0) }
+  100% {
+    -webkit-transform: scale(1.0);
+    opacity: 0;
+  }
+}
+
+@keyframes sk-scaleout {
+  0% { 
+    -webkit-transform: scale(0);
+    transform: scale(0);
+  } 100% {
+    -webkit-transform: scale(1.0);
+    transform: scale(1.0);
+    opacity: 0;
+  }
+}

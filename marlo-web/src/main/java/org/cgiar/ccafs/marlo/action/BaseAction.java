@@ -24,6 +24,7 @@ import org.cgiar.ccafs.marlo.data.manager.CrpProgramLeaderManager;
 import org.cgiar.ccafs.marlo.data.manager.CrpProgramManager;
 import org.cgiar.ccafs.marlo.data.manager.DeliverableManager;
 import org.cgiar.ccafs.marlo.data.manager.FileDBManager;
+import org.cgiar.ccafs.marlo.data.manager.FundingSourceInstitutionManager;
 import org.cgiar.ccafs.marlo.data.manager.FundingSourceManager;
 import org.cgiar.ccafs.marlo.data.manager.ICapacityDevelopmentService;
 import org.cgiar.ccafs.marlo.data.manager.ICenterCycleManager;
@@ -81,6 +82,7 @@ import org.cgiar.ccafs.marlo.data.model.DeliverableDissemination;
 import org.cgiar.ccafs.marlo.data.model.DeliverableQualityCheck;
 import org.cgiar.ccafs.marlo.data.model.FileDB;
 import org.cgiar.ccafs.marlo.data.model.FundingSource;
+import org.cgiar.ccafs.marlo.data.model.FundingSourceInstitution;
 import org.cgiar.ccafs.marlo.data.model.ImpactPathwayCyclesEnum;
 import org.cgiar.ccafs.marlo.data.model.ImpactPathwaySectionsEnum;
 import org.cgiar.ccafs.marlo.data.model.Institution;
@@ -249,6 +251,8 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
   private boolean fullEditable; // If user is able to edit all the form.
   @Inject
   private FundingSourceManager fundingSourceManager;
+  @Inject
+  private FundingSourceInstitutionManager fundingSourceInstitutionManager;
   @Inject
   private FundingSourceValidator fundingSourceValidator;
 
@@ -534,6 +538,16 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
         final FundingSource fundingSource = fundingSourceManager.getFundingSourceById(id);
         if (fundingSource.getProjectBudgets().stream().filter(c -> c.isActive()).collect(Collectors.toList())
           .size() > 0) {
+          return false;
+        }
+      }
+      if (clazz == FundingSourceInstitution.class) {
+        FundingSourceInstitution fundingSourceInstitution =
+          fundingSourceInstitutionManager.getFundingSourceInstitutionById(id);
+        if (fundingSourceInstitution.getFundingSource().getProjectBudgets().stream()
+          .filter(
+            c -> c.isActive() && c.getInstitution().getId().equals(fundingSourceInstitution.getInstitution().getId()))
+          .collect(Collectors.toList()).size() > 0) {
           return false;
         }
       }
@@ -1739,15 +1753,15 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
         List<Deliverable> openA = new ArrayList<>();
 
         if (this.isPlanningActive()) {
-          openA = deliverables.stream()
-
-            .filter(
-              a -> a.isActive() && (((a.getStatus() == null)
-                || (a.getStatus() == Integer.parseInt(ProjectStatusEnum.Ongoing.getStatusId()))
-                || ((a.getStatus() == Integer.parseInt(ProjectStatusEnum.Extended.getStatusId()))
-                  || (a.getStatus().intValue() == 0) || (a.getStatus().intValue() == -1)))))
-            .collect(Collectors.toList());
-
+          openA =
+            deliverables.stream()
+              .filter(
+                a -> a.isActive()
+                  && ((a.getStatus() == null
+                    || a.getStatus() == Integer.parseInt(ProjectStatusEnum.Ongoing.getStatusId())
+                    || (a.getStatus() == Integer.parseInt(ProjectStatusEnum.Extended.getStatusId())
+                      || a.getStatus().intValue() == 0 || a.getStatus().intValue() == -1))))
+              .collect(Collectors.toList());
         } else {
           openA = deliverables.stream()
             .filter(a -> a.isActive() && (((a.getStatus() == null)
@@ -2940,10 +2954,11 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
 
     Project project = projectManager.getProjectById(projectID);
     int year = this.getCurrentCycleYear();
-    List<Submission> submissions = project
-      .getSubmissions().stream().filter(c -> c.getCycle().equals(this.getCurrentCycle())
-        && (c.getYear().intValue() == year) && ((c.isUnSubmit() == null) || !c.isUnSubmit()))
-      .collect(Collectors.toList());
+    List<Submission> submissions =
+      project
+        .getSubmissions().stream().filter(c -> c.getCycle().equals(this.getCurrentCycle())
+          && c.getYear().intValue() == year && (c.isUnSubmit() == null || !c.isUnSubmit()))
+        .collect(Collectors.toList());
     if (submissions.isEmpty()) {
       return false;
     }
