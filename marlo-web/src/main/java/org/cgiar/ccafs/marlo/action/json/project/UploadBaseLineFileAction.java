@@ -24,7 +24,8 @@ import org.cgiar.ccafs.marlo.utils.FileManager;
 
 import java.io.File;
 
-import com.google.inject.Inject;
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -83,6 +84,23 @@ public class UploadBaseLineFileAction extends BaseAction {
   }
 
 
+  private String getBaseLineFilePath() {
+    String upload = config.getUploadsBaseFolder();
+    return upload + File.separator + this.getBaseLineRelativePath() + File.separator;
+  }
+
+
+  public String getBaseLineFileURL() {
+    return config.getDownloadURL() + "/" + this.getBaseLineFilePath().replace('\\', '/');
+  }
+
+
+  private String getBaseLineRelativePath() {
+    return config.getProjectsBaseFolder(this.getCrpSession()) + File.separator + outcomeID + File.separator + "baseLine"
+      + File.separator;
+  }
+
+
   public File getFile() {
     return file;
   }
@@ -97,25 +115,8 @@ public class UploadBaseLineFileAction extends BaseAction {
     return fileFileName;
   }
 
-
   public long getFileID() {
     return fileID;
-  }
-
-
-  private String getBaseLineFilePath() {
-    String upload = config.getUploadsBaseFolder();
-    return upload + File.separator + this.getBaseLineRelativePath() + File.separator;
-  }
-
-
-  public String getBaseLineFileURL() {
-    return config.getDownloadURL() + "/" + this.getBaseLineFilePath().replace('\\', '/');
-  }
-
-  private String getBaseLineRelativePath() {
-    return config.getProjectsBaseFolder(this.getCrpSession()) + File.separator + outcomeID + File.separator + "baseLine"
-      + File.separator;
   }
 
   public String getOutcomeID() {
