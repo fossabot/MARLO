@@ -64,6 +64,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.struts2.dispatcher.Parameter;
 
@@ -217,17 +218,18 @@ public class ProjectListAction extends BaseAction {
 
     CenterProject centerProject = projectService.getCenterProjectById(centerProjectID);
 
-    centerProject.setName(project.getTitle());
-    centerProject.setDescription(project.getSummary());
-    centerProject.setStartDate(project.getStartDate());
-    centerProject.setEndDate(project.getEndDate());
-    centerProject.setProjectLeader(project.getLeaderPerson().getUser());
+    centerProject.setName(project.getProjecInfoPhase(this.getActualPhase()).getTitle());
+    centerProject.setDescription(project.getProjecInfoPhase(this.getActualPhase()).getSummary());
+    centerProject.setStartDate(project.getProjecInfoPhase(this.getActualPhase()).getStartDate());
+    centerProject.setEndDate(project.getProjecInfoPhase(this.getActualPhase()).getEndDate());
+    centerProject.setProjectLeader(project.getLeaderPerson(this.getActualPhase()).getUser());
     centerProject.setSync(true);
     centerProject.setSyncDate(new Date());
     centerProject.setAutoFill(true);
 
     // Add Project Status
-    centerProject.setProjectStatus(new CenterProjectStatus(project.getStatus(), true));
+    centerProject
+      .setProjectStatus(new CenterProjectStatus(project.getProjecInfoPhase(this.getActualPhase()).getStatus(), true));
 
     // Add Crp Project CrossCutting to Center Project
     this.crpCrossCuttingInformation(project, centerProject);
@@ -248,10 +250,10 @@ public class ProjectListAction extends BaseAction {
     fundingSource.setSyncDate(new Date());
     fundingSource.setAutoFill(true);
     fundingSource.setCrp(project.getCrp());
-    fundingSource.setTitle(project.getTitle());
-    fundingSource.setDescription(project.getSummary());
-    fundingSource.setStartDate(project.getStartDate());
-    fundingSource.setEndDate(project.getEndDate());
+    fundingSource.setTitle(project.getProjecInfoPhase(this.getActualPhase()).getTitle());
+    fundingSource.setDescription(project.getProjecInfoPhase(this.getActualPhase()).getSummary());
+    fundingSource.setStartDate(project.getProjecInfoPhase(this.getActualPhase()).getStartDate());
+    fundingSource.setEndDate(project.getProjecInfoPhase(this.getActualPhase()).getEndDate());
 
     // Setting the sync type (2 = MARLO-CRP)
     CenterFundingSyncType fundingSyncType = fundingSyncTypeManager.getCenterFundingSyncTypeById(2);
@@ -383,17 +385,20 @@ public class ProjectListAction extends BaseAction {
 
     CenterProjectCrosscutingTheme crosscutingThemeSave = centerProject.getProjectCrosscutingTheme();
 
-    if ((project.getCrossCuttingGender() != null) && project.getCrossCuttingGender()) {
+    if ((project.getProjecInfoPhase(this.getActualPhase()).getCrossCuttingGender() != null)
+      && project.getProjecInfoPhase(this.getActualPhase()).getCrossCuttingGender()) {
       hasChanges = true;
       crosscutingThemeSave.setGender(true);
     }
 
-    if ((project.getCrossCuttingYouth() != null) && project.getCrossCuttingYouth()) {
+    if ((project.getProjecInfoPhase(this.getActualPhase()).getCrossCuttingYouth() != null)
+      && project.getProjecInfoPhase(this.getActualPhase()).getCrossCuttingYouth()) {
       hasChanges = true;
       crosscutingThemeSave.setYouth(true);
     }
 
-    if ((project.getCrossCuttingCapacity() != null) && project.getCrossCuttingCapacity()) {
+    if ((project.getProjecInfoPhase(this.getActualPhase()).getCrossCuttingCapacity() != null)
+      && project.getProjecInfoPhase(this.getActualPhase()).getCrossCuttingCapacity()) {
       hasChanges = true;
       crosscutingThemeSave.setCapacityDevelopment(true);
     }
@@ -628,7 +633,7 @@ public class ProjectListAction extends BaseAction {
         } catch (Exception ex) {
           User user = userService.getUser(this.getCurrentUser().getId());
           // Check if the User is an Area Leader
-           List<CenterLeader> userAreaLeads =
+          List<CenterLeader> userAreaLeads =
             new ArrayList<>(user.getResearchLeaders().stream()
               .filter(rl -> rl.isActive()
                 && rl.getType().getId() == CenterLeaderTypeEnum.RESEARCH_AREA_LEADER_TYPE.getValue())
