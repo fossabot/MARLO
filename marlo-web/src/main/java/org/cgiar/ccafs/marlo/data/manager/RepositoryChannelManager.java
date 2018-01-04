@@ -27,7 +27,6 @@ import java.util.List;
  * @time 9:09:19 AM: Manager Creation
  * @time 10:22:12 AM: added getRepositoryChannelByShortName
  */
-
 public interface RepositoryChannelManager {
 
 

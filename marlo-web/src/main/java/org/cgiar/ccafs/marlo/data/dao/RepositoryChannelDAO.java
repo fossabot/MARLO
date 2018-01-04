@@ -20,7 +20,6 @@ import org.cgiar.ccafs.marlo.data.model.RepositoryChannel;
 
 import java.util.List;
 
-
 /**
  * RepositoryChannelDAO
  * 
@@ -29,7 +28,6 @@ import java.util.List;
  * @time 9:09:08 AM: DAO creation
  * @time 10:22:12 AM: added findByShortName
  */
-
 public interface RepositoryChannelDAO {
 
   /**

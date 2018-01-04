@@ -21,7 +21,6 @@ import org.cgiar.ccafs.marlo.data.manager.CrpManager;
 import org.cgiar.ccafs.marlo.data.manager.CrpProgramManager;
 import org.cgiar.ccafs.marlo.data.manager.DeliverableManager;
 import org.cgiar.ccafs.marlo.data.manager.GenderTypeManager;
-import org.cgiar.ccafs.marlo.data.manager.ProjectHighligthManager;
 import org.cgiar.ccafs.marlo.data.manager.RepositoryChannelManager;
 import org.cgiar.ccafs.marlo.data.model.Crp;
 import org.cgiar.ccafs.marlo.data.model.Deliverable;
@@ -109,9 +108,7 @@ public class DeliverablesReportingExcelSummaryAction extends BaseAction implemen
 
   @Inject
   public DeliverablesReportingExcelSummaryAction(APConfig config, CrpManager crpManager,
-    ProjectHighligthManager projectHighLightManager, CrpProgramManager programManager,
-    GenderTypeManager genderTypeManager, DeliverableManager deliverableManager,
-    RepositoryChannelManager repositoryChannelManager) {
+    CrpProgramManager programManager, GenderTypeManager genderTypeManager, DeliverableManager deliverableManager, RepositoryChannelManager repositoryChannelManager) {
     super(config);
     this.crpManager = crpManager;
     this.genderTypeManager = genderTypeManager;
