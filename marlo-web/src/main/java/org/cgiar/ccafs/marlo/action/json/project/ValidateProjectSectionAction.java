@@ -51,6 +51,7 @@ import org.cgiar.ccafs.marlo.data.model.ProjectFocus;
 import org.cgiar.ccafs.marlo.data.model.ProjectHighlight;
 import org.cgiar.ccafs.marlo.data.model.ProjectHighlightType;
 import org.cgiar.ccafs.marlo.data.model.ProjectHighligthsTypeEnum;
+import org.cgiar.ccafs.marlo.data.model.ProjectInfo;
 import org.cgiar.ccafs.marlo.data.model.ProjectLeverage;
 import org.cgiar.ccafs.marlo.data.model.ProjectLocation;
 import org.cgiar.ccafs.marlo.data.model.ProjectLocationElementType;
@@ -82,7 +83,6 @@ import org.cgiar.ccafs.marlo.validation.projects.ProjectOutputsValidator;
 import org.cgiar.ccafs.marlo.validation.projects.ProjectPartnersValidator;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -264,25 +264,25 @@ public class ValidateProjectSectionAction extends BaseAction {
     }
 
     Project project = projectManager.getProjectById(projectID);
-
+    ProjectInfo projectInfo = project.getProjecInfoPhase(this.getActualPhase());
     switch (ProjectSectionStatusEnum.value(sectionName.toUpperCase())) {
       case OUTCOMES:
         section = new HashMap<String, Object>();
         section.put("sectionName", ProjectSectionStatusEnum.OUTCOMES);
         section.put("missingFields", "");
 
-        List<ProjectOutcome> projectOutcomes =
-          project.getProjectOutcomes().stream().filter(c -> c.isActive()).collect(Collectors.toList());
+        List<ProjectOutcome> projectOutcomes = project.getProjectOutcomes().stream()
+          .filter(c -> c.isActive() && c.getPhase().equals(this.getActualPhase())).collect(Collectors.toList());
 
 
-        if (!(project.getAdministrative() != null && project.getAdministrative().booleanValue() == true)) {
+        if (!(projectInfo.getAdministrative() != null && projectInfo.getAdministrative().booleanValue() == true)) {
           if (projectOutcomes.isEmpty()) {
             section.put("missingFields", section.get("missingFields") + "-" + "outcomes");
           }
           project.setOutcomes(projectOutcomes);
           for (ProjectOutcome projectOutcome : project.getOutcomes()) {
             sectionStatus = sectionStatusManager.getSectionStatusByProjectOutcome(projectOutcome.getId(), cycle,
-              this.getCurrentCycleYear(), sectionName);
+              this.getActualPhase().getYear(), sectionName);
             if (sectionStatus.getMissingFields().length() > 0) {
               section.put("missingFields", section.get("missingFields") + "-" + sectionStatus.getMissingFields());
 
@@ -306,22 +306,29 @@ public class ValidateProjectSectionAction extends BaseAction {
 
         List<Deliverable> deliverables =
           project.getDeliverables().stream().filter(d -> d.isActive()).collect(Collectors.toList());
-        List<Deliverable> openA = deliverables.stream()
-          .filter(a -> a.isActive() && a.getYear() >= this.getCurrentCycleYear()
-            && ((a.getStatus() == null || a.getStatus() == Integer.parseInt(ProjectStatusEnum.Ongoing.getStatusId())
-              || (a.getStatus() == Integer.parseInt(ProjectStatusEnum.Extended.getStatusId())
-                || a.getStatus().intValue() == 0))))
+        List<Deliverable> openA = deliverables.stream().filter(a -> a.isActive()
+
+          && ((a.getDeliverableInfo(this.getActualPhase()).getStatus() == null
+            || (a.getDeliverableInfo(this.getActualPhase()).getStatus() == Integer
+              .parseInt(ProjectStatusEnum.Ongoing.getStatusId())
+            && a.getDeliverableInfo(this.getActualPhase()).getYear() >= this.getActualPhase().getYear())
+            || (a.getDeliverableInfo(this.getActualPhase()).getStatus() == Integer
+              .parseInt(ProjectStatusEnum.Extended.getStatusId())
+              || a.getDeliverableInfo(this.getActualPhase()).getStatus().intValue() == 0))))
           .collect(Collectors.toList());
         if (this.isReportingActive()) {
           openA.addAll(deliverables.stream()
-            .filter(d -> d.isActive() && d.getYear() == this.getCurrentCycleYear() && d.getStatus() != null
-              && d.getStatus().intValue() == Integer.parseInt(ProjectStatusEnum.Complete.getStatusId()))
+            .filter(d -> d.isActive()
+              && d.getDeliverableInfo(this.getActualPhase()).getYear() == this.getActualPhase().getYear()
+              && d.getDeliverableInfo(this.getActualPhase()).getStatus() != null
+              && d.getDeliverableInfo(this.getActualPhase()).getStatus().intValue() == Integer
+                .parseInt(ProjectStatusEnum.Complete.getStatusId()))
             .collect(Collectors.toList()));
         }
 
         for (Deliverable deliverable : openA) {
           sectionStatus = sectionStatusManager.getSectionStatusByDeliverable(deliverable.getId(), cycle,
-            this.getCurrentCycleYear(), sectionName);
+            this.getActualPhase().getYear(), sectionName);
           if (sectionStatus == null) {
 
             sectionStatus = new SectionStatus();
@@ -334,7 +341,8 @@ public class ValidateProjectSectionAction extends BaseAction {
 
 
         }
-        if (project.getAdministrative() != null && project.getAdministrative().booleanValue()) {
+        if (project.getProjecInfoPhase(this.getActualPhase()).getAdministrative() != null
+          && project.getProjecInfoPhase(this.getActualPhase()).getAdministrative().booleanValue()) {
           sectionStatus = new SectionStatus();
           sectionStatus.setMissingFields("");
           section.put("missingFields", "");
@@ -345,8 +353,8 @@ public class ValidateProjectSectionAction extends BaseAction {
 
 
       case ACTIVITIES:
-        sectionStatus =
-          sectionStatusManager.getSectionStatusByProject(projectID, cycle, this.getCurrentCycleYear(), sectionName);
+        sectionStatus = sectionStatusManager.getSectionStatusByProject(projectID, cycle,
+          this.getActualPhase().getYear(), sectionName);
         section = new HashMap<String, Object>();
         section.put("sectionName", sectionStatus.getSectionName());
         section.put("missingFields", sectionStatus.getMissingFields());
@@ -364,10 +372,11 @@ public class ValidateProjectSectionAction extends BaseAction {
 
 
         for (CaseStudyProject caseStudyProject : caseStudies) {
-          if (caseStudyProject.isCreated() && caseStudyProject.getCaseStudy().getYear() == this.getCurrentCycleYear()) {
+          if (caseStudyProject.isCreated()
+            && caseStudyProject.getCaseStudy().getYear() == this.getActualPhase().getYear()) {
             projectCaseStudies.add(caseStudyProject.getCaseStudy());
             sectionStatus = sectionStatusManager.getSectionStatusByCaseStudy(caseStudyProject.getCaseStudy().getId(),
-              cycle, this.getCurrentCycleYear(), sectionName);
+              cycle, this.getActualPhase().getYear(), sectionName);
             if (sectionStatus == null) {
 
               sectionStatus = new SectionStatus();
@@ -385,7 +394,7 @@ public class ValidateProjectSectionAction extends BaseAction {
 
       case HIGHLIGHT:
         List<ProjectHighlight> highlights = project.getProjectHighligths().stream()
-          .filter(d -> d.isActive() && d.getYear().intValue() == this.getCurrentCycleYear())
+          .filter(d -> d.isActive() && d.getYear().intValue() == this.getActualPhase().getYear())
           .collect(Collectors.toList());
 
         section = new HashMap<String, Object>();
@@ -396,7 +405,7 @@ public class ValidateProjectSectionAction extends BaseAction {
         for (ProjectHighlight highlight : highlights) {
 
           sectionStatus = sectionStatusManager.getSectionStatusByProjectHighlight(highlight.getId(), cycle,
-            this.getCurrentCycleYear(), sectionName);
+            this.getActualPhase().getYear(), sectionName);
           if (sectionStatus == null) {
 
             sectionStatus = new SectionStatus();
@@ -422,8 +431,8 @@ public class ValidateProjectSectionAction extends BaseAction {
           section.put("missingFields", "");
 
         } else {
-          sectionStatus =
-            sectionStatusManager.getSectionStatusByProject(projectID, cycle, this.getCurrentCycleYear(), sectionName);
+          sectionStatus = sectionStatusManager.getSectionStatusByProject(projectID, cycle,
+            this.getActualPhase().getYear(), sectionName);
           section = new HashMap<String, Object>();
 
           section.put("sectionName", sectionStatus.getSectionName());
@@ -435,8 +444,8 @@ public class ValidateProjectSectionAction extends BaseAction {
 
 
       case LEVERAGES:
-        sectionStatus =
-          sectionStatusManager.getSectionStatusByProject(projectID, cycle, this.getCurrentCycleYear(), sectionName);
+        sectionStatus = sectionStatusManager.getSectionStatusByProject(projectID, cycle,
+          this.getActualPhase().getYear(), sectionName);
         section = new HashMap<String, Object>();
 
         section.put("sectionName", sectionStatus.getSectionName());
@@ -444,8 +453,8 @@ public class ValidateProjectSectionAction extends BaseAction {
         break;
 
       default:
-        sectionStatus =
-          sectionStatusManager.getSectionStatusByProject(projectID, cycle, this.getCurrentCycleYear(), sectionName);
+        sectionStatus = sectionStatusManager.getSectionStatusByProject(projectID, cycle,
+          this.getActualPhase().getYear(), sectionName);
         if (sectionStatus != null) {
           section = new HashMap<String, Object>();
           section.put("sectionName", sectionStatus.getSectionName());
@@ -473,9 +482,13 @@ public class ValidateProjectSectionAction extends BaseAction {
     List<ProjectLocationElementType> locationsElementType = new ArrayList<>(
       project.getProjectLocationElementTypes().stream().filter(pl -> pl.getIsGlobal()).collect(Collectors.toList()));
 
-    project.setLocations(new ArrayList<ProjectLocation>(project.getProjectLocations().stream()
-      .filter(p -> p.isActive() && p.getLocElementType() == null && p.getLocElement() != null)
-      .collect(Collectors.toList())));
+    project
+      .setLocations(
+        new ArrayList<ProjectLocation>(
+          project
+            .getProjectLocations().stream().filter(p -> p.isActive() && p.getLocElementType() == null
+              && p.getLocElement() != null && p.getPhase().equals(this.getActualPhase()))
+          .collect(Collectors.toList())));
     Map<String, Object> locationParent;
     if (!project.getLocations().isEmpty()) {
 
@@ -602,8 +615,9 @@ public class ValidateProjectSectionAction extends BaseAction {
 
 
     Project projectDB = projectManager.getProjectById(projectID);
-    List<ProjectLocation> locElements = projectDB.getProjectLocations().stream()
-      .filter(c -> c.isActive() && c.getLocElement() != null && c.getLocElement().getId().longValue() == locElementID)
+    List<ProjectLocation> locElements = projectDB.getProjectLocations()
+      .stream().filter(c -> c.isActive() && c.getLocElement() != null
+        && c.getLocElement().getId().longValue() == locElementID && c.getPhase().equals(this.getActualPhase()))
       .collect(Collectors.toList());
 
     return !locElements.isEmpty();
@@ -616,8 +630,8 @@ public class ValidateProjectSectionAction extends BaseAction {
 
     Project projectDB = projectManager.getProjectById(projectID);
     List<ProjectLocation> locElements = projectDB.getProjectLocations().stream()
-      .filter(
-        c -> c.isActive() && c.getLocElementType() != null && c.getLocElementType().getId().longValue() == locElementID)
+      .filter(c -> c.isActive() && c.getLocElementType() != null
+        && c.getLocElementType().getId().longValue() == locElementID && c.getPhase().equals(this.getActualPhase()))
       .collect(Collectors.toList());
 
     return !locElements.isEmpty();
@@ -628,7 +642,8 @@ public class ValidateProjectSectionAction extends BaseAction {
   public List<DeliverablePartnership> otherPartners(Deliverable deliverable) {
     try {
       List<DeliverablePartnership> list = deliverable.getDeliverablePartnerships().stream()
-        .filter(dp -> dp.isActive() && dp.getPartnerType().equals(DeliverablePartnershipTypeEnum.OTHER.getValue()))
+        .filter(dp -> dp.getPhase() != null && dp.getPhase() != null && dp.getPhase().equals(this.getActualPhase())
+          && dp.isActive() && dp.getPartnerType().equals(DeliverablePartnershipTypeEnum.OTHER.getValue()))
         .collect(Collectors.toList());
       return list;
     } catch (Exception e) {
@@ -663,8 +678,10 @@ public class ValidateProjectSectionAction extends BaseAction {
     Project projectDB = projectManager.getProjectById(project.getId());
 
 
-    List<ProjectBudget> projectBudgets = new ArrayList<>(projectDB.getProjectBudgets().stream()
-      .filter(pb -> pb.isActive() && pb.getYear() == this.getCurrentCycleYear()).collect(Collectors.toList()));
+    List<ProjectBudget> projectBudgets =
+      new ArrayList<>(projectDB.getProjectBudgets().stream().filter(pb -> pb.isActive()
+        && pb.getYear() == this.getActualPhase().getYear() && pb.getPhase().equals(this.getActualPhase()))
+      .collect(Collectors.toList()));
 
     List<FundingSource> fundingSources = new ArrayList<>();
     for (ProjectBudget projectBudget : projectBudgets) {
@@ -699,8 +716,7 @@ public class ValidateProjectSectionAction extends BaseAction {
 
     }
 
-    project.setCountryFS(new ArrayList<>());
-    project.setRegionFS(new ArrayList<>());
+
     HashSet<LocElement> hashElements = new HashSet<>();
     hashElements.addAll(locElements);
     locElements = new ArrayList<>(hashElements);
@@ -710,26 +726,11 @@ public class ValidateProjectSectionAction extends BaseAction {
       countryFundingSources.setLocElement(locElement);
 
 
-      if (locElement.getLocElementType().getId().longValue() == 2) {
-        project.getCountryFS().add(countryFundingSources);
-      } else {
-        project.getRegionFS().add(countryFundingSources);
-      }
-
-
     }
 
     HashSet<LocElementType> hashElementTypes = new HashSet<>();
     hashElementTypes.addAll(locElementTypes);
     locElementTypes = new ArrayList<>(hashElementTypes);
-
-    for (LocElementType locElementType : hashElementTypes) {
-      CountryFundingSources countryFundingSources = new CountryFundingSources();
-      countryFundingSources.setLocElementType(locElementType);
-      project.getRegionFS().add(countryFundingSources);
-    }
-    Collections.sort(project.getCountryFS(),
-      (tu1, tu2) -> tu1.getLocElement().getName().compareTo(tu2.getLocElement().getName()));
 
 
   }
@@ -737,8 +738,8 @@ public class ValidateProjectSectionAction extends BaseAction {
   public DeliverablePartnership responsiblePartner(Deliverable deliverable) {
     try {
       DeliverablePartnership partnership = deliverable.getDeliverablePartnerships().stream()
-        .filter(
-          dp -> dp.isActive() && dp.getPartnerType().equals(DeliverablePartnershipTypeEnum.RESPONSIBLE.getValue()))
+        .filter(dp -> dp.getPhase() != null && dp.getPhase().equals(this.getActualPhase()) && dp.isActive()
+          && dp.getPartnerType().equals(DeliverablePartnershipTypeEnum.RESPONSIBLE.getValue()))
         .collect(Collectors.toList()).get(0);
       return partnership;
     } catch (Exception e) {
@@ -776,7 +777,8 @@ public class ValidateProjectSectionAction extends BaseAction {
       project.getCaseStudyProjects().stream().filter(d -> d.isActive()).collect(Collectors.toList());
 
     for (CaseStudyProject caseStudyProject : caseStudies) {
-      if (caseStudyProject.isCreated() && caseStudyProject.getCaseStudy().getYear() == this.getCurrentCycleYear()) {
+      if (caseStudyProject.isCreated()
+        && caseStudyProject.getCaseStudy().getYear() == this.getActualPhase().getYear()) {
 
         caseStudyProject.getCaseStudy().setIndicators(
           caseStudyProject.getCaseStudy().getCaseStudyIndicators().stream().collect(Collectors.toList()));
@@ -809,7 +811,8 @@ public class ValidateProjectSectionAction extends BaseAction {
     Project project = projectManager.getProjectById(projectID);
 
     List<ProjectHighlight> highlights = project.getProjectHighligths().stream()
-      .filter(d -> d.isActive() && d.getYear().intValue() == this.getCurrentCycleYear()).collect(Collectors.toList());
+      .filter(d -> d.isActive() && d.getYear().intValue() == this.getActualPhase().getYear())
+      .collect(Collectors.toList());
 
     for (ProjectHighlight projectHighlight : highlights) {
       projectHighlight.setTypes(
@@ -835,7 +838,7 @@ public class ValidateProjectSectionAction extends BaseAction {
     Project project = projectManager.getProjectById(projectID);
 
     List<ProjectLeverage> projectLeverages = new ArrayList<>(project.getProjectLeverages().stream()
-      .filter(pl -> pl.isActive() && pl.getYear() == this.getCurrentCycleYear()).collect(Collectors.toList()));
+      .filter(pl -> pl.isActive() && pl.getYear() == this.getActualPhase().getYear()).collect(Collectors.toList()));
 
     project.setLeverages(projectLeverages);
 
@@ -889,7 +892,7 @@ public class ValidateProjectSectionAction extends BaseAction {
     Project project = projectManager.getProjectById(projectID);
 
     project.setProjectActivities(new ArrayList<Activity>(project.getActivities().stream()
-      .filter(a -> a.isActive() && a.getActivityStatus() != null
+      .filter(a -> a.isActive() && a.getPhase().equals(this.getActualPhase()) && a.getActivityStatus() != null
         && ((a.getActivityStatus() == Integer.parseInt(ProjectStatusEnum.Ongoing.getStatusId())
           || (a.getActivityStatus() == Integer.parseInt(ProjectStatusEnum.Extended.getStatusId())))))
       .collect(Collectors.toList())));
@@ -897,13 +900,13 @@ public class ValidateProjectSectionAction extends BaseAction {
 
     if (project.getProjectActivities() != null) {
       for (Activity openActivity : project.getProjectActivities()) {
-        openActivity.setDeliverables(new ArrayList<DeliverableActivity>(
-          openActivity.getDeliverableActivities().stream().filter(da -> da.isActive()).collect(Collectors.toList())));
+        openActivity.setDeliverables(new ArrayList<DeliverableActivity>(openActivity.getDeliverableActivities().stream()
+          .filter(da -> da.isActive() && da.getPhase().equals(this.getActualPhase())).collect(Collectors.toList())));
       }
     }
 
     project.setClosedProjectActivities(new ArrayList<Activity>(project.getActivities().stream()
-      .filter(a -> a.isActive() && a.getActivityStatus() != null
+      .filter(a -> a.isActive() && a.getActivityStatus() != null && a.getPhase().equals(this.getActualPhase())
         && ((a.getActivityStatus() == Integer.parseInt(ProjectStatusEnum.Complete.getStatusId())
           || (a.getActivityStatus() == Integer.parseInt(ProjectStatusEnum.Cancelled.getStatusId())))))
       .collect(Collectors.toList())));
@@ -921,7 +924,8 @@ public class ValidateProjectSectionAction extends BaseAction {
     // Getting the project information.
     Project project = projectManager.getProjectById(projectID);
 
-    project.setBudgets(project.getProjectBudgets().stream().filter(c -> c.isActive()).collect(Collectors.toList()));
+    project.setBudgets(project.getProjectBudgets().stream()
+      .filter(c -> c.isActive() && c.getPhase().equals(this.getActualPhase())).collect(Collectors.toList()));
 
 
     projectBudgetsValidator.validate(this, project, false);
@@ -932,8 +936,8 @@ public class ValidateProjectSectionAction extends BaseAction {
   public void validateProjectBudgetsCoAs() {
     // Getting the project information.
     Project project = projectManager.getProjectById(projectID);
-    project.setBudgetsCluserActvities(
-      project.getProjectBudgetsCluserActvities().stream().filter(c -> c.isActive()).collect(Collectors.toList()));
+    project.setBudgetsCluserActvities(project.getProjectBudgetsCluserActvities().stream()
+      .filter(c -> c.isActive() && c.getPhase().equals(this.getActualPhase())).collect(Collectors.toList()));
     if (!(project.getProjectBudgetsCluserActvities().isEmpty()
       || project.getProjectBudgetsCluserActvities().size() == 1)) {
       projectBudgetsCoAValidator.validate(this, project, false);
@@ -948,27 +952,39 @@ public class ValidateProjectSectionAction extends BaseAction {
     List<Deliverable> deliverables =
       project.getDeliverables().stream().filter(d -> d.isActive()).collect(Collectors.toList());
     List<Deliverable> openA = deliverables.stream()
-      .filter(a -> a.isActive() && a.getYear() >= this.getCurrentCycleYear()
-        && ((a.getStatus() == null || a.getStatus() == Integer.parseInt(ProjectStatusEnum.Ongoing.getStatusId())
-          || (a.getStatus() == Integer.parseInt(ProjectStatusEnum.Extended.getStatusId())
-            || a.getStatus().intValue() == 0))))
+      .filter(a -> a.isActive() && ((a.getDeliverableInfo(this.getActualPhase()).getStatus() == null
+        || (a.getDeliverableInfo(this.getActualPhase()).getStatus() == Integer
+          .parseInt(ProjectStatusEnum.Ongoing.getStatusId())
+        && a.getDeliverableInfo(this.getActualPhase()).getYear() >= this.getCurrentCycleYear())
+      || (a.getDeliverableInfo(this.getActualPhase()).getStatus() == Integer
+        .parseInt(ProjectStatusEnum.Extended.getStatusId())
+        || a.getDeliverableInfo(this.getActualPhase()).getStatus().intValue() == 0))))
       .collect(Collectors.toList());
 
     if (this.isReportingActive()) {
-      openA.addAll(deliverables.stream()
-        .filter(d -> d.isActive() && d.getYear() == this.getCurrentCycleYear() && d.getStatus() != null
-          && d.getStatus().intValue() == Integer.parseInt(ProjectStatusEnum.Complete.getStatusId()))
-        .collect(Collectors.toList()));
-      openA.addAll(deliverables.stream()
-        .filter(d -> d.isActive() && d.getNewExpectedYear() != null
-          && d.getNewExpectedYear().intValue() == this.getCurrentCycleYear() && d.getStatus() != null
-          && d.getStatus().intValue() == Integer.parseInt(ProjectStatusEnum.Complete.getStatusId()))
-        .collect(Collectors.toList()));
+      openA
+        .addAll(deliverables.stream()
+          .filter(d -> d.isActive()
+            && d.getDeliverableInfo(this.getActualPhase()).getYear() == this.getActualPhase().getYear()
+            && d.getDeliverableInfo(this.getActualPhase()).getStatus() != null
+            && d.getDeliverableInfo(this.getActualPhase()).getStatus().intValue() == Integer
+              .parseInt(ProjectStatusEnum.Complete.getStatusId()))
+          .collect(Collectors.toList()));
+      openA
+        .addAll(
+          deliverables.stream()
+            .filter(d -> d.isActive() && d.getDeliverableInfo(this.getActualPhase()).getNewExpectedYear() != null
+              && d.getDeliverableInfo(this.getActualPhase()).getNewExpectedYear().intValue() == this
+                .getCurrentCycleYear()
+              && d.getDeliverableInfo(this.getActualPhase()).getStatus() != null
+              && d.getDeliverableInfo(this.getActualPhase()).getStatus().intValue() == Integer
+                .parseInt(ProjectStatusEnum.Complete.getStatusId()))
+            .collect(Collectors.toList()));
     }
 
     for (Deliverable deliverable : openA) {
 
-
+      deliverable.setDeliverableInfo(deliverable.getDeliverableInfo(this.getActualPhase()));
       deliverable.setResponsiblePartner(this.responsiblePartner(deliverable));
       deliverable.setOtherPartners(this.otherPartners(deliverable));
       deliverable.setGenderLevels(
@@ -979,8 +995,8 @@ public class ValidateProjectSectionAction extends BaseAction {
 
       if (this.isReportingActive()) {
 
-        DeliverableQualityCheck deliverableQualityCheck =
-          deliverableQualityCheckManager.getDeliverableQualityCheckByDeliverable(deliverable.getId());
+        DeliverableQualityCheck deliverableQualityCheck = deliverableQualityCheckManager
+          .getDeliverableQualityCheckByDeliverable(deliverable.getId(), this.getActualPhase().getId());
         deliverable.setQualityCheck(deliverableQualityCheck);
 
         if (deliverable.getDeliverableMetadataElements() != null) {
@@ -1013,8 +1029,12 @@ public class ValidateProjectSectionAction extends BaseAction {
         }
 
 
-        deliverable.setUsers(deliverable.getDeliverableUsers().stream().collect(Collectors.toList()));
-        deliverable.setCrps(deliverable.getDeliverableCrps().stream().collect(Collectors.toList()));
+        deliverable.setUsers(deliverable.getDeliverableUsers().stream()
+          .filter(c -> c.getPhase() != null && c.getPhase().equals(this.getActualPhase()))
+          .collect(Collectors.toList()));
+        deliverable.setCrps(deliverable.getDeliverableCrps().stream()
+          .filter(c -> c.getPhase() != null && c.getPhase().equals(this.getActualPhase()))
+          .collect(Collectors.toList()));
         deliverable.setFiles(new ArrayList<>());
         for (DeliverableDataSharingFile dataSharingFile : deliverable.getDeliverableDataSharingFiles()) {
 
@@ -1043,9 +1063,12 @@ public class ValidateProjectSectionAction extends BaseAction {
 
   public void validateProjectDescription() {
     Project project = projectManager.getProjectById(projectID);
+    ProjectInfo projectInfo = project.getProjecInfoPhase(this.getActualPhase());
+
     List<CrpProgram> programs = new ArrayList<>();
     for (ProjectFocus projectFocuses : project.getProjectFocuses().stream()
-      .filter(c -> c.isActive() && c.getCrpProgram().getProgramType() == ProgramType.FLAGSHIP_PROGRAM_TYPE.getValue())
+      .filter(c -> c.isActive() && c.getPhase() != null && c.getPhase().equals(this.getActualPhase())
+        && c.getCrpProgram().getProgramType() == ProgramType.FLAGSHIP_PROGRAM_TYPE.getValue())
       .collect(Collectors.toList())) {
       programs.add(projectFocuses.getCrpProgram());
 
@@ -1059,7 +1082,8 @@ public class ValidateProjectSectionAction extends BaseAction {
 
     List<CrpProgram> regions = new ArrayList<>();
     for (ProjectFocus projectFocuses : project.getProjectFocuses().stream()
-      .filter(c -> c.isActive() && c.getCrpProgram().getProgramType() == ProgramType.REGIONAL_PROGRAM_TYPE.getValue())
+      .filter(c -> c.isActive() && c.getPhase() != null && c.getPhase().equals(this.getActualPhase())
+        && c.getCrpProgram().getProgramType() == ProgramType.REGIONAL_PROGRAM_TYPE.getValue())
       .collect(Collectors.toList())) {
       regions.add(projectFocuses.getCrpProgram());
       if (project.getRegionsValue() == null) {
@@ -1072,7 +1096,8 @@ public class ValidateProjectSectionAction extends BaseAction {
 
     List<ProjectClusterActivity> projectClusterActivities = new ArrayList<>();
     for (ProjectClusterActivity projectClusterActivity : project.getProjectClusterActivities().stream()
-      .filter(c -> c.isActive()).collect(Collectors.toList())) {
+      .filter(c -> c.isActive() && c.getPhase() != null && c.getPhase().equals(this.getActualPhase()))
+      .collect(Collectors.toList())) {
 
       projectClusterActivity.getCrpClusterOfActivity().setLeaders(projectClusterActivity.getCrpClusterOfActivity()
         .getCrpClusterActivityLeaders().stream().filter(c -> c.isActive()).collect(Collectors.toList()));
@@ -1095,28 +1120,33 @@ public class ValidateProjectSectionAction extends BaseAction {
 
   public void validateProjectLocations() {
     // Getting the project information.
+    // Getting the project information.
     Project project = projectManager.getProjectById(projectID);
     project.setLocationsData(new ArrayList<>(this.getProjectLocationsData(project)));
     this.prepareFundingList(project);
-    for (CountryFundingSources locElement : project.getRegionFS()) {
+    if (project.getRegionFS() != null) {
+      for (CountryFundingSources locElement : project.getRegionFS()) {
 
 
-      if (locElement.getLocElement() != null) {
-        locElement.setSelected(this.locElementSelected(locElement.getLocElement().getId(), project.getId()));
-      } else {
-        locElement.setSelected(this.locElementTypeSelected(locElement.getLocElementType().getId(), project.getId()));
+        if (locElement.getLocElement() != null) {
+          locElement.setSelected(this.locElementSelected(locElement.getLocElement().getId(), project.getId()));
+        } else {
+          locElement.setSelected(this.locElementTypeSelected(locElement.getLocElementType().getId(), project.getId()));
+        }
+
       }
-
     }
-    for (CountryFundingSources locElement : project.getCountryFS()) {
+    if (project.getCountryFS() != null) {
+      for (CountryFundingSources locElement : project.getCountryFS()) {
 
 
-      if (locElement.getLocElement() != null) {
-        locElement.setSelected(this.locElementSelected(locElement.getLocElement().getId(), project.getId()));
-      } else {
-        locElement.setSelected(this.locElementTypeSelected(locElement.getLocElementType().getId(), project.getId()));
+        if (locElement.getLocElement() != null) {
+          locElement.setSelected(this.locElementSelected(locElement.getLocElement().getId(), project.getId()));
+        } else {
+          locElement.setSelected(this.locElementTypeSelected(locElement.getLocElementType().getId(), project.getId()));
+        }
+
       }
-
     }
     locationValidator.validate(this, project, false);
   }
@@ -1125,8 +1155,8 @@ public class ValidateProjectSectionAction extends BaseAction {
     // Getting the project information.
     Project project = projectManager.getProjectById(projectID);
 
-    List<ProjectOutcome> projectOutcomes =
-      project.getProjectOutcomes().stream().filter(c -> c.isActive()).collect(Collectors.toList());
+    List<ProjectOutcome> projectOutcomes = project.getProjectOutcomes().stream()
+      .filter(c -> c.isActive() && c.getPhase().equals(this.getActualPhase())).collect(Collectors.toList());
 
 
     project.setOutcomes(projectOutcomes);
@@ -1148,7 +1178,8 @@ public class ValidateProjectSectionAction extends BaseAction {
 
   public void validateProjectParnters() {
     Project project = projectManager.getProjectById(projectID);
-    project.setPartners(project.getProjectPartners().stream().filter(c -> c.isActive()).collect(Collectors.toList()));
+    project.setPartners(project.getProjectPartners().stream()
+      .filter(c -> c.isActive() && c.getPhase().equals(this.getActualPhase())).collect(Collectors.toList()));
     for (ProjectPartner projectPartner : project.getPartners()) {
       List<ProjectPartnerContribution> contributors = new ArrayList<>();
 

@@ -16,7 +16,6 @@ package org.cgiar.ccafs.marlo.validation.projects;
 
 
 import org.cgiar.ccafs.marlo.action.BaseAction;
-import org.cgiar.ccafs.marlo.config.APConstants;
 import org.cgiar.ccafs.marlo.data.manager.BudgetTypeManager;
 import org.cgiar.ccafs.marlo.data.manager.CrpManager;
 import org.cgiar.ccafs.marlo.data.manager.ProjectManager;
@@ -151,7 +150,7 @@ public class ProjectBudgetsCoAValidator extends BaseValidator {
         if (CollectionUtils.isNotEmpty(project.getBudgetsCluserActvities())) {
           if (this.hasBudgets(new Long(1), action.getCurrentCycleYear(), project.getId())) {
             List<ProjectBudgetsCluserActvity> w1w2List = project
-              .getBudgetsCluserActvities().stream().filter(c -> c.isActive()
+              .getBudgetsCluserActvities().stream().filter(c -> c != null && c.isActive()
                 && (c.getBudgetType().getId().longValue() == 1) && (c.getYear() == action.getCurrentCycleYear()))
               .collect(Collectors.toList());
             this.validateBudgets(action, w1w2List, new Long(1),
@@ -194,13 +193,12 @@ public class ProjectBudgetsCoAValidator extends BaseValidator {
         action
           .addActionMessage(" " + action.getText("saving.missingFields", new String[] {validationMessage.toString()}));
       }
-      if (action.isReportingActive()) {
-        this.saveMissingFields(project, APConstants.REPORTING, action.getReportingYear(),
-          ProjectSectionStatusEnum.BUDGETBYCOA.getStatus());
-      } else {
-        this.saveMissingFields(project, APConstants.PLANNING, action.getPlanningYear(),
-          ProjectSectionStatusEnum.BUDGETBYCOA.getStatus());
-      }
+
+
+      this.saveMissingFields(project, action.getActualPhase().getDescription(), action.getActualPhase().getYear(),
+        ProjectSectionStatusEnum.BUDGETBYCOA.getStatus());
+
+
       // Saving missing fields.
 
     }

@@ -16,7 +16,6 @@ package org.cgiar.ccafs.marlo.validation.projects;
 
 
 import org.cgiar.ccafs.marlo.action.BaseAction;
-import org.cgiar.ccafs.marlo.config.APConstants;
 import org.cgiar.ccafs.marlo.data.manager.CrpManager;
 import org.cgiar.ccafs.marlo.data.manager.FundingSourceManager;
 import org.cgiar.ccafs.marlo.data.model.Crp;
@@ -107,10 +106,10 @@ public class ProjectBudgetsValidator extends BaseValidator {
                 // the year evaluated. If it is not new this budget is excluded from the calculation
                 double remaining = 0;
                 if (projectBudget.getId() == null) {
-                  remaining = fundingSource.getRemaining(projectBudget.getYear());
+                  remaining = fundingSource.getRemaining(projectBudget.getYear(), action.getActualPhase());
                 } else {
-                  remaining =
-                    fundingSource.getRemainingExcludeBudget(projectBudget.getYear(), projectBudget.getId().longValue());
+                  remaining = fundingSource.getRemainingExcludeBudget(projectBudget.getYear(),
+                    projectBudget.getId().longValue(), action.getActualPhase());
                 }
                 double currentAmount = projectBudget.getAmount().doubleValue();
                 double subBudgets = remaining - currentAmount;
@@ -129,7 +128,7 @@ public class ProjectBudgetsValidator extends BaseValidator {
           }
           i++;
         }
-        if (total == 0) {
+        if (total < 0) {
           this.addMessage(action.getText("projectBudgets.amount"));
           i = 0;
           for (ProjectBudget projectBudget : project.getBudgets()) {
@@ -152,13 +151,10 @@ public class ProjectBudgetsValidator extends BaseValidator {
         action
           .addActionMessage(" " + action.getText("saving.missingFields", new String[] {validationMessage.toString()}));
       }
-      if (action.isReportingActive()) {
-        this.saveMissingFields(project, APConstants.REPORTING, action.getReportingYear(),
-          ProjectSectionStatusEnum.BUDGET.getStatus());
-      } else {
-        this.saveMissingFields(project, APConstants.PLANNING, action.getPlanningYear(),
-          ProjectSectionStatusEnum.BUDGET.getStatus());
-      }
+
+      this.saveMissingFields(project, action.getActualPhase().getDescription(), action.getActualPhase().getYear(),
+        ProjectSectionStatusEnum.BUDGET.getStatus());
+
       // Saving missing fields.
 
     }

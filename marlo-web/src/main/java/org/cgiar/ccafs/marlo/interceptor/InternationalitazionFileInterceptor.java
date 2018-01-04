@@ -123,7 +123,9 @@ public class InternationalitazionFileInterceptor extends AbstractInterceptor {
           }
 
         }
-
+        session.remove(APConstants.CURRENT_PHASE);
+        session.remove(APConstants.PHASES);
+        session.remove(APConstants.PHASES_IMPACT);
       }
     }
 

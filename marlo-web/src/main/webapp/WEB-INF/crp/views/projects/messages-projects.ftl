@@ -1,4 +1,5 @@
 [#ftl]
+
 [#-- Projects data information --]
 [#include "/WEB-INF/crp/views/projects/dataInfo-projects.ftl" /]
 
@@ -34,7 +35,10 @@
     [#if crpClosed]
       <p class="readPrivileges">MARLO is closed.</p>
     [#else]
-      [#if project.projectEditLeader]
+     [#if !action.getActualPhase().editable]
+        <p class="readPrivileges">[@s.text name="phase.read.privileges.section" /]</p>
+        [/#if]
+      [#if project.projectInfo.isProjectEditLeader()]
         [#if !(action.hasPermission("statusDescription")) ]
         <p class="readPrivileges">[@s.text name="saving.read.privileges.section" /]</p>
         [/#if]

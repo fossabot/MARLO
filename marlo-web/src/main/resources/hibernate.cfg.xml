@@ -144,7 +144,9 @@
 		<mapping resource="xmls/CustomParameters.hbm.xml" />
 		<mapping resource="xmls/InstitutionsLocations.hbm.xml" />
 		<mapping resource="xmls/ProjectPartnerLocations.hbm.xml" />
-
+		<mapping resource="xmls/FundingSourceInfo.hbm.xml" />
+		<mapping resource="xmls/ProjectsInfo.hbm.xml" />
+		
 		<mapping resource="xmls/CenterUsers.hbm.xml" />
 		<mapping resource="xmls/CenterAllTypes.hbm.xml" />
 		<mapping resource="xmls/CenterMilestones.hbm.xml" />
@@ -206,6 +208,7 @@
 		<mapping resource="xmls/CapdevSuppDocsDocuments.hbm.xml" />
 		<mapping resource="xmls/CapdevFoundingType.hbm.xml" />
 		<mapping resource="xmls/CapdevHighestDegree.hbm.xml" />
+		<mapping resource="xmls/DeliverablesInfo.hbm.xml" />
 		<mapping resource="xmls/Agreement.hbm.xml" />
 		<mapping resource="xmls/CountryAgreement.hbm.xml" />
 		<mapping resource="xmls/CrpAgreement.hbm.xml" />

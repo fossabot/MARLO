@@ -18,10 +18,13 @@ import org.cgiar.ccafs.marlo.config.APConstants;
 import org.cgiar.ccafs.marlo.data.IAuditLog;
 import org.cgiar.ccafs.marlo.data.manager.AuditLogManager;
 import org.cgiar.ccafs.marlo.data.manager.CrpClusterKeyOutputManager;
+import org.cgiar.ccafs.marlo.data.manager.CrpClusterOfActivityManager;
 import org.cgiar.ccafs.marlo.data.manager.CrpManager;
+import org.cgiar.ccafs.marlo.data.manager.CrpMilestoneManager;
 import org.cgiar.ccafs.marlo.data.manager.CrpPpaPartnerManager;
 import org.cgiar.ccafs.marlo.data.manager.CrpProgramLeaderManager;
 import org.cgiar.ccafs.marlo.data.manager.CrpProgramManager;
+import org.cgiar.ccafs.marlo.data.manager.CrpProgramOutcomeManager;
 import org.cgiar.ccafs.marlo.data.manager.DeliverableManager;
 import org.cgiar.ccafs.marlo.data.manager.FileDBManager;
 import org.cgiar.ccafs.marlo.data.manager.FundingSourceInstitutionManager;
@@ -42,9 +45,12 @@ import org.cgiar.ccafs.marlo.data.manager.IpLiaisonInstitutionManager;
 import org.cgiar.ccafs.marlo.data.manager.IpProgramManager;
 import org.cgiar.ccafs.marlo.data.manager.LiaisonUserManager;
 import org.cgiar.ccafs.marlo.data.manager.LocElementTypeManager;
+import org.cgiar.ccafs.marlo.data.manager.PhaseManager;
+import org.cgiar.ccafs.marlo.data.manager.ProjectBudgetManager;
 import org.cgiar.ccafs.marlo.data.manager.ProjectComponentLessonManager;
 import org.cgiar.ccafs.marlo.data.manager.ProjectManager;
 import org.cgiar.ccafs.marlo.data.manager.ProjectOutcomeManager;
+import org.cgiar.ccafs.marlo.data.manager.ProjectPartnerPersonManager;
 import org.cgiar.ccafs.marlo.data.manager.SectionStatusManager;
 import org.cgiar.ccafs.marlo.data.manager.SrfTargetUnitManager;
 import org.cgiar.ccafs.marlo.data.manager.UserManager;
@@ -72,13 +78,19 @@ import org.cgiar.ccafs.marlo.data.model.CenterUser;
 import org.cgiar.ccafs.marlo.data.model.Crp;
 import org.cgiar.ccafs.marlo.data.model.CrpCategoryEnum;
 import org.cgiar.ccafs.marlo.data.model.CrpClusterKeyOutput;
+import org.cgiar.ccafs.marlo.data.model.CrpClusterKeyOutputOutcome;
+import org.cgiar.ccafs.marlo.data.model.CrpClusterOfActivity;
+import org.cgiar.ccafs.marlo.data.model.CrpMilestone;
 import org.cgiar.ccafs.marlo.data.model.CrpPpaPartner;
 import org.cgiar.ccafs.marlo.data.model.CrpProgram;
 import org.cgiar.ccafs.marlo.data.model.CrpProgramLeader;
+import org.cgiar.ccafs.marlo.data.model.CrpProgramOutcome;
 import org.cgiar.ccafs.marlo.data.model.CrpUser;
 import org.cgiar.ccafs.marlo.data.model.CustomLevelSelect;
 import org.cgiar.ccafs.marlo.data.model.Deliverable;
 import org.cgiar.ccafs.marlo.data.model.DeliverableDissemination;
+import org.cgiar.ccafs.marlo.data.model.DeliverableFundingSource;
+import org.cgiar.ccafs.marlo.data.model.DeliverableInfo;
 import org.cgiar.ccafs.marlo.data.model.DeliverableQualityCheck;
 import org.cgiar.ccafs.marlo.data.model.FileDB;
 import org.cgiar.ccafs.marlo.data.model.FundingSource;
@@ -92,11 +104,18 @@ import org.cgiar.ccafs.marlo.data.model.LiaisonUser;
 import org.cgiar.ccafs.marlo.data.model.LicensesTypeEnum;
 import org.cgiar.ccafs.marlo.data.model.LocElement;
 import org.cgiar.ccafs.marlo.data.model.LocElementType;
+import org.cgiar.ccafs.marlo.data.model.Phase;
 import org.cgiar.ccafs.marlo.data.model.Project;
+import org.cgiar.ccafs.marlo.data.model.ProjectBudget;
+import org.cgiar.ccafs.marlo.data.model.ProjectClusterActivity;
 import org.cgiar.ccafs.marlo.data.model.ProjectComponentLesson;
 import org.cgiar.ccafs.marlo.data.model.ProjectFocus;
 import org.cgiar.ccafs.marlo.data.model.ProjectHighlight;
+import org.cgiar.ccafs.marlo.data.model.ProjectInfo;
+import org.cgiar.ccafs.marlo.data.model.ProjectMilestone;
 import org.cgiar.ccafs.marlo.data.model.ProjectOutcome;
+import org.cgiar.ccafs.marlo.data.model.ProjectPartner;
+import org.cgiar.ccafs.marlo.data.model.ProjectPartnerPerson;
 import org.cgiar.ccafs.marlo.data.model.ProjectSectionStatusEnum;
 import org.cgiar.ccafs.marlo.data.model.ProjectSectionsEnum;
 import org.cgiar.ccafs.marlo.data.model.ProjectStatusEnum;
@@ -129,10 +148,12 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -140,6 +161,8 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.opensymphony.xwork2.ActionContext;
 import com.opensymphony.xwork2.ActionSupport;
 import com.opensymphony.xwork2.Preparable;
@@ -200,16 +223,33 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
   private InstitutionManager institutionManager;
   private String basePermission;
   protected boolean cancel;
+  private boolean editStatus = false; // If user is able to edit the form.
+
 
   private boolean canEdit; // If user is able to edit the form.
+
+
+  private boolean availabePhase = true; // If user is able to edit the form.
+
+  private boolean canEditPhase = true; // If user is able to edit the form.
   private boolean canSwitchProject; // If user is able to Switch Project. (generally is a project leader)
 
+
   private boolean switchSession;
+
 
   protected APConfig config;
 
   @Inject
+  private PhaseManager phaseManager;
+
+  @Inject
   private CrpClusterKeyOutputManager crpClusterKeyOutputManager;
+  @Inject
+  private CrpClusterOfActivityManager crpClusterOfActivityManager;
+
+  @Inject
+  private CrpMilestoneManager crpMilestoneManager;
 
   private Long crpID;
 
@@ -217,37 +257,48 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
   @Inject
   private CrpManager crpManager;
 
+
   @Inject
   private CrpPpaPartnerManager crpPpaPartnerManager;
 
   @Inject
   private CrpProgramLeaderManager crpProgramLeaderManager;
-
   @Inject
   private CrpProgramManager crpProgramManager;
 
-
+  @Inject
+  private CrpProgramOutcomeManager crpProgramOutcomeManager;
   // Variables
   private String crpSession;
 
   private Crp currentCrp;
 
-
   protected boolean dataSaved;
+
   protected boolean delete;
+
   @Inject
   private DeliverableManager deliverableManager;
 
   private boolean draft;
+
+
   @Inject
   private SrfTargetUnitManager targetUnitManager;
+
   @Inject
   private LocElementTypeManager locElementTypeManager;
+
+  @Inject
+  private ProjectBudgetManager projectBudgetManager;
+  @Inject
+  private ProjectPartnerPersonManager partnerPersonManager;
 
   @Inject
   private UserManager userManager;
   @Inject
   private FileDBManager fileDBManager;
+
   private boolean fullEditable; // If user is able to edit all the form.
   @Inject
   private FundingSourceManager fundingSourceManager;
@@ -255,56 +306,52 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
   private FundingSourceInstitutionManager fundingSourceInstitutionManager;
   @Inject
   private FundingSourceValidator fundingSourceValidator;
-
   private HashMap<String, String> invalidFields;
+
   // User actions
   private boolean isEditable; // If user is able to edit the form.
-
   // Justification of the changes
   private String justification;
-
   private boolean lessonsActive;
-
-
   @Inject
   private LiaisonUserManager liaisonUserManager;
-
   protected boolean next;
-  private Map<String, Parameter> parameters;
 
+  private Map<String, Parameter> parameters;
   private boolean planningActive;
   private int planningYear;
-
 
   @Inject
   private ProjectComponentLessonManager projectComponentLessonManager;
 
+
   @Inject
   private ProjectManager projectManager;
+
   @Inject
   private ProjectOutcomeManager projectOutcomeManager;
   private boolean reportingActive;
 
   private int reportingYear;
-
   private HttpServletRequest request;
+
   /*********************************************************
    * CENTER VARIABLES
    * *******************************************************
    */
   @Inject
   private ICenterTopicManager topicService;
+
+
   @Inject
   private ICenterImpactManager impactService;
 
   @Inject
   private ICenterOutcomeManager outcomeService;
-
   @Inject
   private ICenterOutputManager outputService;
   @Inject
   private ICenterSectionStatusManager secctionStatusService;
-
 
   @Inject
   private ICenterCycleManager cycleService;
@@ -315,12 +362,17 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
   private ICenterProgramManager programService;
   @Inject
   private ICenterProjectManager projectService;
+
   @Inject
   private ICenterDeliverableManager deliverableService;
+
   @Inject
   private ICenterSectionStatusManager sectionStatusService;
   private String centerSession;
+
+
   private Long centerID;
+
   private Center currentCenter;
   private CenterSubmission centerSubmission;
 
@@ -337,12 +389,9 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
   @Inject
   protected BaseSecurityContext securityContext;
   private Map<String, Object> session;
-
   private Submission submission;
   protected boolean submit;
-
   private String url;
-
   @Inject
   private UserRoleManager userRoleManager;
   @Inject
@@ -414,19 +463,16 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
 
   }
 
-
   public boolean canAcessImpactPathway() {
     final String permission =
       this.generatePermission(Permission.IMPACT_PATHWAY_VISIBLE_PRIVILEGES, this.getCrpSession());
     return securityContext.hasPermission(permission);
   }
 
-
   public boolean canAcessPublications() {
     final String params[] = {this.getCrpSession()};
     return (this.hasPermission(this.generatePermission(Permission.PUBLICATION_ADD, params)));
   }
-
 
   public boolean canAcessSynthesisMog() {
     final String permission = this.generatePermission(Permission.SYNTHESIS_BY_MOG_PERMISSION, this.getCrpSession());
@@ -438,12 +484,10 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
     return securityContext.hasPermission(permission);
   }
 
-
   public boolean canAddCoreProject() {
     final String permission = this.generatePermission(Permission.PROJECT_CORE_ADD, this.getCrpSession());
     return securityContext.hasPermission(permission);
   }
-
 
   public boolean canBeDeleted(long id, String className) {
     Class<?> clazz;
@@ -474,8 +518,9 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
         if (programs.size() > 0) {
 
           for (ProjectFocus projectFocus : programs) {
-            if (projectFocus.getProject().getStatus() != null) {
-              switch (ProjectStatusEnum.getValue(projectFocus.getProject().getStatus().intValue())) {
+            if (projectFocus.getProject().getProjecInfoPhase(this.getActualPhase()).getStatus() != null) {
+              switch (ProjectStatusEnum
+                .getValue(projectFocus.getProject().getProjecInfoPhase(this.getActualPhase()).getStatus().intValue())) {
                 case Ongoing:
                 case Extended:
                   deleted = false;
@@ -496,16 +541,18 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
           .collect(Collectors.toList())) {
 
 
-          List<Project> projects =
+          List<ProjectInfo> projects =
             liaisonUser.getProjects().stream().filter(c -> c.isActive()).collect(Collectors.toList());
           boolean deleted = true;
           if (projects.size() > 0) {
 
-            for (Project project : projects) {
-              if (project.getLiaisonInstitution().getCrpProgram().getId()
+            for (ProjectInfo projectInfo : projects) {
+              Project project = projectInfo.getProject();
+              if (project.getProjecInfoPhase(this.getActualPhase()).getLiaisonInstitution().getCrpProgram().getId()
                 .equals(crpProgramLeader.getCrpProgram().getId())) {
-                if (project.getStatus() != null) {
-                  switch (ProjectStatusEnum.getValue(project.getStatus().intValue())) {
+                if (project.getProjecInfoPhase(this.getActualPhase()).getStatus() != null) {
+                  switch (ProjectStatusEnum
+                    .getValue(project.getProjecInfoPhase(this.getActualPhase()).getStatus().intValue())) {
                     case Ongoing:
                     case Extended:
                       deleted = false;
@@ -553,10 +600,14 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
       }
 
       if (clazz == CrpPpaPartner.class) {
-        final CrpPpaPartner crpPpaPartner = crpPpaPartnerManager.getCrpPpaPartnerById(id);
-        if (crpPpaPartner.getInstitution().getProjectPartners().stream()
-          .filter(c -> c.isActive() && (c.getProject().getCrp().getId().longValue() == this.getCrpID().longValue()))
-          .collect(Collectors.toList()).size() > 0) {
+          CrpPpaPartner crpPpaPartner = crpPpaPartnerManager.getCrpPpaPartnerById(id);
+
+        List<ProjectPartner> partners = crpPpaPartner.getInstitution().getProjectPartners().stream()
+          .filter(
+            c -> c.isActive() && c.getPhase() != null && c.getPhase().getId().equals(this.getActualPhase().getId())
+              && c.getProject().getCrp().getId().longValue() == this.getCrpID().longValue())
+          .collect(Collectors.toList());
+        if (partners.size() > 0) {
           return false;
         }
       }
@@ -588,6 +639,52 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
 
       }
 
+      if (clazz == ProjectPartnerPerson.class) {
+        ProjectPartnerPerson partnerPerson = partnerPersonManager.getProjectPartnerPersonById(id);
+        if (partnerPerson != null) {
+          if (partnerPerson.getDeliverablePartnerships().stream()
+            .filter(o -> o.isActive() && o.getPhase() != null && o.getPhase().equals(this.getActualPhase()))
+            .collect(Collectors.toList()).size() > 0) {
+            return false;
+          }
+        }
+
+
+      }
+
+      if (clazz == ProjectBudget.class) {
+
+
+        ProjectBudget projectBudget = projectBudgetManager.getProjectBudgetById(id);
+        FundingSource fundingSource =
+          fundingSourceManager.getFundingSourceById(projectBudget.getFundingSource().getId());
+        List<DeliverableFundingSource> deliverableFundingSources =
+          fundingSource.getDeliverableFundingSources().stream()
+            .filter(
+              c -> c.isActive() && c.getDeliverable().isActive() && c.getPhase() != null
+                && c.getPhase().getYear() == projectBudget.getYear() && c.getDeliverable().getProject() != null && c
+                  .getDeliverable().getProject().getId().longValue() == projectBudget.getProject().getId().longValue())
+          .collect(Collectors.toList());
+        List<Deliverable> onDeliverables = new ArrayList<>();
+        for (DeliverableFundingSource deliverableFundingSource : deliverableFundingSources) {
+          if (deliverableFundingSource.getDeliverable().getDeliverableInfo(this.getActualPhase())
+            .getYear() < projectBudget.getYear()
+            && deliverableFundingSource.getDeliverable().getDeliverableInfo(this.getActualPhase()).getStatus()
+              .intValue() == Integer.parseInt(ProjectStatusEnum.Extended.getStatusId())) {
+            onDeliverables.add(deliverableFundingSource.getDeliverable());
+          }
+          if (deliverableFundingSource.getDeliverable().getDeliverableInfo(this.getActualPhase())
+            .getYear() >= projectBudget.getYear()
+            && deliverableFundingSource.getDeliverable().getDeliverableInfo(this.getActualPhase()).getStatus()
+              .intValue() == Integer.parseInt(ProjectStatusEnum.Ongoing.getStatusId())) {
+            onDeliverables.add(deliverableFundingSource.getDeliverable());
+          }
+        }
+        System.out.println(fundingSource.getId() + " " + Arrays.toString(onDeliverables.toArray()));
+        if (!onDeliverables.isEmpty()) {
+          return false;
+        }
+      }
       if (clazz == CustomLevelSelect.class) {
         final LocElementType locElementType = locElementTypeManager.getLocElementTypeById(id);
 
@@ -603,19 +700,49 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
 
 
       }
+      if (clazz == CrpProgramOutcome.class || clazz == CrpClusterOfActivity.class || clazz == CrpMilestone.class) {
+        List<Project> projects = this.getProjectRelationsImpact(id, className);
+        if (!projects.isEmpty()) {
+          return false;
+        }
+
+
+      }
+      if (clazz == CrpClusterKeyOutput.class) {
+
+        List<Deliverable> projects = this.getDeliverableRelationsImpact(id, className);
+        if (!projects.isEmpty()) {
+          return false;
+        }
+        CrpClusterKeyOutput crpClusterKeyOutput = crpClusterKeyOutputManager.getCrpClusterKeyOutputById(id);
+        if (crpClusterKeyOutput.getCrpClusterKeyOutputOutcomes().stream().filter(c -> c.isActive())
+          .collect(Collectors.toList()).size() > 0) {
+          return false;
+        }
+      }
+      if (clazz == ProjectOutcome.class) {
+
+        ProjectOutcome projectOutcome = projectOutcomeManager.getProjectOutcomeById(id);
+        List<Deliverable> projects =
+          this.getDeliverableRelationsProject(id, className, projectOutcome.getProject().getId());
+        if (!projects.isEmpty()) {
+          return false;
+        }
+      }
       return true;
     } catch (final Exception e) {
-      return false;
+      e.printStackTrace();
+      return true;
     }
 
 
   }
 
-
   /* Override this method depending of the cancel action. */
   public String cancel() {
     return CANCEL;
   }
+
 
   /**
    * Verify if the project have Cluster of Activity to activate Budget by CoA
@@ -624,11 +751,13 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
    */
   public Boolean canEditBudgetByCoAs(long projectID) {
     final Project project = projectManager.getProjectById(projectID);
-    if (project.getProjectClusterActivities().stream().filter(pc -> pc.isActive())
+    if (project.getProjectClusterActivities().stream()
+      .filter(pc -> pc.isActive() && pc.getPhase().equals(this.getActualPhase()))
       .collect(Collectors.toList()) == null) {
       return false;
     }
-    if (project.getProjectClusterActivities().stream().filter(pc -> pc.isActive()).collect(Collectors.toList())
+    if (project.getProjectClusterActivities().stream()
+      .filter(pc -> pc.isActive() && pc.getPhase().equals(this.getActualPhase())).collect(Collectors.toList())
       .size() > 1) {
       return true;
     } else {
@@ -641,11 +770,11 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
       this.generatePermission(Permission.PROJECT_FUNDING_W1_BASE_PERMISSION, this.getCrpSession()));
   }
 
+
   public boolean canEditCrpAdmin() {
     final String permission = this.generatePermission(Permission.CRP_ADMIN_EDIT_PRIVILEGES, this.getCrpSession());
     return securityContext.hasPermission(permission);
   }
-
 
   public boolean canProjectSubmited(long projectID) {
     final String params[] = {crpManager.getCrpById(this.getCrpID()).getAcronym(), projectID + ""};
@@ -793,6 +922,7 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
 
   }
 
+
   /**
    * ***********************CENTER METHOD********************
    * Check if the Impact Pathway section is Active
@@ -810,6 +940,7 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
     }
 
   }
+
 
   /**
    * ***********************CENTER METHOD********************
@@ -871,10 +1002,10 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
       .clearCachedAuthorizationInfo(securityContext.getSubject().getPrincipals());
   }
 
+
   public String crpActivitesModule() {
     return APConstants.CRP_ACTIVITES_MODULE;
   }
-
 
   /* Override this method depending of the delete action. */
   public String delete() {
@@ -924,14 +1055,75 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
     return allYears;
   }
 
+  public String generatePermission(String permission, Map<String, Object> session, long crpID, String... params) {
+    Phase phase = this.getActualPhase(session, crpID);
+    String paramsRefactor[] = Arrays.copyOf(params, params.length);
+    paramsRefactor[0] = paramsRefactor[0] + ":" + phase.getDescription() + ":" + phase.getYear();
+    return this.getText(permission, paramsRefactor);
+
+  }
+
+
   public String generatePermission(String permission, String... params) {
-    return this.getText(permission, params);
+    Phase phase = this.getActualPhase();
+    String paramsRefactor[] = Arrays.copyOf(params, params.length);
+    paramsRefactor[0] = paramsRefactor[0] + ":" + phase.getDescription() + ":" + phase.getYear();
+    return this.getText(permission, paramsRefactor);
 
   }
 
   public String getActionName() {
     return ServletActionContext.getActionMapping().getName();
   }
+
+
+  /**
+   * get the actual
+   * 
+   * @return the actual phase of the crp
+   */
+  public Phase getActualPhase() {
+    try {
+      if (this.getSession().containsKey(APConstants.CURRENT_PHASE)) {
+        return (Phase) this.getSession().get(APConstants.CURRENT_PHASE);
+      } else {
+        Phase phase =
+          phaseManager.findCycle(this.getCurrentCycleParam(), this.getCurrentCycleYearParam(), this.getCrpID());
+        this.getSession().put(APConstants.CURRENT_PHASE, phase);
+        return phase;
+      }
+    } catch (Exception e) {
+      return new Phase(null, "", -1);
+    }
+
+
+  }
+
+  public Phase getActualPhase(Map<String, Object> session, long crpID) {
+    try {
+      if (session.containsKey(APConstants.CURRENT_PHASE)) {
+        return (Phase) session.get(APConstants.CURRENT_PHASE);
+      } else {
+        String cyle = "";
+        int year = 0;
+        if (Boolean.parseBoolean(session.get(APConstants.CRP_REPORTING_ACTIVE).toString())) {
+          cyle = APConstants.REPORTING;
+          year = Integer.parseInt(session.get(APConstants.CRP_REPORTING_YEAR).toString());
+        } else {
+          cyle = APConstants.PLANNING;
+          year = Integer.parseInt(session.get(APConstants.CRP_PLANNING_YEAR).toString());
+        }
+        Phase phase = phaseManager.findCycle(cyle, year, crpID);
+        session.put(APConstants.CURRENT_PHASE, phase);
+        return phase;
+      }
+    } catch (Exception e) {
+      return new Phase(null, "", -1);
+    }
+
+
+  }
+
 
   /**
    * ************************ CENTER METHOD ******************************
@@ -987,12 +1179,10 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
     return config.getBaseUrl() + "/crp";
   }
 
-
   public List<CrpCategoryEnum> getCategories() {
 
     return Arrays.asList(CrpCategoryEnum.values());
   }
-
 
   /**
    * ***********************CENTER METHOD***************************************************************
@@ -1044,7 +1234,6 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
     }
     return this.centerID;
   }
-
 
   /**
    * ***********************CENTER METHOD********************
@@ -1182,6 +1371,7 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
     return this.centerSession;
   }
 
+
   public List<Center> getCentersList() {
     List<Center> centers = new ArrayList<>();
     if (!this.canAccessSuperAdmin()) {
@@ -1200,6 +1390,7 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
     }
     return centers;
   }
+
 
   public CenterSubmission getCenterSubmission() {
     return centerSubmission;
@@ -1221,10 +1412,41 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
     return APConstants.INSTITUTION_CGIAR;
   }
 
+  public List<CrpClusterOfActivity> getClusterOutcome(long projectID, long crpProgramID) {
+    Project project = projectManager.getProjectById(projectID);
+
+    List<ProjectClusterActivity> clusters = project.getProjectClusterActivities().stream()
+      .filter(c -> c.isActive() && c.getPhase().equals(this.getActualPhase())
+        && c.getCrpClusterOfActivity().getCrpProgram().getId().longValue() == crpProgramID)
+      .collect(Collectors.toList());
+
+    List<CrpClusterOfActivity> clusterOfActivities = new ArrayList<>();
+    for (ProjectClusterActivity projectClusterActivity : clusters) {
+      clusterOfActivities.add(projectClusterActivity.getCrpClusterOfActivity());
+
+    }
+    return clusterOfActivities;
+  }
+
+
   public APConfig getConfig() {
     return config;
   }
 
+  public List<CrpProgramOutcome> getContributionsOutcome(long projectID, long crpProgramID) {
+    Project project = projectManager.getProjectById(projectID);
+
+    List<ProjectOutcome> outcomes =
+      project.getProjectOutcomes().stream().filter(c -> c.isActive() && c.getPhase().equals(this.getActualPhase())
+        && c.getCrpProgramOutcome().getCrpProgram().getId().longValue() == crpProgramID).collect(Collectors.toList());
+
+    List<CrpProgramOutcome> crpProgramOutcomes = new ArrayList<>();
+    for (ProjectOutcome projectOutcome : outcomes) {
+      crpProgramOutcomes.add(projectOutcome.getCrpProgramOutcome());
+
+    }
+    return crpProgramOutcomes;
+  }
 
   public List<Crp> getCrpCategoryList(String category) {
     return crpManager.findAll().stream()
@@ -1314,7 +1536,6 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
     return this.crpSession;
   }
 
-
   /**
    * ************************ CENTER METHOD *********************
    * Get the center that is currently save in the session
@@ -1369,9 +1590,26 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
     }
   }
 
-  public int getCurrentCycleYear() {
+
+  public String getCurrentCycleParam() {
     try {
-      if (this.isReportingActive()) {
+      if (this.isReportingActiveParam()) {
+        return APConstants.REPORTING;
+      } else {
+        return APConstants.PLANNING;
+      }
+    } catch (Exception e) {
+      return null;
+    }
+  }
+
+  public int getCurrentCycleYear() {
+    return this.getActualPhase().getYear();
+  }
+
+  public int getCurrentCycleYearParam() {
+    try {
+      if (this.isReportingActiveParam()) {
         return Integer.parseInt(this.getSession().get(APConstants.CRP_REPORTING_YEAR).toString());
       } else {
         return Integer.parseInt(this.getSession().get(APConstants.CRP_PLANNING_YEAR).toString());
@@ -1407,6 +1645,147 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
     return APConstants.DATE_FORMAT;
   }
 
+
+  public List<Deliverable> getDeliverableRelationsImpact(long id, String className) {
+    Class<?> clazz;
+    List<Deliverable> deliverables = null;
+    try {
+      clazz = Class.forName(className);
+      if (clazz == CrpClusterKeyOutput.class) {
+        CrpClusterKeyOutput crpClusterKeyOutput = crpClusterKeyOutputManager.getCrpClusterKeyOutputById(id);
+        List<DeliverableInfo> deList =
+          crpClusterKeyOutput.getDeliverables().stream().filter(c -> c.isActive()).collect(Collectors.toList());
+        Set<Deliverable> deSet = new HashSet<>();
+        for (DeliverableInfo deliverableInfo : deList) {
+          Deliverable deliverable = deliverableInfo.getDeliverable();
+          deliverable.getDeliverableInfo(this.getActualPhase());
+          if (deliverable.getDeliverableInfo() != null) {
+            if (deliverable.getDeliverableInfo().getYear() < this.getActualPhase().getYear()
+              && deliverable.getDeliverableInfo(this.getActualPhase()).getStatus().intValue() == Integer
+                .parseInt(ProjectStatusEnum.Extended.getStatusId())) {
+              deSet.add(deliverable);
+            }
+            if (deliverable.getDeliverableInfo(this.getActualPhase()).getYear() >= this.getActualPhase().getYear()
+              && deliverable.getDeliverableInfo(this.getActualPhase()).getStatus().intValue() == Integer
+                .parseInt(ProjectStatusEnum.Ongoing.getStatusId())) {
+              deSet.add(deliverable);
+            }
+          }
+
+
+        }
+        deliverables = new ArrayList<>();
+        deliverables.addAll(deSet);
+      }
+
+    } catch (Exception e) {
+      e.printStackTrace();
+
+    }
+    return deliverables;
+
+  }
+
+
+  public List<Deliverable> getDeliverableRelationsProject(long id, String className, long projectID) {
+    Class<?> clazz;
+    List<Deliverable> deliverables = null;
+    try {
+      clazz = Class.forName(className);
+
+      if (clazz == ProjectBudget.class) {
+        ProjectBudget projectBudget = projectBudgetManager.getProjectBudgetById(id);
+        List<DeliverableFundingSource> deList = projectBudget.getFundingSource().getDeliverableFundingSources().stream()
+          .filter(c -> c.isActive() && c.getPhase().equals(this.getActualPhase())
+            && c.getDeliverable().getProject().getId().longValue() == projectID)
+          .collect(Collectors.toList());
+        Set<Deliverable> deSet = new HashSet<>();
+        for (DeliverableFundingSource deliverableInfo : deList) {
+          Deliverable deliverable = deliverableInfo.getDeliverable();
+          long projectDB = deliverable.getProject().getId().longValue();
+          if (deliverable.getProject() != null && projectDB == projectID) {
+            if (deliverable.getDeliverableInfo() != null) {
+              if (deliverable.getDeliverableInfo().getYear() < this.getActualPhase().getYear()
+                && deliverable.getDeliverableInfo(this.getActualPhase()).getStatus().intValue() == Integer
+                  .parseInt(ProjectStatusEnum.Extended.getStatusId())) {
+                deSet.add(deliverable);
+              }
+              if (deliverable.getDeliverableInfo(this.getActualPhase()).getYear() >= this.getActualPhase().getYear()
+                && deliverable.getDeliverableInfo(this.getActualPhase()).getStatus().intValue() == Integer
+                  .parseInt(ProjectStatusEnum.Ongoing.getStatusId())) {
+                deSet.add(deliverable);
+              }
+            }
+          }
+
+
+        }
+        deliverables = new ArrayList<>();
+        deliverables.addAll(deSet);
+      }
+
+      if (clazz == Project.class) {
+        ProjectBudget projectBudget = projectBudgetManager.getProjectBudgetById(id);
+        List<DeliverableFundingSource> deList = projectBudget.getFundingSource().getDeliverableFundingSources().stream()
+          .filter(c -> c.isActive() && c.getPhase().equals(this.getActualPhase())
+            && c.getDeliverable().getProject().getId().longValue() == projectID)
+          .collect(Collectors.toList());
+        Set<Deliverable> deSet = new HashSet<>();
+        for (DeliverableFundingSource deliverableInfo : deList) {
+          Deliverable deliverable = deliverableInfo.getDeliverable();
+          long projectDB = deliverable.getProject().getId().longValue();
+          if (deliverable.getProject() != null && projectDB == projectID) {
+            if (deliverable.getDeliverableInfo() != null) {
+              if (deliverable.getDeliverableInfo().getYear() < this.getActualPhase().getYear()
+                && deliverable.getDeliverableInfo(this.getActualPhase()).getStatus().intValue() == Integer
+                  .parseInt(ProjectStatusEnum.Extended.getStatusId())) {
+                deSet.add(deliverable);
+              }
+              if (deliverable.getDeliverableInfo(this.getActualPhase()).getYear() >= this.getActualPhase().getYear()
+                && deliverable.getDeliverableInfo(this.getActualPhase()).getStatus().intValue() == Integer
+                  .parseInt(ProjectStatusEnum.Ongoing.getStatusId())) {
+                deSet.add(deliverable);
+              }
+            }
+          }
+
+
+        }
+        deliverables = new ArrayList<>();
+        deliverables.addAll(deSet);
+      }
+
+      if (clazz == ProjectOutcome.class) {
+        deliverables = new ArrayList<>();
+        ProjectOutcome projectOutcome = projectOutcomeManager.getProjectOutcomeById(id);
+        List<CrpClusterKeyOutputOutcome> keyOutputOutcomes = projectOutcome.getCrpProgramOutcome()
+          .getCrpClusterKeyOutputOutcomes().stream().filter(c -> c.isActive()).collect(Collectors.toList());
+        for (CrpClusterKeyOutputOutcome crpClusterKeyOutputOutcome : keyOutputOutcomes) {
+
+          deliverables.addAll(this.getDeliverableRelationsImpact(
+            crpClusterKeyOutputOutcome.getCrpClusterKeyOutput().getId(), CrpClusterKeyOutput.class.getName()));
+        }
+        List<Deliverable> deList = new ArrayList<>();
+
+        for (Deliverable deliverable : deliverables) {
+          if (deliverable.getProject() != null && deliverable.getProject().getId().longValue() == projectID) {
+            deList.add(deliverable);
+          }
+        }
+        deliverables.clear();
+        deliverables.addAll(deList);
+
+
+      }
+
+    } catch (Exception e) {
+      e.printStackTrace();
+
+    }
+    return deliverables;
+
+  }
+
   /**
    * This method gets the specific section status from the sectionStatuses array for a Deliverable.
    * 
@@ -1416,7 +1795,18 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
    */
   public SectionStatus getDeliverableStatus(long deliverableID) {
     final Deliverable deliverable = deliverableManager.getDeliverableById(deliverableID);
-
+    if (deliverableID == 4063) {
+      System.out.println("holi");
+    }
+    if (deliverable.getDeliverableInfo(this.getActualPhase()) != null) {
+      DeliverableInfo deliverableInfo = deliverable.getDeliverableInfo(this.getActualPhase());
+      if (deliverableInfo.getStatus() != null
+        && deliverableInfo.getStatus().intValue() == Integer.parseInt(ProjectStatusEnum.Ongoing.getStatusId())) {
+        if (deliverableInfo.getYear() < this.getActualPhase().getYear()) {
+          return new SectionStatus();
+        }
+      }
+    }
     final List<SectionStatus> sectionStatuses = deliverable.getSectionStatuses().stream()
       .filter(c -> (c.getYear() == this.getCurrentCycleYear()) && c.getCycle().equals(this.getCurrentCycle()))
       .collect(Collectors.toList());
@@ -1473,23 +1863,35 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
 
   }
 
-  public boolean getFundingSourceStatus(long fundingSourceID) {
-    final FundingSource fundingSource = fundingSourceManager.getFundingSourceById(fundingSourceID);
+   private boolean getFundingSourceStatus(FundingSource fundingSource) {
+    fundingSource.setFundingSourceInfo(fundingSource.getFundingSourceInfo(this.getActualPhase()));
+    if (fundingSource.getFundingSourceInfo(this.getActualPhase()) != null) {
+      List<SectionStatus> sectionStatuses = fundingSource.getSectionStatuses().stream()
+        .filter(c -> c.getCycle().equals(this.getActualPhase().getDescription())
+          && c.getYear() == this.getActualPhase().getYear())
 
-    final List<SectionStatus> sectionStatuses = fundingSource.getSectionStatuses().stream()
+        .collect(Collectors.toList());
 
-      .collect(Collectors.toList());
+      if (!sectionStatuses.isEmpty()) {
+        SectionStatus sectionStatus = sectionStatuses.get(0);
+        return sectionStatus.getMissingFields().length() == 0
+          && !this.getAutoSaveFilePath(fundingSource.getClass().getSimpleName(),
+            ProjectSectionStatusEnum.FUNDINGSOURCE.getStatus(), fundingSource.getId());
 
-    if (!sectionStatuses.isEmpty()) {
-      final SectionStatus sectionStatus = sectionStatuses.get(0);
-      return (sectionStatus.getMissingFields().length() == 0)
-        && !this.getAutoSaveFilePath(fundingSource.getClass().getSimpleName(),
-          ProjectSectionStatusEnum.FUNDINGSOURCE.getStatus(), fundingSource.getId());
+      } else {
 
+        fundingSourceValidator.validate(this, fundingSource, false);
+        return this.getFundingSourceStatus(fundingSource);
+      }
     } else {
-      fundingSourceValidator.validate(this, fundingSource, false);
-      return this.getFundingSourceStatus(fundingSource.getId());
+      return false;
     }
+
+  }
+
+  public boolean getFundingSourceStatus(long fundingSourceID) {
+    FundingSource fundingSource = fundingSourceManager.getFundingSourceById(fundingSourceID);
+    return this.getFundingSourceStatus(fundingSource);
   }
 
 
@@ -1514,9 +1916,10 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
   }
 
   public boolean getImpactSectionStatus(String section, long crpProgramID) {
-    final SectionStatus sectionStatus = sectionStatusManager.getSectionStatusByCrpProgam(crpProgramID, section);
+   SectionStatus sectionStatus = sectionStatusManager.getSectionStatusByCrpProgam(crpProgramID, section,
+      this.getActualPhase().getDescription(), this.getActualPhase().getYear());
     if (sectionStatus != null) {
-      if ((sectionStatus.getMissingFields().length() == 0)
+      if (sectionStatus.getMissingFields().length() == 0
         && !this.getAutoSaveFilePath(CrpProgram.class.getSimpleName(), section, crpProgramID)) {
         return true;
       }
@@ -1527,6 +1930,7 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
   public HashMap<String, String> getInvalidFields() {
     return invalidFields;
   }
+
 
   public String getJustification() {
     return justification;
@@ -1547,17 +1951,15 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
     return liasonsUsers;
   }
 
-
   public List<Auditlog> getListLog(IAuditLog object) {
     try {
       return auditLogManager.listLogs(object.getClass(), Long.parseLong(object.getId().toString()),
-        this.getActionName());
+        this.getActionName(), this.getActualPhase().getId());
     } catch (final Exception e) {
       e.printStackTrace();
       return new ArrayList<Auditlog>();
     }
   }
-
 
   /**
    * Define default locale while we decide to support other languages in the future.
@@ -1567,10 +1969,10 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
     return Locale.ENGLISH;
   }
 
-
   public String getNamespace() {
     return ServletActionContext.getActionMapping().getNamespace();
   }
+
 
   /**
    * get the number of users log in in the application
@@ -1586,27 +1988,30 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
 
   public List<Deliverable> getOpenDeliverables(List<Deliverable> deliverables) {
 
-    final List<Deliverable> openDeliverables = new ArrayList<>();
+   List<Deliverable> openDeliverables = new ArrayList<>();
 
-    for (final Deliverable a : deliverables) {
+    for (Deliverable a : deliverables) {
 
-      if (a.isActive()
-        && (((a.getStatus() == null) || (a.getStatus() == Integer.parseInt(ProjectStatusEnum.Ongoing.getStatusId()))
-          || ((a.getStatus() == Integer.parseInt(ProjectStatusEnum.Extended.getStatusId()))
-            || (a.getStatus().intValue() == 0))))) {
+      if (a.isActive() && ((a.getDeliverableInfo(this.getActualPhase()).getStatus() == null
+        || a.getDeliverableInfo(this.getActualPhase()).getStatus() == Integer
+          .parseInt(ProjectStatusEnum.Ongoing.getStatusId())
+        || (a.getDeliverableInfo(this.getActualPhase()).getStatus() == Integer
+          .parseInt(ProjectStatusEnum.Extended.getStatusId())
+          || a.getDeliverableInfo(this.getActualPhase()).getStatus().intValue() == 0)))) {
 
-        if (a.getNewExpectedYear() != null) {
-          if (a.getStatus() == Integer.parseInt(ProjectStatusEnum.Extended.getStatusId())) {
-            if (a.getNewExpectedYear() >= this.getCurrentCycleYear()) {
+        if (a.getDeliverableInfo(this.getActualPhase()).getNewExpectedYear() != null) {
+          if (a.getDeliverableInfo(this.getActualPhase()).getStatus() == Integer
+            .parseInt(ProjectStatusEnum.Extended.getStatusId())) {
+            if (a.getDeliverableInfo(this.getActualPhase()).getNewExpectedYear() >= this.getCurrentCycleYear()) {
               openDeliverables.add(a);
             }
           } else {
-            if (a.getYear() >= this.getCurrentCycleYear()) {
+            if (a.getDeliverableInfo(this.getActualPhase()).getYear() >= this.getCurrentCycleYear()) {
               openDeliverables.add(a);
             }
           }
         } else {
-          if (a.getYear() >= this.getCurrentCycleYear()) {
+          if (a.getDeliverableInfo(this.getActualPhase()).getYear() >= this.getCurrentCycleYear()) {
             openDeliverables.add(a);
           }
         }
@@ -1618,11 +2023,11 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
 
   }
 
-
   public Map<String, Parameter> getParameters() {
     parameters = ActionContext.getContext().getParameters();
     return parameters;
   }
+
 
   public String getParameterValue(String param) {
     final Object paramObj = this.getParameters().get(param);
@@ -1631,6 +2036,80 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
     }
     return ((String[]) paramObj)[0];
   }
+
+
+  /**
+   * validate if the list of phases are on session if not, will be find on bd
+   * 
+   * @return the list of the phases for the crp
+   */
+  public List<Phase> getPhases() {
+    if (this.getSession().containsKey(APConstants.PHASES)) {
+      return (List<Phase>) this.getSession().get(APConstants.PHASES);
+    } else {
+      List<Phase> phases = phaseManager.findAll().stream().filter(
+        c -> c.getCrp().getId().longValue() == this.getCrpID().longValue() && c.getVisible() != null && c.getVisible())
+        .collect(Collectors.toList());
+      phases.sort((p1, p2) -> p1.getStartDate().compareTo(p2.getStartDate()));
+      this.getSession().put(APConstants.PHASES, phases);
+      return phases;
+    }
+  }
+
+
+  public List<Phase> getPhasesImpact() {
+    if (this.getSession().containsKey(APConstants.PHASES_IMPACT)) {
+      return (List<Phase>) this.getSession().get(APConstants.PHASES_IMPACT);
+    } else {
+      List<Phase> phases = phaseManager
+        .findAll().stream().filter(c -> c.getCrp().getId().longValue() == this.getCrpID().longValue()
+          && c.getVisible() != null && c.getVisible() && c.getDescription().equals(APConstants.PLANNING))
+        .collect(Collectors.toList());
+      phases.sort((p1, p2) -> p1.getStartDate().compareTo(p2.getStartDate()));
+      this.getSession().put(APConstants.PHASES_IMPACT, phases);
+      return phases;
+    }
+  }
+
+  public String getPhasesImpactJson() {
+    List<Phase> phases;
+    if (this.getSession().containsKey(APConstants.PHASES_IMPACT)) {
+      phases = (List<Phase>) this.getSession().get(APConstants.PHASES_IMPACT);
+    } else {
+      phases = phaseManager
+        .findAll().stream().filter(c -> c.getCrp().getId().longValue() == this.getCrpID().longValue()
+          && c.getVisible() != null && c.getVisible() && c.getDescription().equals(APConstants.PLANNING))
+        .collect(Collectors.toList());
+      phases.sort((p1, p2) -> new Integer(p1.getYear()).compareTo(new Integer(p2.getYear())));
+      this.getSession().put(APConstants.PHASES_IMPACT, phases);
+
+    }
+    GsonBuilder builder = new GsonBuilder();
+    Gson gson = builder.create();
+    return gson.toJson(phases);
+  }
+
+  /**
+   * validate if the list of phases are on session if not, will be find on bd on json format
+   * 
+   * @return the jsons of the phases for the crp
+   */
+  public String getPhasesJson() {
+    List<Phase> phases;
+    if (this.getSession().containsKey(APConstants.PHASES)) {
+      phases = (List<Phase>) this.getSession().get(APConstants.PHASES);
+    } else {
+      phases = phaseManager.findAll().stream().filter(
+        c -> c.getCrp().getId().longValue() == this.getCrpID().longValue() && c.getVisible() != null && c.getVisible())
+        .collect(Collectors.toList());
+      phases.sort((p1, p2) -> new Integer(p1.getYear()).compareTo(new Integer(p2.getYear())));
+      this.getSession().put(APConstants.PHASES, phases);
+    }
+    GsonBuilder builder = new GsonBuilder();
+    Gson gson = builder.create();
+    return gson.toJson(phases);
+  }
+
 
   public int getPlanningYear() {
     return Integer.parseInt(this.getSession().get(APConstants.CRP_PLANNING_YEAR).toString());
@@ -1650,6 +2129,80 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
     return null;
   }
 
+  public List<Project> getProjectRelationsImpact(long id, String className) {
+    Class<?> clazz;
+    List<Project> projects = null;
+    try {
+      clazz = Class.forName(className);
+      if (clazz == CrpProgramOutcome.class) {
+        CrpProgramOutcome crpProgramOutcome = crpProgramOutcomeManager.getCrpProgramOutcomeById(id);
+        List<ProjectOutcome> outcomes = crpProgramOutcome.getProjectOutcomes().stream()
+          .filter(c -> c.isActive() && c.getPhase() != null && c.getPhase().equals(this.getActualPhase()))
+          .collect(Collectors.toList());
+        Set<Project> projectsSet = new HashSet<>();
+        for (ProjectOutcome projectOutcome : outcomes) {
+          projectOutcome.getProject().getProjecInfoPhase(this.getActualPhase());
+          if (projectOutcome.getProject().getProjectInfo() != null) {
+            projectsSet.add(projectOutcome.getProject());
+          }
+
+        }
+        projects = new ArrayList<>();
+        projects.addAll(projectsSet);
+      }
+      if (clazz == CrpClusterOfActivity.class) {
+        CrpClusterOfActivity crpClusterOfActivity = crpClusterOfActivityManager.getCrpClusterOfActivityById(id);
+        List<ProjectClusterActivity> activities = crpClusterOfActivity.getProjectClusterActivities().stream()
+          .filter(c -> c.isActive() && c.getPhase() != null && c.getPhase().equals(this.getActualPhase()))
+          .collect(Collectors.toList());
+        Set<Project> projectsSet = new HashSet<>();
+        for (ProjectClusterActivity crProjectClusterActivity : activities) {
+          crProjectClusterActivity.getProject().getProjecInfoPhase(this.getActualPhase());
+          if (crProjectClusterActivity.getProject().getProjectInfo() != null) {
+            projectsSet.add(crProjectClusterActivity.getProject());
+          }
+          projectsSet.add(crProjectClusterActivity.getProject());
+        }
+        projects = new ArrayList<>();
+        projects.addAll(projectsSet);
+      }
+      if (clazz == CrpMilestone.class) {
+        CrpMilestone crpMilestone = crpMilestoneManager.getCrpMilestoneById(id);
+        List<ProjectMilestone> projectMilestones = crpMilestone.getProjectMilestones().stream().filter(c -> c.isActive()
+          && c.getProjectOutcome().getPhase() != null && c.getProjectOutcome().getPhase().equals(this.getActualPhase()))
+          .collect(Collectors.toList());
+        Set<Project> projectsSet = new HashSet<>();
+        for (ProjectMilestone projectMilestone : projectMilestones) {
+          projectMilestone.getProjectOutcome().getProject().getProjecInfoPhase(this.getActualPhase());
+          if (projectMilestone.getProjectOutcome().getProject().getProjectInfo() != null) {
+            projectsSet.add(projectMilestone.getProjectOutcome().getProject());
+          }
+
+        }
+        projects = new ArrayList<>();
+        projects.addAll(projectsSet);
+      }
+
+    } catch (Exception e) {
+
+    }
+
+    List<Project> avaliableProjects = new ArrayList<>();
+    if (projects != null) {
+      for (Project project : projects) {
+        if (project.getProjecInfoPhase(this.getActualPhase()).getPhase().equals(this.getActualPhase())) {
+          avaliableProjects.add(project);
+        }
+
+      }
+      projects.clear();
+      projects.addAll(avaliableProjects);
+    }
+
+    return projects;
+
+  }
+
   public boolean getProjectSectionStatus(String section, long projectID) {
     boolean returnValue = false;
     SectionStatus sectionStatus;
@@ -1661,13 +2214,15 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
     switch (ProjectSectionStatusEnum.value(section.toUpperCase())) {
       case OUTCOMES:
         project = projectManager.getProjectById(projectID);
-        final List<ProjectOutcome> projectOutcomes =
-          project.getProjectOutcomes().stream().filter(c -> c.isActive()).collect(Collectors.toList());
+        List<ProjectOutcome> projectOutcomes = project.getProjectOutcomes().stream()
+          .filter(c -> c.isActive() && c.getPhase() != null && c.getPhase().equals(this.getActualPhase()))
+          .collect(Collectors.toList());
 
 
         project.setOutcomes(projectOutcomes);
 
-        if (!((project.getAdministrative() != null) && (project.getAdministrative().booleanValue() == true))) {
+        if (!(project.getProjecInfoPhase(this.getActualPhase()).getAdministrative() != null
+          && project.getProjecInfoPhase(this.getActualPhase()).getAdministrative().booleanValue() == true)) {
           if (project.getOutcomes().isEmpty()) {
             return false;
           }
@@ -1675,7 +2230,7 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
           return true;
         }
 
-        for (final ProjectOutcome projectOutcome : project.getOutcomes()) {
+        for (ProjectOutcome projectOutcome : project.getOutcomes()) {
           sectionStatus = sectionStatusManager.getSectionStatusByProjectOutcome(projectOutcome.getId(),
             this.getCurrentCycle(), this.getCurrentCycleYear(), section);
           if (sectionStatus == null) {
@@ -1692,14 +2247,13 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
 
       case CASESTUDIES:
         project = projectManager.getProjectById(projectID);
-        final List<CaseStudyProject> caseStudies =
+        List<CaseStudyProject> caseStudies =
           project.getCaseStudyProjects().stream().filter(d -> d.isActive()).collect(Collectors.toList());
-        final List<CaseStudy> caStudies = new ArrayList<>();
+        List<CaseStudy> caStudies = new ArrayList<>();
 
 
-        for (final CaseStudyProject caseStudyProject : caseStudies) {
-          if (caseStudyProject.isCreated()
-            && (caseStudyProject.getCaseStudy().getYear() == this.getCurrentCycleYear())) {
+        for (CaseStudyProject caseStudyProject : caseStudies) {
+          if (caseStudyProject.isCreated() && caseStudyProject.getCaseStudy().getYear() == this.getCurrentCycleYear()) {
             caStudies.add(caseStudyProject.getCaseStudy());
             sectionStatus = sectionStatusManager.getSectionStatusByCaseStudy(caseStudyProject.getCaseStudy().getId(),
               this.getCurrentCycle(), this.getCurrentCycleYear(), section);
@@ -1721,14 +2275,14 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
 
       case HIGHLIGHT:
         project = projectManager.getProjectById(projectID);
-        final List<ProjectHighlight> highlights = project.getProjectHighligths().stream()
-          .filter(d -> d.isActive() && (d.getYear().intValue() == this.getCurrentCycleYear()))
+        List<ProjectHighlight> highlights = project.getProjectHighligths().stream()
+          .filter(d -> d.isActive() && d.getYear().intValue() == this.getCurrentCycleYear())
           .collect(Collectors.toList());
         if (highlights.isEmpty()) {
           return true;
         }
 
-        for (final ProjectHighlight highlight : highlights) {
+        for (ProjectHighlight highlight : highlights) {
 
           sectionStatus = sectionStatusManager.getSectionStatusByProjectHighlight(highlight.getId(),
             this.getCurrentCycle(), this.getCurrentCycleYear(), section);
@@ -1747,46 +2301,63 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
         break;
       case DELIVERABLES:
         project = projectManager.getProjectById(projectID);
-        if (project.getAdministrative() != null && project.getAdministrative().booleanValue()) {
+        if (project.getProjecInfoPhase(this.getActualPhase()).getAdministrative() != null
+          && project.getProjecInfoPhase(this.getActualPhase()).getAdministrative().booleanValue()) {
           return true;
         } else {
           List<Deliverable> deliverables =
             project.getDeliverables().stream().filter(d -> d.isActive()).collect(Collectors.toList());
           List<Deliverable> openA = new ArrayList<>();
 
+
           if (this.isPlanningActive()) {
             openA =
-              deliverables.stream()
-                .filter(
-                  a -> a.isActive() && ((a.getStatus() == null
-                    || a.getStatus() == Integer.parseInt(ProjectStatusEnum.Ongoing.getStatusId())
-                    || (a.getStatus() == Integer.parseInt(ProjectStatusEnum.Extended.getStatusId())
-                      || a.getStatus().intValue() == 0 || a.getStatus().intValue() == -1))))
+              deliverables.stream().filter(a -> a.isActive() && a.getDeliverableInfo(this.getActualPhase()) != null
+
+                && ((a.getDeliverableInfo(this.getActualPhase()).getStatus() == null
+                  || (a.getDeliverableInfo(this.getActualPhase()).getStatus() == Integer
+                    .parseInt(ProjectStatusEnum.Ongoing.getStatusId())
+                  && a.getDeliverableInfo(this.getActualPhase()).getYear() >= this.getActualPhase().getYear())
+                  || (a.getDeliverableInfo(this.getActualPhase()).getStatus() == Integer
+                    .parseInt(ProjectStatusEnum.Extended.getStatusId())
+                    || a.getDeliverableInfo(this.getActualPhase()).getStatus().intValue() == 0))))
                 .collect(Collectors.toList());
           } else {
             openA = deliverables.stream()
-              .filter(a -> a.isActive() && (((a.getStatus() == null)
-                || (a.getStatus() == Integer.parseInt(ProjectStatusEnum.Ongoing.getStatusId()))
-                || ((a.getStatus() == Integer.parseInt(ProjectStatusEnum.Extended.getStatusId()))
-                  || (a.getStatus().intValue() == 0)))))
+              .filter(a -> a.isActive() && a.getDeliverableInfo(this.getActualPhase()) != null
+                && a.getDeliverableInfo(this.getActualPhase()) != null
+                && ((a.getDeliverableInfo(this.getActualPhase()).getStatus() == null
+                  || a.getDeliverableInfo(this.getActualPhase()).getStatus() == Integer
+                    .parseInt(ProjectStatusEnum.Ongoing.getStatusId())
+                || (a.getDeliverableInfo(this.getActualPhase()).getStatus() == Integer
+                  .parseInt(ProjectStatusEnum.Extended.getStatusId())
+                  || a.getDeliverableInfo(this.getActualPhase()).getStatus().intValue() == 0))))
               .collect(Collectors.toList());
 
             openA.addAll(deliverables.stream()
-              .filter(d -> d.isActive() && (d.getYear() == this.getCurrentCycleYear()) && (d.getStatus() != null)
-                && (d.getStatus().intValue() == Integer.parseInt(ProjectStatusEnum.Complete.getStatusId())))
+              .filter(d -> d.isActive() && d.getDeliverableInfo(this.getActualPhase()) != null
+                && d.getDeliverableInfo(this.getActualPhase()) != null
+                && d.getDeliverableInfo(this.getActualPhase()).getYear() == this.getCurrentCycleYear()
+                && d.getDeliverableInfo(this.getActualPhase()).getStatus() != null
+                && d.getDeliverableInfo(this.getActualPhase()).getStatus().intValue() == Integer
+                  .parseInt(ProjectStatusEnum.Complete.getStatusId()))
               .collect(Collectors.toList()));
 
             openA.addAll(deliverables.stream()
-              .filter(d -> d.isActive() && (d.getNewExpectedYear() != null)
-                && (d.getNewExpectedYear().intValue() == this.getCurrentCycleYear()) && (d.getStatus() != null)
-                && (d.getStatus().intValue() == Integer.parseInt(ProjectStatusEnum.Complete.getStatusId())))
+              .filter(d -> d.isActive() && d.getDeliverableInfo(this.getActualPhase()) != null
+                && d.getDeliverableInfo(this.getActualPhase()) != null
+                && d.getDeliverableInfo(this.getActualPhase()).getNewExpectedYear() != null
+                && d.getDeliverableInfo(this.getActualPhase()).getNewExpectedYear().intValue() == this
+                  .getCurrentCycleYear()
+                && d.getDeliverableInfo(this.getActualPhase()).getStatus() != null
+                && d.getDeliverableInfo(this.getActualPhase()).getStatus().intValue() == Integer
+                  .parseInt(ProjectStatusEnum.Complete.getStatusId()))
               .collect(Collectors.toList()));
 
           }
           if (openA.isEmpty()) {
             return false;
           }
-
           for (Deliverable deliverable : openA) {
             sectionStatus = sectionStatusManager.getSectionStatusByDeliverable(deliverable.getId(),
               this.getCurrentCycle(), this.getCurrentCycleYear(), section);
@@ -1810,8 +2381,8 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
         project = projectManager.getProjectById(projectID);
 
         project.setProjectActivities(new ArrayList<Activity>(project.getActivities().stream()
-          .filter(a -> a.isActive() && (a.getActivityStatus() != null)
-            && (((a.getActivityStatus() == Integer.parseInt(ProjectStatusEnum.Ongoing.getStatusId()))
+          .filter(a -> a.isActive() && a.getPhase().equals(this.getActualPhase()) && a.getActivityStatus() != null
+            && ((a.getActivityStatus() == Integer.parseInt(ProjectStatusEnum.Ongoing.getStatusId())
               || (a.getActivityStatus() == Integer.parseInt(ProjectStatusEnum.Extended.getStatusId())))))
           .collect(Collectors.toList())));
 
@@ -1835,7 +2406,9 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
           return true;
         }
         project = projectManager.getProjectById(projectID);
-        if (project.getProjectBudgets().stream().filter(d -> d.isActive()).collect(Collectors.toList()).isEmpty()) {
+        if (project.getProjectBudgets().stream()
+          .filter(d -> d.isActive() && d.getPhase() != null && d.getPhase().equals(this.getActualPhase()))
+          .collect(Collectors.toList()).isEmpty()) {
           return false;
         }
 
@@ -1910,6 +2483,7 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
     return submissions;
   }
 
+
   /**
    ************************ CENTER METHOD *********************
    * return true if the user can view the impactPathway
@@ -1941,7 +2515,6 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
 
     return "---";
   }
-
 
   public int getReportingYear() {
     return Integer.parseInt(this.getSession().get(APConstants.CRP_REPORTING_YEAR).toString());
@@ -1985,6 +2558,7 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
     return display;
   }
 
+
   public String getUrl() {
     return url;
   }
@@ -1992,6 +2566,7 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
   public List<UserToken> getUsersOnline() {
     return SessionCounter.users;
   }
+
 
   /**
    * Return the artifact version of the Marlo project pom.xml
@@ -2011,7 +2586,6 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
     }
     return version;
   }
-
 
   public int goldDataValue(long deliverableID) {
     final Deliverable deliverableBD = deliverableManager.getDeliverableById(deliverableID);
@@ -2070,10 +2644,20 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
   }
 
   public boolean hasPermission(String fieldName) {
+
     if (basePermission == null) {
       return securityContext.hasPermission(fieldName);
     } else {
-      return securityContext.hasPermission(this.getBasePermission() + ":" + fieldName);
+      if (this.getCrpSession() != null) {
+        Phase phase = this.getActualPhase();
+        String basePhase = this.getBasePermission().replaceAll(this.getCrpSession(),
+          this.getCrpSession() + ":" + phase.getDescription() + ":" + phase.getYear());
+        return securityContext.hasPermission(basePhase + ":" + fieldName) || securityContext.hasPermission(basePhase);
+      } else {
+        return securityContext.hasPermission(this.getBasePermission() + ":" + fieldName);
+      }
+
+
     }
   }
 
@@ -2109,6 +2693,7 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
     return this.hasPermission("submit");
   }
 
+
   /**
    * ************************ CENTER METHOD *********************
    * validate if the user can submit the impact pathway
@@ -2124,7 +2709,6 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
     final boolean permissions = this.securityContext.hasPermission(permission);
     return permissions;
   }
-
 
   /**
    * ************************ CENTER METHOD *********************
@@ -2156,7 +2740,6 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
     final boolean permissions = this.securityContext.hasPermission(permission);
     return permissions;
   }
-
 
   public boolean hasProgramnsRegions() {
     try {
@@ -2203,9 +2786,19 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
     return securityContext.hasRole("Admin");
   }
 
+
+  public boolean isAvailabePhase() {
+    return availabePhase;
+  }
+
   public boolean isCanEdit() {
     return canEdit;
   }
+
+  public boolean isCanEditPhase() {
+    return canEditPhase;
+  }
+
 
   public boolean isCanSwitchProject() {
     return canSwitchProject;
@@ -2248,7 +2841,6 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
     return true;
   }
 
-
   public boolean isCompleteCrpIndicator(long liaisonIntitution) {
     List<SectionStatus> sectionStatus = null;
     final IpLiaisonInstitution ipLiaisonInstitution =
@@ -2271,15 +2863,17 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
     return true;
   }
 
-
   public boolean isCompleteImpact(long crpProgramID) {
 
     final List<SectionStatus> sectionsBD = sectionStatusManager.findAll();
     if (sectionsBD == null) {
       return false;
     }
-    final List<SectionStatus> sections = sectionsBD.stream()
-      .filter(c -> ((c.getCrpProgram() != null) && (c.getCrpProgram().getId().longValue() == crpProgramID)))
+    CrpProgram cpCrpProgram = crpProgramManager.getCrpProgramById(crpProgramID);
+    List<SectionStatus> sections =
+      cpCrpProgram
+        .getSectionStatuses().stream().filter(c -> c.getYear() == this.getActualPhase().getYear()
+          && c.getCycle() != null && c.getCycle().equals(this.getActualPhase().getDescription()))
       .collect(Collectors.toList());
 
     for (final SectionStatus sectionStatus : sections) {
@@ -2339,7 +2933,6 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
     return true;
   }
 
-
   public boolean isCompletePreProject(long projectID) {
 
     final Project project = projectManager.getProjectById(projectID);
@@ -2381,11 +2974,11 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
     return true;
   }
 
-  public boolean isCompleteProject(long projectID) {
+   public boolean isCompleteProject(long projectID) {
 
     try {
       Project project = projectManager.getProjectById(projectID);
-      final List<SectionStatus> sections = project.getSectionStatuses().stream().collect(Collectors.toList());
+      List<SectionStatus> sections = project.getSectionStatuses().stream().collect(Collectors.toList());
       int totalSections = 0;
       int deliverableSection = 0;
       int budgetCoASection = 0;
@@ -2393,43 +2986,55 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
       int caseStudySection = 0;
       int highlightSection = 0;
 
-      final List<Deliverable> deliverables =
+      List<Deliverable> deliverables =
         project.getDeliverables().stream().filter(d -> d.isActive()).collect(Collectors.toList());
-      final List<Deliverable> openA = deliverables.stream()
-        .filter(a -> a.isActive() && (a.getYear() >= this.getCurrentCycleYear())
-          && (((a.getStatus() == null) || (a.getStatus() == Integer.parseInt(ProjectStatusEnum.Ongoing.getStatusId()))
-            || ((a.getStatus() == Integer.parseInt(ProjectStatusEnum.Extended.getStatusId()))
-              || (a.getStatus().intValue() == 0)))))
+      List<Deliverable> openA = deliverables.stream()
+        .filter(a -> a.isActive() && ((a.getDeliverableInfo(this.getActualPhase()).getStatus() == null
+          || (a.getDeliverableInfo(this.getActualPhase()).getStatus() == Integer
+            .parseInt(ProjectStatusEnum.Ongoing.getStatusId())
+          && a.getDeliverableInfo(this.getActualPhase()).getYear() >= this.getCurrentCycleYear())
+        || (a.getDeliverableInfo(this.getActualPhase()).getStatus() == Integer
+          .parseInt(ProjectStatusEnum.Extended.getStatusId())
+          || a.getDeliverableInfo(this.getActualPhase()).getStatus().intValue() == 0))))
         .collect(Collectors.toList());
 
       if (this.isReportingActive()) {
         openA.addAll(deliverables.stream()
-          .filter(d -> d.isActive() && (d.getYear() == this.getCurrentCycleYear()) && (d.getStatus() != null)
-            && (d.getStatus().intValue() == Integer.parseInt(ProjectStatusEnum.Complete.getStatusId())))
+          .filter(
+            d -> d.isActive() && d.getDeliverableInfo(this.getActualPhase()).getYear() == this.getCurrentCycleYear()
+              && d.getDeliverableInfo(this.getActualPhase()).getStatus() != null
+              && d.getDeliverableInfo(this.getActualPhase()).getStatus().intValue() == Integer
+                .parseInt(ProjectStatusEnum.Complete.getStatusId()))
           .collect(Collectors.toList()));
-        openA.addAll(deliverables.stream()
-          .filter(d -> d.isActive() && (d.getNewExpectedYear() != null)
-            && (d.getNewExpectedYear().intValue() == this.getCurrentCycleYear()) && (d.getStatus() != null)
-            && (d.getStatus().intValue() == Integer.parseInt(ProjectStatusEnum.Complete.getStatusId())))
-          .collect(Collectors.toList()));
+        openA
+          .addAll(deliverables.stream()
+            .filter(d -> d.isActive() && d.getDeliverableInfo(this.getActualPhase()).getNewExpectedYear() != null
+              && d.getDeliverableInfo(this.getActualPhase()).getNewExpectedYear().intValue() == this
+                .getCurrentCycleYear()
+              && d.getDeliverableInfo(this.getActualPhase()).getStatus() != null
+              && d.getDeliverableInfo(this.getActualPhase()).getStatus().intValue() == Integer
+                .parseInt(ProjectStatusEnum.Complete.getStatusId()))
+            .collect(Collectors.toList()));
       }
 
       for (Deliverable deliverable : openA) {
         deliverable = deliverableManager.getDeliverableById(deliverable.getId());
       }
 
-      if (project.getAdministrative() != null && project.getAdministrative().booleanValue()) {
+      if (project.getProjecInfoPhase(this.getActualPhase()).getAdministrative() != null
+        && project.getProjecInfoPhase(this.getActualPhase()).getAdministrative().booleanValue()) {
         deliverableSection = 1;
         totalSections++;
       }
-      for (final SectionStatus sectionStatus : sections) {
+      for (SectionStatus sectionStatus : sections) {
         if (sectionStatus.getCycle().equals(this.getCurrentCycle())
-          && (sectionStatus.getYear().intValue() == this.getCurrentCycleYear())) {
+          && sectionStatus.getYear().intValue() == this.getCurrentCycleYear()) {
 
           if (sectionStatus.getSectionName().equals(ProjectSectionStatusEnum.DELIVERABLES.getStatus())) {
-            final Deliverable a = deliverableManager.getDeliverableById(sectionStatus.getDeliverable().getId());
+            Deliverable a = deliverableManager.getDeliverableById(sectionStatus.getDeliverable().getId());
 
-            if (project.getAdministrative() != null && !project.getAdministrative().booleanValue()) {
+            if (project.getProjecInfoPhase(this.getActualPhase()).getAdministrative() != null
+              && !project.getProjecInfoPhase(this.getActualPhase()).getAdministrative().booleanValue()) {
               if (openA.contains(a)) {
                 if (sectionStatus.getMissingFields().length() > 0) {
                   return false;
@@ -2451,9 +3056,9 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
       }
 
       if (this.isPlanningActive()) {
-        for (final SectionStatus sectionStatus : sections) {
+        for (SectionStatus sectionStatus : sections) {
           if (sectionStatus.getCycle().equals(this.getCurrentCycle())
-            && (sectionStatus.getYear().intValue() == this.getCurrentCycleYear())) {
+            && sectionStatus.getYear().intValue() == this.getCurrentCycleYear()) {
             switch (ProjectSectionStatusEnum.value(sectionStatus.getSectionName().toUpperCase())) {
 
               case DESCRIPTION:
@@ -2490,7 +3095,8 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
           return totalSections == 8;
         } else {
 
-          if (!((project.getAdministrative() != null) && (project.getAdministrative().booleanValue() == true))) {
+          if (!(project.getProjecInfoPhase(this.getActualPhase()).getAdministrative() != null
+            && project.getProjecInfoPhase(this.getActualPhase()).getAdministrative().booleanValue() == true)) {
             if (project.getProjectClusterActivities().stream().filter(c -> c.isActive()).collect(Collectors.toList())
               .size() <= 1) {
               return totalSections == 7;
@@ -2506,9 +3112,9 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
         }
       } else {
 
-        for (final SectionStatus sectionStatus : sections) {
+        for (SectionStatus sectionStatus : sections) {
           if (sectionStatus.getCycle().equals(this.getCurrentCycle())
-            && (sectionStatus.getYear().intValue() == this.getCurrentCycleYear())) {
+            && sectionStatus.getYear().intValue() == this.getCurrentCycleYear()) {
             switch (ProjectSectionStatusEnum.value(sectionStatus.getSectionName().toUpperCase())) {
 
               case DESCRIPTION:
@@ -2550,36 +3156,36 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
 
         project = projectManager.getProjectById(projectID);
 
-        final List<ProjectHighlight> highlights = project.getProjectHighligths().stream()
-          .filter(d -> d.isActive() && (d.getYear().intValue() == this.getCurrentCycleYear()))
+        List<ProjectHighlight> highlights = project.getProjectHighligths().stream()
+          .filter(d -> d.isActive() && d.getYear().intValue() == this.getCurrentCycleYear())
           .collect(Collectors.toList());
         if (highlights.isEmpty()) {
           totalSections++;
         }
 
-        final List<CaseStudyProject> caseStudyProjects =
+        List<CaseStudyProject> caseStudyProjects =
           project.getCaseStudyProjects().stream().filter(d -> d.isActive()).collect(Collectors.toList());
-        final List<CaseStudy> caseStudies = new ArrayList<>();
-        for (final CaseStudyProject caseStudyProject : caseStudyProjects) {
-          if (caseStudyProject.isCreated()
-            && (caseStudyProject.getCaseStudy().getYear() == this.getCurrentCycleYear())) {
+        List<CaseStudy> caseStudies = new ArrayList<>();
+        for (CaseStudyProject caseStudyProject : caseStudyProjects) {
+          if (caseStudyProject.isCreated() && caseStudyProject.getCaseStudy().getYear() == this.getCurrentCycleYear()) {
             caseStudies.add(caseStudyProject.getCaseStudy());
           }
 
 
         }
-        if (caseStudies.isEmpty() && !project.getAdministrative()) {
+        if (caseStudies.isEmpty() && !project.getProjecInfoPhase(this.getActualPhase()).getAdministrative()) {
           totalSections++;
         }
 
-        if (((project.getAdministrative() != null) && (project.getAdministrative().booleanValue() == true))) {
+        if ((project.getProjecInfoPhase(this.getActualPhase()).getAdministrative() != null
+          && project.getProjecInfoPhase(this.getActualPhase()).getAdministrative().booleanValue() == true)) {
           return totalSections == 9;
         } else {
           return totalSections == 12;
         }
 
       }
-    } catch (final Exception e) {
+    } catch (Exception e) {
       return false;
     }
 
@@ -2624,6 +3230,7 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
     return true;
   }
 
+
   public boolean isCrpClosed() {
     try {
       // return Integer.parseInt(this.getSession().get(APConstants.CRP_CLOSED).toString()) == 1;
@@ -2652,44 +3259,44 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
   }
 
   public Boolean isDeliverableNew(long deliverableID) {
-
-    final Deliverable deliverable = deliverableManager.getDeliverableById(deliverableID);
-
-    final SimpleDateFormat dateFormat = new SimpleDateFormat(APConstants.DATE_FORMAT);
-
-    if (this.isReportingActive()) {
-
-      try {
-        final Date reportingDate =
-          dateFormat.parse(this.getSession().get(APConstants.CRP_OPEN_REAL_DATE_REPORTING).toString());
-        if (deliverable.getCreateDate().compareTo(reportingDate) >= 0) {
-          return true;
-        } else {
-          return false;
-        }
-
-      } catch (final ParseException e) {
-        e.printStackTrace();
-        return false;
-      }
-
-    } else {
-      try {
-
-        final Date reportingDate =
-          dateFormat.parse(this.getSession().get(APConstants.CRP_OPEN_PLANNING_DATE).toString());
-        if (deliverable.getCreateDate().compareTo(reportingDate) >= 0) {
-          return true;
-        } else {
-          return false;
-        }
-
-      } catch (final ParseException e) {
-        e.printStackTrace();
-        return false;
-      }
-
+    /*
+     * Deliverable deliverable = deliverableManager.getDeliverableById(deliverableID);
+     * SimpleDateFormat dateFormat = new SimpleDateFormat(APConstants.DATE_FORMAT);
+     * if (this.isReportingActive()) {
+     * try {
+     * Date reportingDate =
+     * dateFormat.parse(this.getSession().get(APConstants.CRP_OPEN_REAL_DATE_REPORTING).toString());
+     * if (deliverable.getCreateDate().compareTo(reportingDate) >= 0) {
+     * return true;
+     * } else {
+     * return false;
+     * }
+     * } catch (ParseException e) {
+     * e.printStackTrace();
+     * return false;
+     * }
+     * } else {
+     * try {
+     * Date reportingDate = dateFormat.parse(this.getSession().get(APConstants.CRP_OPEN_PLANNING_DATE).toString());
+     * if (deliverable.getCreateDate().compareTo(reportingDate) >= 0) {
+     * return true;
+     * } else {
+     * return false;
+     * }
+     * } catch (ParseException e) {
+     * e.printStackTrace();
+     * return false;
+     * }
+     * }
+     */
+    Deliverable deliverable = deliverableManager.getDeliverableById(deliverableID);
+    if (deliverable.getPhase() == null) {
+      return false;
     }
+    if (deliverable.getPhase().equals(this.getActualPhase())) {
+      return true;
+    }
+    return false;
   }
 
   public boolean isDraft() {
@@ -2699,6 +3306,11 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
   public boolean isEditable() {
     return isEditable;
   }
+
+  public boolean isEditStatus() {
+    return editStatus;
+  }
+
 
   public Boolean isF(long deliverableID) {
 
@@ -2731,7 +3343,6 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
     }
     return false;
   }
-
 
   public Boolean isI(long deliverableID) {
     try {
@@ -2811,7 +3422,6 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
     return true;
   }
 
-
   public boolean isPhaseOne() {
     try {
       if (this.isReportingActive() && this.getCrpSession().equals("ccafs") && (this.getCurrentCycleYear() == 2016)) {
@@ -2826,6 +3436,10 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
 
 
   public boolean isPlanningActive() {
+    return this.getActualPhase().getDescription().equals(APConstants.PLANNING);
+  }
+
+  public boolean isPlanningActiveParam() {
     return Boolean.parseBoolean(this.getSession().get(APConstants.CRP_PLANNING_ACTIVE).toString());
   }
 
@@ -2837,7 +3451,8 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
     return false;
   }
 
-  public boolean isPPA(Institution institution) {
+
+ public boolean isPPA(Institution institution) {
     if (institution == null) {
       return false;
     }
@@ -2845,15 +3460,23 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
     if (institution.getId() != null) {
       institution = institutionManager.getInstitutionById(institution.getId());
       if (institution != null) {
-        if (institution.getCrpPpaPartners().stream()
-          .filter(c -> (c.getCrp().getId().longValue() == this.getCrpID()) && c.isActive()).collect(Collectors.toList())
-          .size() > 0) {
+        if (institution.getCrpPpaPartners().stream().filter(c -> c.getCrp().getId().longValue() == this.getCrpID()
+          && c.isActive() && c.getPhase().equals(this.getActualPhase())).collect(Collectors.toList()).size() > 0) {
           return true;
         }
       }
 
     }
 
+    return false;
+  }
+
+
+  public boolean isProjectDescription() {
+    String name = this.getActionName();
+    if (name.contains(ProjectSectionStatusEnum.DESCRIPTION.getStatus())) {
+      return true;
+    }
     return false;
   }
 
@@ -2909,26 +3532,30 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
     return true;
   }
 
-  public Boolean isR(long deliverableID) {
+ public Boolean isR(long deliverableID) {
     try {
-      final Deliverable deliverableBD = deliverableManager.getDeliverableById(deliverableID);
-      if (deliverableBD.getAdoptedLicense() == null) {
+      Deliverable deliverableBD = deliverableManager.getDeliverableById(deliverableID);
+      if (deliverableBD.getDeliverableInfo(this.getActualPhase()).getAdoptedLicense() == null) {
         return null;
       }
-      if (deliverableBD.getAdoptedLicense()) {
-        if (deliverableBD.getLicense() == null) {
+      if (deliverableBD.getDeliverableInfo(this.getActualPhase()).getAdoptedLicense()) {
+        if (deliverableBD.getDeliverableInfo(this.getActualPhase()).getLicense() == null) {
           return false;
         } else {
-          if (!(deliverableBD.getLicense().equals(LicensesTypeEnum.OTHER.getValue())
-            || deliverableBD.getLicense().equals(LicensesTypeEnum.CC_BY_ND.getValue())
-            || deliverableBD.getLicense().equals(LicensesTypeEnum.CC_BY_NC_ND.getValue()))) {
+          if (!(deliverableBD.getDeliverableInfo(this.getActualPhase()).getLicense()
+            .equals(LicensesTypeEnum.OTHER.getValue())
+            || deliverableBD.getDeliverableInfo(this.getActualPhase()).getLicense()
+              .equals(LicensesTypeEnum.CC_BY_ND.getValue())
+            || deliverableBD.getDeliverableInfo(this.getActualPhase()).getLicense()
+              .equals(LicensesTypeEnum.CC_BY_NC_ND.getValue()))) {
             return true;
           } else {
-            if ((deliverableBD.getAllowModifications() == null)
-              || !deliverableBD.getAllowModifications().booleanValue()) {
+            if (deliverableBD.getDeliverableInfo(this.getActualPhase()).getAllowModifications() == null
+              || !deliverableBD.getDeliverableInfo(this.getActualPhase()).getAllowModifications().booleanValue()) {
               return false;
             }
-            if ((deliverableBD.getOtherLicense() == null) || deliverableBD.getOtherLicense().isEmpty()) {
+            if (deliverableBD.getDeliverableInfo(this.getActualPhase()).getOtherLicense() == null
+              || deliverableBD.getDeliverableInfo(this.getActualPhase()).getOtherLicense().isEmpty()) {
               return false;
             }
             return true;
@@ -2937,23 +3564,29 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
         }
       }
       return false;
-    } catch (final Exception e) {
+    } catch (Exception e) {
       return false;
     }
   }
 
   public boolean isReportingActive() {
 
-    if (this.getSession().containsKey(APConstants.TEMP_CYCLE)) {
-      return true;
-    }
-    return Boolean.parseBoolean(this.getSession().get(APConstants.CRP_REPORTING_ACTIVE).toString());
+    return this.getActualPhase().getDescription().equals(APConstants.REPORTING);
 
   }
 
   public boolean isReportingActiveMenu() {
 
 
+    return Boolean.parseBoolean(this.getSession().get(APConstants.CRP_REPORTING_ACTIVE).toString());
+
+  }
+
+  public boolean isReportingActiveParam() {
+
+    if (this.getSession().containsKey(APConstants.TEMP_CYCLE)) {
+      return true;
+    }
     return Boolean.parseBoolean(this.getSession().get(APConstants.CRP_REPORTING_ACTIVE).toString());
 
   }
@@ -3004,7 +3637,6 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
     return false;
   }
 
-
   /**
    * ************************ CENTER METHOD *********************
    * Check if the impact pathway is submitted
@@ -3031,7 +3663,6 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
     return false;
   }
 
-
   public boolean isSwitchSession() {
     return switchSession;
   }
@@ -3049,39 +3680,28 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
     }
   }
 
-  public void loadLessons(Crp crp, Project project) {
+public void loadLessons(Crp crp, Project project) {
 
     Project projectDB = projectManager.getProjectById(project.getId());
+    List<ProjectComponentLesson> lessons = projectDB.getProjectComponentLessons().stream()
+      .filter(c -> c.isActive() && c.getPhase().equals(this.getActualPhase())
+        && c.getComponentName().equals(this.getActionName().replaceAll(crp.getAcronym() + "/", "")))
+      .collect(Collectors.toList());
+    if (!lessons.isEmpty()) {
+      project.setProjectComponentLesson(lessons.get(0));
+    }
     if (this.isReportingActive()) {
-
-      List<ProjectComponentLesson> lessons = projectDB.getProjectComponentLessons().stream()
-        .filter(
-          c -> c.isActive() && (c.getYear() == this.getReportingYear()) && c.getCycle().equals(APConstants.REPORTING)
-            && c.getComponentName().equals(this.getActionName().replaceAll(crp.getAcronym() + "/", "")))
-        .collect(Collectors.toList());
-      if (!lessons.isEmpty()) {
-        project.setProjectComponentLesson(lessons.get(0));
-      }
       List<ProjectComponentLesson> lessonsPreview = projectDB.getProjectComponentLessons().stream()
-        .filter(
-          c -> c.isActive() && (c.getYear() == this.getReportingYear()) && c.getCycle().equals(APConstants.PLANNING)
-            && c.getComponentName().equals(this.getActionName().replaceAll(crp.getAcronym() + "/", "")))
+        .filter(c -> c.isActive() && c.getYear() == this.getActualPhase().getYear()
+          && c.getCycle().equals(APConstants.PLANNING)
+          && c.getComponentName().equals(this.getActionName().replaceAll(crp.getAcronym() + "/", "")))
         .collect(Collectors.toList());
       if (!lessonsPreview.isEmpty()) {
         project.setProjectComponentLessonPreview(lessonsPreview.get(0));
       }
-    } else {
-
-      List<ProjectComponentLesson> lessons = projectDB.getProjectComponentLessons().stream()
-        .filter(
-          c -> c.isActive() && (c.getYear() == this.getPlanningYear()) && c.getCycle().equals(APConstants.PLANNING)
-            && c.getComponentName().equals(this.getActionName().replaceAll(crp.getAcronym() + "/", "")))
-        .collect(Collectors.toList());
-      if (!lessons.isEmpty()) {
-        project.setProjectComponentLesson(lessons.get(0));
-      }
     }
   }
+
 
   public void loadLessons(Crp crp, Project project, String actionName) {
 
@@ -3089,14 +3709,14 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
     if (this.isReportingActive()) {
 
       List<ProjectComponentLesson> lessons = projectDB.getProjectComponentLessons().stream()
-        .filter(c -> c.isActive() && (c.getYear() == this.getReportingYear())
+        .filter(c -> c.isActive() && c.getYear() == this.getActualPhase().getYear()
           && c.getCycle().equals(APConstants.REPORTING) && c.getComponentName().equals(actionName))
         .collect(Collectors.toList());
       if (!lessons.isEmpty()) {
         project.setProjectComponentLesson(lessons.get(0));
       }
       List<ProjectComponentLesson> lessonsPreview = projectDB.getProjectComponentLessons().stream()
-        .filter(c -> c.isActive() && (c.getYear() == this.getReportingYear())
+        .filter(c -> c.isActive() && c.getYear() == this.getActualPhase().getYear()
           && c.getCycle().equals(APConstants.PLANNING) && c.getComponentName().equals(actionName))
         .collect(Collectors.toList());
       if (!lessonsPreview.isEmpty()) {
@@ -3105,7 +3725,7 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
     } else {
 
       List<ProjectComponentLesson> lessons = projectDB.getProjectComponentLessons().stream()
-        .filter(c -> c.isActive() && (c.getYear() == this.getPlanningYear())
+        .filter(c -> c.isActive() && c.getYear() == this.getActualPhase().getYear()
           && c.getCycle().equals(APConstants.PLANNING) && c.getComponentName().equals(actionName))
         .collect(Collectors.toList());
       if (!lessons.isEmpty()) {
@@ -3116,31 +3736,31 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
 
   public void loadLessonsOutcome(Crp crp, ProjectOutcome projectOutcome) {
 
-    final ProjectOutcome projectOutcomeDB = projectOutcomeManager.getProjectOutcomeById(projectOutcome.getId());
+    ProjectOutcome projectOutcomeDB = projectOutcomeManager.getProjectOutcomeById(projectOutcome.getId());
     if (this.isReportingActive()) {
 
-      final List<ProjectComponentLesson> lessons = projectOutcomeDB.getProjectComponentLessons().stream()
-        .filter(
-          c -> c.isActive() && (c.getYear() == this.getReportingYear()) && c.getCycle().equals(APConstants.REPORTING)
-            && c.getComponentName().equals(this.getActionName().replaceAll(crp.getAcronym() + "/", "")))
+      List<ProjectComponentLesson> lessons = projectOutcomeDB.getProjectComponentLessons().stream()
+        .filter(c -> c.isActive() && c.getYear() == this.getActualPhase().getYear()
+          && c.getCycle().equals(APConstants.REPORTING)
+          && c.getComponentName().equals(this.getActionName().replaceAll(crp.getAcronym() + "/", "")))
         .collect(Collectors.toList());
       if (!lessons.isEmpty()) {
         projectOutcome.setProjectComponentLesson(lessons.get(0));
       }
-      final List<ProjectComponentLesson> lessonsPreview = projectOutcomeDB.getProjectComponentLessons().stream()
-        .filter(
-          c -> c.isActive() && (c.getYear() == this.getReportingYear()) && c.getCycle().equals(APConstants.PLANNING)
-            && c.getComponentName().equals(this.getActionName().replaceAll(crp.getAcronym() + "/", "")))
+      List<ProjectComponentLesson> lessonsPreview = projectOutcomeDB.getProjectComponentLessons().stream()
+        .filter(c -> c.isActive() && c.getYear() == this.getActualPhase().getYear()
+          && c.getCycle().equals(APConstants.PLANNING)
+          && c.getComponentName().equals(this.getActionName().replaceAll(crp.getAcronym() + "/", "")))
         .collect(Collectors.toList());
       if (!lessonsPreview.isEmpty()) {
         projectOutcome.setProjectComponentLessonPreview(lessonsPreview.get(0));
       }
     } else {
 
-      final List<ProjectComponentLesson> lessons = projectOutcomeDB.getProjectComponentLessons().stream()
-        .filter(
-          c -> c.isActive() && (c.getYear() == this.getPlanningYear()) && c.getCycle().equals(APConstants.PLANNING)
-            && c.getComponentName().equals(this.getActionName().replaceAll(crp.getAcronym() + "/", "")))
+      List<ProjectComponentLesson> lessons = projectOutcomeDB.getProjectComponentLessons().stream()
+        .filter(c -> c.isActive() && c.getYear() == this.getActualPhase().getYear()
+          && c.getCycle().equals(APConstants.PLANNING)
+          && c.getComponentName().equals(this.getActionName().replaceAll(crp.getAcronym() + "/", "")))
         .collect(Collectors.toList());
       if (!lessons.isEmpty()) {
         projectOutcome.setProjectComponentLesson(lessons.get(0));
@@ -3152,34 +3772,35 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
 
     if (this.isReportingActive()) {
 
-      final List<ProjectComponentLesson> lessons = program.getProjectComponentLessons().stream()
-        .filter(
-          c -> c.isActive() && (c.getYear() == this.getReportingYear()) && c.getCycle().equals(APConstants.REPORTING)
-            && c.getComponentName().equals(this.getActionName().replaceAll(crp.getAcronym() + "/", "")))
+      List<ProjectComponentLesson> lessons = program.getProjectComponentLessons().stream()
+        .filter(c -> c.isActive() && c.getYear() == this.getActualPhase().getYear()
+          && c.getCycle().equals(APConstants.REPORTING)
+          && c.getComponentName().equals(this.getActionName().replaceAll(crp.getAcronym() + "/", "")))
         .collect(Collectors.toList());
       if (!lessons.isEmpty()) {
         program.setProjectComponentLesson(lessons.get(0));
       }
-      final List<ProjectComponentLesson> lessonsPreview = program.getProjectComponentLessons().stream()
-        .filter(
-          c -> c.isActive() && (c.getYear() == this.getReportingYear()) && c.getCycle().equals(APConstants.PLANNING)
-            && c.getComponentName().equals(this.getActionName().replaceAll(crp.getAcronym() + "/", "")))
+      List<ProjectComponentLesson> lessonsPreview = program.getProjectComponentLessons().stream()
+        .filter(c -> c.isActive() && c.getYear() == this.getActualPhase().getYear()
+          && c.getCycle().equals(APConstants.PLANNING)
+          && c.getComponentName().equals(this.getActionName().replaceAll(crp.getAcronym() + "/", "")))
         .collect(Collectors.toList());
       if (!lessonsPreview.isEmpty()) {
         program.setProjectComponentLessonPreview(lessonsPreview.get(0));
       }
     } else {
 
-      final List<ProjectComponentLesson> lessons = program.getProjectComponentLessons().stream()
-        .filter(
-          c -> c.isActive() && (c.getYear() == this.getPlanningYear()) && c.getCycle().equals(APConstants.PLANNING)
-            && c.getComponentName().equals(this.getActionName().replaceAll(crp.getAcronym() + "/", "")))
+      List<ProjectComponentLesson> lessons = program.getProjectComponentLessons().stream()
+        .filter(c -> c.isActive() && c.getYear() == this.getActualPhase().getYear()
+          && c.getCycle().equals(APConstants.PLANNING)
+          && c.getComponentName().equals(this.getActionName().replaceAll(crp.getAcronym() + "/", "")))
         .collect(Collectors.toList());
       if (!lessons.isEmpty()) {
         program.setProjectComponentLesson(lessons.get(0));
       }
     }
   }
+ 
 
   public void loadQualityCheck(Deliverable deliverableBD) {
 
@@ -3210,7 +3831,8 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
 
   public void saveLessons(Crp crp, Project project) {
 
-    if (project.isProjectEditLeader() && !this.isProjectNew(project.getId())) {
+    if (project.getProjecInfoPhase(this.getActualPhase()).isProjectEditLeader()
+      && !this.isProjectNew(project.getId())) {
 
       final String actionName = this.getActionName().replaceAll(crp.getAcronym() + "/", "");
 
@@ -3221,25 +3843,21 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
       project.getProjectComponentLesson().setModifiedBy(this.getCurrentUser());
       project.getProjectComponentLesson().setModificationJustification("");
       project.getProjectComponentLesson().setProject(project);
-      if (this.isReportingActive()) {
-        project.getProjectComponentLesson().setCycle(APConstants.REPORTING);
-        project.getProjectComponentLesson().setYear(this.getReportingYear());
 
-      } else {
-        project.getProjectComponentLesson().setCycle(APConstants.PLANNING);
-        project.getProjectComponentLesson().setYear(this.getPlanningYear());
-      }
+      project.getProjectComponentLesson().setCycle(this.getActualPhase().getDescription());
+      project.getProjectComponentLesson().setYear(this.getActualPhase().getYear());
+      project.getProjectComponentLesson().setPhase(this.getActualPhase());
       projectComponentLessonManager.saveProjectComponentLesson(project.getProjectComponentLesson());
     }
 
 
   }
 
-
   public void saveLessonsOutcome(Crp crp, ProjectOutcome projectOutcome) {
 
     final Project project = projectManager.getProjectById(projectOutcome.getProject().getId());
-    if (project.isProjectEditLeader() && !this.isProjectNew(project.getId())) {
+    if (project.getProjecInfoPhase(this.getActualPhase()).isProjectEditLeader()
+      && !this.isProjectNew(project.getId())) {
 
       final String actionName = this.getActionName().replaceAll(crp.getAcronym() + "/", "");
 
@@ -3260,15 +3878,10 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
         projectComponenetLesson.setModifiedBy(this.getCurrentUser());
         projectComponenetLesson.setModificationJustification("");
         projectComponenetLesson.setProjectOutcome(projectOutcome);
+        projectComponenetLesson.setPhase(this.getActualPhase());
+        projectComponenetLesson.setCycle(this.getActualPhase().getDescription());
+        projectComponenetLesson.setYear(this.getActualPhase().getYear());
 
-        if (this.isReportingActive()) {
-          projectComponenetLesson.setCycle(APConstants.REPORTING);
-          projectComponenetLesson.setYear(this.getReportingYear());
-
-        } else {
-          projectComponenetLesson.setCycle(APConstants.PLANNING);
-          projectComponenetLesson.setYear(this.getPlanningYear());
-        }
         projectComponenetLesson = projectComponentLessonManager.saveProjectComponentLesson(projectComponenetLesson);
       } else {
 
@@ -3282,14 +3895,10 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
         projectComponentDB.setModifiedBy(this.getCurrentUser());
         projectComponentDB.setModificationJustification("");
 
-        if (this.isReportingActive()) {
-          projectComponentDB.setCycle(APConstants.REPORTING);
-          projectComponentDB.setYear(this.getReportingYear());
+        projectOutcome.getProjectComponentLesson().setPhase(this.getActualPhase());
+        projectOutcome.getProjectComponentLesson().setCycle(this.getActualPhase().getDescription());
+        projectOutcome.getProjectComponentLesson().setYear(this.getActualPhase().getYear());
 
-        } else {
-          projectComponentDB.setCycle(APConstants.PLANNING);
-          projectComponentDB.setYear(this.getPlanningYear());
-        }
         projectComponentDB.setLessons(projectComponenetLesson.getLessons());
         // project
         // projectComponenetLesson.setComponentName(projectOutcome.getP);
@@ -3301,7 +3910,6 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
     }
 
   }
-
 
   public void saveLessonsSynthesis(Crp crp, IpProgram ipProgram) {
 
@@ -3331,10 +3939,20 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
 
   }
 
+  public void setActualPhase(Phase phase) {
+    this.getSession().put(APConstants.CURRENT_PHASE, phase);
+  }
+
 
   public void setAdd(boolean add) {
     this.add = true;
   }
+
+
+  public void setAvailabePhase(boolean avilabePhase) {
+    this.availabePhase = avilabePhase;
+  }
+
 
   public void setBasePermission(String basePermission) {
     this.basePermission = basePermission;
@@ -3344,9 +3962,13 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
     this.cancel = true;
   }
 
-
   public void setCanEdit(boolean canEdit) {
     this.canEdit = canEdit;
+  }
+
+
+  public void setCanEditPhase(boolean canEditPhase) {
+    this.canEditPhase = canEditPhase;
   }
 
   public void setCanSwitchProject(boolean canSwitchProject) {
@@ -3407,6 +4029,10 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
     this.isEditable = isEditable;
   }
 
+
+  public void setEditStatus(boolean editStatus) {
+    this.editStatus = editStatus;
+  }
 
   public void setFullEditable(boolean fullEditable) {
     this.fullEditable = fullEditable;

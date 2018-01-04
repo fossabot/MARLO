@@ -75,7 +75,10 @@ public class CrpProgramOutcome implements java.io.Serializable, IAuditLog {
   private Set<CrpClusterKeyOutputOutcome> crpClusterKeyOutputOutcomes = new HashSet<CrpClusterKeyOutputOutcome>(0);
   private Set<ProjectFurtherContribution> projectFurtherContributions = new HashSet<ProjectFurtherContribution>(0);
   private Set<CrpProgramOutcomeIndicator> crpProgramOutcomeIndicators = new HashSet<CrpProgramOutcomeIndicator>(0);
-
+  @Expose
+  private Phase phase;
+  @Expose
+  private String composeID;
 
   @Expose
   private boolean active;
@@ -158,6 +161,16 @@ public class CrpProgramOutcome implements java.io.Serializable, IAuditLog {
   public User getCreatedBy() {
     return createdBy;
   }
+   public String getComposeID() {
+    if (composeID != null) {
+      return composeID;
+    } else {
+      if (id != null) {
+        return id + "-" + this.getCrpProgram().getId();
+      }
+    }
+    return null;
+  }
 
   public Set<CrpClusterKeyOutputOutcome> getCrpClusterKeyOutputOutcomes() {
     return crpClusterKeyOutputOutcomes;
@@ -229,7 +242,9 @@ public class CrpProgramOutcome implements java.io.Serializable, IAuditLog {
   public User getModifiedBy() {
     return modifiedBy;
   }
-
+ public Phase getPhase() {
+    return phase;
+  }
 
   public Set<ProjectFurtherContribution> getProjectFurtherContributions() {
     return projectFurtherContributions;
@@ -271,7 +286,9 @@ public class CrpProgramOutcome implements java.io.Serializable, IAuditLog {
   public void setCreatedBy(User createdBy) {
     this.createdBy = createdBy;
   }
-
+ public void setComposeID(String composeID) {
+    this.composeID = composeID;
+  }
   public void setCrpClusterKeyOutputOutcomes(Set<CrpClusterKeyOutputOutcome> crpClusterKeyOutputOutcomes) {
     this.crpClusterKeyOutputOutcomes = crpClusterKeyOutputOutcomes;
   }
@@ -328,6 +345,9 @@ public class CrpProgramOutcome implements java.io.Serializable, IAuditLog {
 
   public void setModifiedBy(User modifiedBy) {
     this.modifiedBy = modifiedBy;
+  }
+  public void setPhase(Phase phase) {
+    this.phase = phase;
   }
 
   public void setProjectFurtherContributions(Set<ProjectFurtherContribution> projectFurtherContributions) {
