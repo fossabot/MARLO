@@ -88,7 +88,7 @@
           [#if isReportingActive]
             [#-- Deliverable FAIR compliance --]
             <td class="fair text-center"> 
-            [#if deliverable.requeriedFair()]
+            [#if deliverable.deliverableInfo.requeriedFair()]
               <span class="[#attempt][#if action.isF(deliverable.id)??][#if action.isF(deliverable.id)] achieved [#else] notAchieved [/#if][/#if][#recover][/#attempt]">F</span>
               <span class="[#attempt][#if action.isA(deliverable.id)??][#if action.isA(deliverable.id)] achieved [#else] notAchieved [/#if][/#if][#recover][/#attempt]">A</span>
               <span class="[#attempt][#if action.isI(deliverable.id)??][#if action.isI(deliverable.id)] achieved [#else] notAchieved [/#if][/#if][#recover][/#attempt]">I</span>
@@ -228,10 +228,11 @@
           [#-- Deliverable Status --]
           <td class="text-center">
             [#attempt]
-              ${deliverable.deliverableInfo.getStatusName(action.getActualPhase())!'none'}
-              [#if deliverable.deliverableInfo.status?? && deliverable.deliverableInfo.status==4 && deliverable.deliverableInfo.newExpectedYear??]
-               to ${deliverable.deliverableInfo.newExpectedYear}
-              [/#if]
+              <div class="status-container">
+                <div class="status-indicator ${(deliverable.deliverableInfo.getStatusName(action.getActualPhase()))!'none'}" title="${(deliverable.deliverableInfo.getStatusName(action.getActualPhase()))!'none'}"></div>
+                <span class="hidden">${(deliverable.deliverableInfo.getStatusName(action.getActualPhase()))!'none'}</span>
+              </div>
+              [#-- ${deliverable.deliverableInfo.getStatusName(action.getActualPhase())!'none'} --]
             [#recover]
               none
             [/#attempt]
@@ -254,20 +255,20 @@
           </td>
           [#-- Deliverable Funding source(s) --]
           <td>
-            [#if deliverable.fundingSources??]
+            [#if deliverable.fundingSources?? && deliverable.fundingSources?size > 0]
               [#list deliverable.fundingSources as deliverableFundingSource]
-                <div class="fundingSource-container">
+                <div class="fundingSource-container" title="${(deliverableFundingSource.fundingSource.fundingSourceInfo.title)!'none'}">
                  <div class="fundingSource-id-window label label-default">FS${(deliverableFundingSource.fundingSource.id)!'none'}-${(deliverableFundingSource.fundingSource.fundingSourceInfo.budgetType.name)!'none'}</div>
                  [#-- Could be necessary add a ->deliverable.title?? that check if exists --]
-                   [#if deliverable.deliverableInfo.title?length < 13] 
-                    ${(deliverableFundingSource.fundingSource.fundingSourceInfo.title)!'none'}
+                   [#if deliverableFundingSource.fundingSource.fundingSourceInfo.title?length < 13] 
+                      <span>${(deliverableFundingSource.fundingSource.fundingSourceInfo.title)!'none'}</span>
                    [#else] 
-                     <span title="${(deliverableFundingSource.fundingSource.fundingSourceInfo.title)!'none'}">[@utilities.wordCutter string=deliverableFundingSource.fundingSource.fundingSourceInfo.title maxPos=13 /]<span>
+                     <span>[@utilities.letterCutter string=deliverableFundingSource.fundingSource.fundingSourceInfo.title maxPos=13 /]<span>
                    [/#if]
                 </div>
               [/#list]
             [#else]
-              none
+              <span>none<span>
             [/#if]
           </td>
         </tr>  
