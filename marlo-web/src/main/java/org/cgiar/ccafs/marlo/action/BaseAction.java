@@ -168,7 +168,6 @@ import com.opensymphony.xwork2.ActionSupport;
 import com.opensymphony.xwork2.Preparable;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.struts2.ServletActionContext;
 import org.apache.struts2.dispatcher.Parameter;
 import org.apache.struts2.interceptor.ServletRequestAware;
@@ -602,7 +601,7 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
       }
 
       if (clazz == CrpPpaPartner.class) {
-          CrpPpaPartner crpPpaPartner = crpPpaPartnerManager.getCrpPpaPartnerById(id);
+        CrpPpaPartner crpPpaPartner = crpPpaPartnerManager.getCrpPpaPartnerById(id);
 
         List<ProjectPartner> partners = crpPpaPartner.getInstitution().getProjectPartners().stream()
           .filter(
@@ -1085,30 +1084,31 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
    * @return the actual phase of the crp
    */
   public Phase getActualPhase() {
+
+    try {
+      if (this.getSession().containsKey(APConstants.CURRENT_PHASE)) {
+        return (Phase) this.getSession().get(APConstants.CURRENT_PHASE);
+      } else {
+        Phase phase =
+          phaseManager.findCycle(this.getCurrentCycleParam(), this.getCurrentCycleYearParam(), this.getCrpID());
+        this.getSession().put(APConstants.CURRENT_PHASE, phase);
+        return phase;
+      }
+    } catch (Exception e) {
+      return new Phase(null, "", -1);
+    }
+
     /*
-     * try {
-     * if (this.getSession().containsKey(APConstants.CURRENT_PHASE)) {
-     * return (Phase) this.getSession().get(APConstants.CURRENT_PHASE);
+     * if (parameters.containsKey(APConstants.PHASE_ID)) {
+     * long phaseID = Long.parseLong(StringUtils.trim(parameters.get(APConstants.PHASE_ID).getMultipleValues()[0]));
+     * Phase phase = phaseManager.getPhaseById(phaseID);
+     * return phase;
      * } else {
      * Phase phase =
      * phaseManager.findCycle(this.getCurrentCycleParam(), this.getCurrentCycleYearParam(), this.getCrpID());
-     * this.getSession().put(APConstants.CURRENT_PHASE, phase);
      * return phase;
      * }
-     * } catch (Exception e) {
-     * return new Phase(null, "", -1);
-     * }
      */
-    if (parameters.containsKey(APConstants.PHASE_ID)) {
-      long phaseID = Long.parseLong(StringUtils.trim(parameters.get(APConstants.PHASE_ID).getMultipleValues()[0]));
-      Phase phase = phaseManager.getPhaseById(phaseID);
-      return phase;
-    } else {
-      Phase phase =
-        phaseManager.findCycle(this.getCurrentCycleParam(), this.getCurrentCycleYearParam(), this.getCrpID());
-      return phase;
-    }
-
 
   }
 
@@ -1876,7 +1876,7 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
 
   }
 
-   private boolean getFundingSourceStatus(FundingSource fundingSource) {
+  private boolean getFundingSourceStatus(FundingSource fundingSource) {
     fundingSource.setFundingSourceInfo(fundingSource.getFundingSourceInfo(this.getActualPhase()));
     if (fundingSource.getFundingSourceInfo(this.getActualPhase()) != null) {
       List<SectionStatus> sectionStatuses = fundingSource.getSectionStatuses().stream()
@@ -1929,7 +1929,7 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
   }
 
   public boolean getImpactSectionStatus(String section, long crpProgramID) {
-   SectionStatus sectionStatus = sectionStatusManager.getSectionStatusByCrpProgam(crpProgramID, section,
+    SectionStatus sectionStatus = sectionStatusManager.getSectionStatusByCrpProgam(crpProgramID, section,
       this.getActualPhase().getDescription(), this.getActualPhase().getYear());
     if (sectionStatus != null) {
       if (sectionStatus.getMissingFields().length() == 0
@@ -2001,7 +2001,7 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
 
   public List<Deliverable> getOpenDeliverables(List<Deliverable> deliverables) {
 
-   List<Deliverable> openDeliverables = new ArrayList<>();
+    List<Deliverable> openDeliverables = new ArrayList<>();
 
     for (Deliverable a : deliverables) {
 
@@ -2987,7 +2987,7 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
     return true;
   }
 
-   public boolean isCompleteProject(long projectID) {
+  public boolean isCompleteProject(long projectID) {
 
     try {
       Project project = projectManager.getProjectById(projectID);
@@ -3465,7 +3465,7 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
   }
 
 
- public boolean isPPA(Institution institution) {
+  public boolean isPPA(Institution institution) {
     if (institution == null) {
       return false;
     }
@@ -3545,7 +3545,7 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
     return true;
   }
 
- public Boolean isR(long deliverableID) {
+  public Boolean isR(long deliverableID) {
     try {
       Deliverable deliverableBD = deliverableManager.getDeliverableById(deliverableID);
       if (deliverableBD.getDeliverableInfo(this.getActualPhase()).getAdoptedLicense() == null) {
@@ -3616,7 +3616,7 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
       project
         .getSubmissions().stream().filter(c -> c.getCycle().equals(this.getCurrentCycle())
           && c.getYear().intValue() == year && (c.isUnSubmit() == null || !c.isUnSubmit()))
-        .collect(Collectors.toList());
+      .collect(Collectors.toList());
     if (submissions.isEmpty()) {
       return false;
     }
@@ -3693,7 +3693,7 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
     }
   }
 
-public void loadLessons(Crp crp, Project project) {
+  public void loadLessons(Crp crp, Project project) {
 
     Project projectDB = projectManager.getProjectById(project.getId());
     List<ProjectComponentLesson> lessons = projectDB.getProjectComponentLessons().stream()
@@ -3813,7 +3813,7 @@ public void loadLessons(Crp crp, Project project) {
       }
     }
   }
- 
+
 
   public void loadQualityCheck(Deliverable deliverableBD) {
 
