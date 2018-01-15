@@ -24,8 +24,8 @@ import org.cgiar.ccafs.marlo.data.model.ProjectFocus;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.inject.Named;
 import javax.inject.Inject;
+import javax.inject.Named;
 
 /**
  * @author Christian Garcia
@@ -54,7 +54,7 @@ public class ProjectFocusManagerImpl implements ProjectFocusManager {
       .filter(c -> c.isActive() && c.getProject().getId().longValue() == projecID
         && projectFocus.getCrpProgram().getId().longValue() == c.getCrpProgram().getId().longValue())
       .collect(Collectors.toList());
-    if (phase.getEditable() != null && phase.getEditable() && projectFocuses.isEmpty()) {
+    if ( projectFocuses.isEmpty()) {
 
       ProjectFocus projectFocusAdd = new ProjectFocus();
       projectFocusAdd.setActive(true);
@@ -92,18 +92,17 @@ public class ProjectFocusManagerImpl implements ProjectFocusManager {
 
   public void deletProjectFocusPhase(Phase next, long projecID, ProjectFocus projectFocus) {
     Phase phase = phaseDAO.find(next.getId());
-    if (phase.getEditable() != null && phase.getEditable()) {
-      List<ProjectFocus> projectFocuses = phase.getProjectFocuses().stream()
-        .filter(c -> c.isActive() && c.getProject().getId().longValue() == projecID
-          && projectFocus.getCrpProgram().getId().longValue() == c.getCrpProgram().getId().longValue())
-        .collect(Collectors.toList());
-      for (ProjectFocus projectFocusDB : projectFocuses) {
-        this.deleteProjectFocus(projectFocusDB.getId());
-      }
-    } else {
-      if (phase.getNext() != null) {
-        this.deletProjectFocusPhase(phase.getNext(), projecID, projectFocus);
-      }
+
+    List<ProjectFocus> projectFocuses = phase.getProjectFocuses().stream()
+      .filter(c -> c.isActive() && c.getProject().getId().longValue() == projecID
+        && projectFocus.getCrpProgram().getId().longValue() == c.getCrpProgram().getId().longValue())
+      .collect(Collectors.toList());
+    for (ProjectFocus projectFocusDB : projectFocuses) {
+      this.deleteProjectFocus(projectFocusDB.getId());
+    }
+
+    if (phase.getNext() != null) {
+      this.deletProjectFocusPhase(phase.getNext(), projecID, projectFocus);
     }
 
 

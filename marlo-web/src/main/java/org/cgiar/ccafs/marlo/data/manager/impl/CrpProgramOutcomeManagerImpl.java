@@ -109,7 +109,7 @@ public class CrpProgramOutcomeManagerImpl implements CrpProgramOutcomeManager {
     List<CrpProgramOutcome> outcomes =
       phase.getOutcomes().stream().filter(c -> c.isActive() && c.getCrpProgram().getId().longValue() == crpProgramID
         && c.getComposeID().equals(outcome.getComposeID())).collect(Collectors.toList());
-    if (phase.getEditable() != null && phase.getEditable() && outcomes.isEmpty()) {
+    if ( outcomes.isEmpty()) {
       CrpProgramOutcome outcomeAdd = new CrpProgramOutcome();
       outcomeAdd.setActive(true);
       outcomeAdd.setActiveSince(outcome.getActiveSince());
@@ -129,18 +129,18 @@ public class CrpProgramOutcomeManagerImpl implements CrpProgramOutcomeManager {
       this.addCrpMilestones(outcome, outcomeAdd);
 
     } else {
-      if (phase.getEditable() != null && phase.getEditable()) {
-        for (CrpProgramOutcome outcomePrev : outcomes) {
-          outcomePrev.setSrfTargetUnit(outcome.getSrfTargetUnit());
-          outcomePrev.setValue(outcome.getValue());
-          outcomePrev.setYear(outcome.getYear());
-          outcomePrev.setDescription(outcome.getDescription());
-          outcomePrev.setIndicator(outcome.getIndicator());
-          crpProgramOutcomeDAO.save(outcomePrev);
-          this.updateCrpSubIdos(outcomePrev, outcome);
-          this.updateMilestones(outcomePrev, outcome);
-        }
+
+      for (CrpProgramOutcome outcomePrev : outcomes) {
+        outcomePrev.setSrfTargetUnit(outcome.getSrfTargetUnit());
+        outcomePrev.setValue(outcome.getValue());
+        outcomePrev.setYear(outcome.getYear());
+        outcomePrev.setDescription(outcome.getDescription());
+        outcomePrev.setIndicator(outcome.getIndicator());
+        crpProgramOutcomeDAO.save(outcomePrev);
+        this.updateCrpSubIdos(outcomePrev, outcome);
+        this.updateMilestones(outcomePrev, outcome);
       }
+
     }
 
     if (phase.getNext() != null) {

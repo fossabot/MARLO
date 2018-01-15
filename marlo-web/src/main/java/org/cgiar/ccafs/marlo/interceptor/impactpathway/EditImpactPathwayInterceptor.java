@@ -109,8 +109,8 @@ public class EditImpactPathwayInterceptor extends AbstractInterceptor implements
     crp = (Crp) session.get(APConstants.SESSION_CRP);
     crpProgramID = this.getCrpProgramId();
 
-    if (!baseAction.hasPermission(baseAction.generatePermission(Permission.IMPACT_PATHWAY_VISIBLE_PRIVILEGES, session,
-      crp.getId(), crp.getAcronym()))) {
+    if (!baseAction
+      .hasPermission(baseAction.generatePermission(Permission.IMPACT_PATHWAY_VISIBLE_PRIVILEGES, crp.getAcronym()))) {
       return BaseAction.NOT_AUTHORIZED;
     }
 
@@ -126,10 +126,11 @@ public class EditImpactPathwayInterceptor extends AbstractInterceptor implements
 
   public void setPermissionParameters(ActionInvocation invocation) {
     BaseAction baseAction = (BaseAction) invocation.getAction();
+    baseAction.setSession(session);
     boolean canEdit = false;
     boolean hasPermissionToEdit = false;
     boolean editParameter = false;
-    phase = baseAction.getActualPhase(session, crp.getId());
+    phase = baseAction.getActualPhase();
     phase = phaseManager.getPhaseById(phase.getId());
 
     CrpProgram crpProgram = crpProgramManager.getCrpProgramById(crpProgramID);
@@ -143,7 +144,7 @@ public class EditImpactPathwayInterceptor extends AbstractInterceptor implements
           canEdit = true;
         } else {
           if (baseAction.hasPermissionNoBase(baseAction.generatePermission(Permission.IMPACT_PATHWAY_EDIT_PRIVILEGES,
-            session, crp.getId(), crp.getAcronym(), crpProgramID + ""))) {
+            crp.getAcronym(), crpProgramID + ""))) {
             canEdit = true;
           }
 
@@ -169,16 +170,21 @@ public class EditImpactPathwayInterceptor extends AbstractInterceptor implements
             baseAction.setEditableParameter(hasPermissionToEdit);
           }
         }
+        if (parameters.get(APConstants.TRANSACTION_ID).isDefined()) {
+          // String stringEditable = ((String[]) parameters.get(APConstants.EDITABLE_REQUEST))[0];
 
+          editParameter = false;
+          // If the user is not asking for edition privileges we don't need to validate them.
+
+        }
         // Check the permission if user want to edit or save the form
         if (editParameter || parameters.get("save") != null) {
-          hasPermissionToEdit = (baseAction.isAdmin()) ? true
-            : baseAction.hasPermission(baseAction.generatePermission(Permission.IMPACT_PATHWAY_EDIT_PRIVILEGES, session,
-              crp.getId(), crp.getAcronym(), crpProgramID + ""));
+          hasPermissionToEdit = (baseAction.isAdmin()) ? true : baseAction.hasPermission(baseAction
+            .generatePermission(Permission.IMPACT_PATHWAY_EDIT_PRIVILEGES, crp.getAcronym(), crpProgramID + ""));
         }
 
         // Set the variable that indicates if the user can edit the section
-        baseAction.setEditableParameter(hasPermissionToEdit && canEdit);
+        baseAction.setEditableParameter(editParameter && canEdit);
         baseAction.setCanEdit(canEdit);
 
       } else {

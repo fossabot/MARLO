@@ -59,6 +59,7 @@ public class BaseValidator {
   public BaseValidator() {
     validationMessage = new StringBuilder();
     missingFields = new StringBuilder();
+
   }
 
   protected void addMessage(String message) {
@@ -536,7 +537,14 @@ public class BaseValidator {
 
     }
 
-    status.setMissingFields(this.missingFields.toString());
+    // Validate if the form have missing fileds in project sections issue #1209
+    String sMissingField = this.missingFields.toString();
+    if (sMissingField.length() > 0) {
+      status.setMissingFields(sMissingField);
+    } else {
+      status.setMissingFields("");
+    }
+
     sectionStatusManager.saveSectionStatus(status);
 
   }

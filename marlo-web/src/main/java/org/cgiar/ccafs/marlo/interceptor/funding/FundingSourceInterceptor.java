@@ -79,9 +79,10 @@ public class FundingSourceInterceptor extends AbstractInterceptor implements Ser
 
   void setPermissionParameters(ActionInvocation invocation) {
     BaseAction baseAction = (BaseAction) invocation.getAction();
+    baseAction.setSession(session);
     User user = (User) session.get(APConstants.SESSION_USER);
     baseAction.setSession(session);
-    phase = baseAction.getActualPhase(session, crp.getId());
+    phase = baseAction.getActualPhase();
     phase = phaseManager.getPhaseById(phase.getId());
     boolean canEdit = false;
     boolean hasPermissionToEdit = false;
@@ -145,6 +146,10 @@ public class FundingSourceInterceptor extends AbstractInterceptor implements Ser
         canEdit = false;
         baseAction.setCanEditPhase(false);
       }
+      if (!phase.getEditable()) {
+        canEdit = false;
+        baseAction.setCanEditPhase(false);
+      }
       if (parameters.get(APConstants.EDITABLE_REQUEST).isDefined()) {
         // String stringEditable = ((String[]) parameters.get(APConstants.EDITABLE_REQUEST))[0];
         String stringEditable = parameters.get(APConstants.EDITABLE_REQUEST).getMultipleValues()[0];
@@ -175,7 +180,14 @@ public class FundingSourceInterceptor extends AbstractInterceptor implements Ser
        * }
        */
       // Set the variable that indicates if the user can edit the section
-      baseAction.setEditableParameter(hasPermissionToEdit && canEdit);
+      if (parameters.get(APConstants.TRANSACTION_ID).isDefined()) {
+        // String stringEditable = ((String[]) parameters.get(APConstants.EDITABLE_REQUEST))[0];
+
+        editParameter = false;
+        // If the user is not asking for edition privileges we don't need to validate them.
+
+      }
+      baseAction.setEditableParameter(editParameter && canEdit);
       baseAction.setCanEdit(canEdit);
 
     } else {

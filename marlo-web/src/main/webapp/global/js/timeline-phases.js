@@ -2,6 +2,7 @@ $(document).ready(function() {
 
   var $example = $('#timelineScroll');
   var $frame = $example.find('.frame');
+
   window.frr = $frame;
   var sly = new Sly($frame, {
       horizontal: 1,
@@ -33,10 +34,22 @@ $(document).ready(function() {
       nextPage: $example.find('.nextPage')
   }).init();
 
-  sly.on('active', function(eventName) {
-    console.log('active');
+  $('.phaseBox.open').on('click', function(e,i) {
+    var phaseID = $(this).attr('id').split('-')[1];
+    var isClosed = $(this).find('.label-danger').exists();
+    console.log('is closed', isClosed);
+    if(isClosed) {
+      e.preventDefault();
+    } else {
+      setPhaseID(phaseID);
+    }
+  });
+
+  sly.on('active', function(eventName,itemIndex) {
+    console.log("eventName", eventName);
+    console.log("itemIndex", itemIndex);
     var phaseID = $frame.find('li.active').attr('id').split('-')[1];
-    setPhaseID(phaseID);
+    var isClosed = $frame.find('li.active').find('.label-danger').exists();
   });
 
 });
