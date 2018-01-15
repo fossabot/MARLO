@@ -1674,7 +1674,7 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
     return APConstants.DATE_FORMAT;
   }
 
-  public List<Deliverable> getDeliverableRelationsImpact(long id, String className) {
+  public List<Deliverable> getDeliverableRelationsImpact(Long id, String className) {
     Class<?> clazz;
     List<Deliverable> deliverables = null;
     try {
@@ -1714,7 +1714,7 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
 
   }
 
-  public List<Deliverable> getDeliverableRelationsProject(long id, String className, long projectID) {
+  public List<Deliverable> getDeliverableRelationsProject(Long id, String className, Long projectID) {
     Class<?> clazz;
     List<Deliverable> deliverables = null;
     try {
@@ -1724,7 +1724,7 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
         ProjectBudget projectBudget = projectBudgetManager.getProjectBudgetById(id);
         List<DeliverableFundingSource> deList = projectBudget.getFundingSource().getDeliverableFundingSources().stream()
           .filter(c -> c.isActive() && c.getPhase().equals(this.getActualPhase())
-            && c.getDeliverable().getProject().getId().longValue() == projectID)
+            && c.getDeliverable().getProject().getId().longValue() == projectID.longValue())
           .collect(Collectors.toList());
         Set<Deliverable> deSet = new HashSet<>();
         for (DeliverableFundingSource deliverableInfo : deList) {
@@ -1755,7 +1755,7 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
         ProjectBudget projectBudget = projectBudgetManager.getProjectBudgetById(id);
         List<DeliverableFundingSource> deList = projectBudget.getFundingSource().getDeliverableFundingSources().stream()
           .filter(c -> c.isActive() && c.getPhase().equals(this.getActualPhase())
-            && c.getDeliverable().getProject().getId().longValue() == projectID)
+            && c.getDeliverable().getProject().getId().longValue() == projectID.longValue())
           .collect(Collectors.toList());
         Set<Deliverable> deSet = new HashSet<>();
         for (DeliverableFundingSource deliverableInfo : deList) {
@@ -1795,7 +1795,8 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
         List<Deliverable> deList = new ArrayList<>();
 
         for (Deliverable deliverable : deliverables) {
-          if (deliverable.getProject() != null && deliverable.getProject().getId().longValue() == projectID) {
+          if (deliverable.getProject() != null
+            && deliverable.getProject().getId().longValue() == projectID.longValue()) {
             deList.add(deliverable);
           }
         }
@@ -2162,7 +2163,7 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
     return null;
   }
 
-  public List<Project> getProjectRelationsImpact(long id, String className) {
+  public List<Project> getProjectRelationsImpact(Long id, String className) {
     Class<?> clazz;
     List<Project> projects = null;
     try {
@@ -3094,11 +3095,17 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
             && sectionStatus.getYear().intValue() == this.getCurrentCycleYear()) {
             switch (ProjectSectionStatusEnum.value(sectionStatus.getSectionName().toUpperCase())) {
 
+              case ACTIVITIES:
+                if (this.hasSpecificities(APConstants.CRP_ACTIVITES_MODULE)) {
+                  totalSections++;
+                }
+
+                break;
               case DESCRIPTION:
               case PARTNERS:
               case LOCATIONS:
               case BUDGET:
-              case ACTIVITIES:
+
                 totalSections++;
                 break;
               case DELIVERABLES:
