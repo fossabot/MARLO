@@ -168,6 +168,7 @@ import com.opensymphony.xwork2.ActionSupport;
 import com.opensymphony.xwork2.Preparable;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.struts2.ServletActionContext;
 import org.apache.struts2.dispatcher.Parameter;
 import org.apache.struts2.interceptor.ServletRequestAware;
@@ -1087,7 +1088,7 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
    */
   public Phase getActualPhase() {
 
-  
+
     try {
       Map<Long, Phase> allPhases = null;
       if (this.getSession() != null) {
@@ -1124,8 +1125,6 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
     }
 
   }
-
- 
 
 
   /*
