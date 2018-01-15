@@ -1,6 +1,6 @@
 [#ftl]
 [#assign title = "Impact Pathway - Outcomes" /]
-[#assign currentSectionString = "program-${actionName?replace('/','-')}-${crpProgramID}" /]
+[#assign currentSectionString = "program-${actionName?replace('/','-')}-${crpProgramID}-phase-${(actualPhase.id)!}" /]
 [#assign pageLibs = ["select2", "blueimp-file-upload", "cytoscape","cytoscape-panzoom"] /]
 [#assign customJS = [ 
   "${baseUrlMedia}/js/impactPathway/programSubmit.js", 
