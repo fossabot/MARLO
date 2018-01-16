@@ -27,6 +27,7 @@ import org.cgiar.ccafs.marlo.data.manager.ICenterProjectFundingSourceManager;
 import org.cgiar.ccafs.marlo.data.manager.ICenterProjectLocationManager;
 import org.cgiar.ccafs.marlo.data.manager.ICenterProjectPartnerManager;
 import org.cgiar.ccafs.marlo.data.manager.ICenterProjectPartnerPersonManager;
+import org.cgiar.ccafs.marlo.data.manager.PhaseManager;
 import org.cgiar.ccafs.marlo.data.manager.ProjectManager;
 import org.cgiar.ccafs.marlo.data.manager.UserManager;
 import org.cgiar.ccafs.marlo.data.manager.impl.CenterProjectManager;
@@ -44,7 +45,10 @@ import org.cgiar.ccafs.marlo.data.model.CenterProjectLocation;
 import org.cgiar.ccafs.marlo.data.model.CenterProjectPartner;
 import org.cgiar.ccafs.marlo.data.model.CenterProjectPartnerPerson;
 import org.cgiar.ccafs.marlo.data.model.CenterProjectStatus;
+import org.cgiar.ccafs.marlo.data.model.Crp;
+import org.cgiar.ccafs.marlo.data.model.CustomParameter;
 import org.cgiar.ccafs.marlo.data.model.Institution;
+import org.cgiar.ccafs.marlo.data.model.Phase;
 import org.cgiar.ccafs.marlo.data.model.Project;
 import org.cgiar.ccafs.marlo.data.model.ProjectLocation;
 import org.cgiar.ccafs.marlo.data.model.ProjectPartner;
@@ -112,6 +116,9 @@ public class ProjectListAction extends BaseAction {
   private MarloOcsClient ocsClient;
   private AgreementOCS agreement;
 
+  // TODO fix Phases without globalUnit
+  private PhaseManager phaseManager;
+
   @Inject
   public ProjectListAction(APConfig config, ICenterManager centerService, ICenterProgramManager programService,
     CenterProjectManager projectService, UserManager userService, ICenterAreaManager researchAreaService,
@@ -119,7 +126,7 @@ public class ProjectListAction extends BaseAction {
     ProjectManager projectManager, ICenterProjectFundingSourceManager centerProjectFudingSourceManager,
     CenterFundingSyncTypeManager fundingSyncTypeManager, ICenterFundingSourceTypeManager centerFundingTypeManager,
     ICenterProjectLocationManager projectLocationService, ICenterProjectPartnerManager partnerService,
-    ICenterProjectPartnerPersonManager partnerPersonService) {
+    ICenterProjectPartnerPersonManager partnerPersonService, PhaseManager phaseManager) {
     super(config);
     this.centerService = centerService;
     this.programService = programService;
@@ -135,6 +142,7 @@ public class ProjectListAction extends BaseAction {
     this.projectLocationService = projectLocationService;
     this.partnerService = partnerService;
     this.partnerPersonService = partnerPersonService;
+    this.phaseManager = phaseManager;
 
   }
 
@@ -216,55 +224,45 @@ public class ProjectListAction extends BaseAction {
     long pID = Long.parseLong(syncCode);
     Project project = projectManager.getProjectById(pID);
 
+
+  // TODO add phase call the parameters
+    Crp crp = project.getCrp();
+
+
+    CustomParameter customParameter = crp.getCustomParameters().stream()
+      .filter(cp -> cp.isActive() && cp.getParameter().getKey().equals(APConstants.CRP_PLANNING_YEAR))
+      .collect(Collectors.toList()).get(0);
+
+    Phase phase = phaseManager.findCycle("Planning", Integer.parseInt(customParameter.getValue()), crp.getId());
+
     CenterProject centerProject = projectService.getCenterProjectById(centerProjectID);
 
-    centerProject.setName(project.getProjecInfoPhase(this.getActualPhase()).getTitle());
-    centerProject.setDescription(project.getProjecInfoPhase(this.getActualPhase()).getSummary());
-    centerProject.setStartDate(project.getProjecInfoPhase(this.getActualPhase()).getStartDate());
-    centerProject.setEndDate(project.getProjecInfoPhase(this.getActualPhase()).getEndDate());
-    centerProject.setProjectLeader(project.getLeaderPerson(this.getActualPhase()).getUser());
-    centerProject.setSync(true);
-    centerProject.setSyncDate(new Date());
-    centerProject.setAutoFill(true);
-
-    // Add Project Status
-    centerProject
-      .setProjectStatus(new CenterProjectStatus(project.getProjecInfoPhase(this.getActualPhase()).getStatus(), true));
-
-    // Add Crp Project CrossCutting to Center Project
-    this.crpCrossCuttingInformation(project, centerProject);
-
-    // Add Crp Project Locations to Center Project
-    this.crpProjectLocation(project, centerProject);
-
-    // Add Crp Project Partners to Center Project
-    this.crpProjectPartners(project, centerProject);
-
+    centerProject.setName(project.getProjecInfoPhase(phase).getTitle());
+    centerProject.setDescription(project.getProjecInfoPhase(phase).getSummary());
+    centerProject.setStartDate(project.getProjecInfoPhase(phase).getStartDate());
+    centerProject.setEndDate(project.getProjecInfoPhase(phase).getEndDate());
+    centerProject.setProjectLeader(project.getLeaderPerson(phase).getUser());
     projectService.saveCenterProject(centerProject);
 
-    CenterProjectFundingSource fundingSource = new CenterProjectFundingSource();
+    // CenterProjectFundingSource fundingSource = new CenterProjectFundingSource();
+    // fundingSource.setCenterProject(centerProject);
+    // fundingSource.setCode("P" + syncCode);
+    // fundingSource.setSync(true);
+    // fundingSource.setSyncDate(new Date());
+    // fundingSource.setCrp(project.getCrp());
+    // fundingSource.setTitle(project.getTitle());
+    // fundingSource.setDescription(project.getSummary());
+    // fundingSource.setStartDate(project.getStartDate());
+    // fundingSource.setEndDate(project.getEndDate());
+    // // Setting the sync type (2 = MARLO-CRP)
+    // CenterFundingSyncType fundingSyncType = fundingSyncTypeManager.getCenterFundingSyncTypeById(2);
+    // fundingSource.setCenterFundingSyncType(fundingSyncType);
+    // fundingSource.setActive(true);
+    // fundingSource.setCreatedBy(this.getCurrentUser());
+    // fundingSource.setModifiedBy(this.getCurrentUser());
+    // fundingSource.setActiveSince(new Date());
+    // centerProjectFudingSourceManager.saveProjectFundingSource(fundingSource);
 
-    fundingSource.setCenterProject(centerProject);
-    fundingSource.setCode("P" + syncCode);
-    fundingSource.setSync(true);
-    fundingSource.setSyncDate(new Date());
-    fundingSource.setAutoFill(true);
-    fundingSource.setCrp(project.getCrp());
-    fundingSource.setTitle(project.getProjecInfoPhase(this.getActualPhase()).getTitle());
-    fundingSource.setDescription(project.getProjecInfoPhase(this.getActualPhase()).getSummary());
-    fundingSource.setStartDate(project.getProjecInfoPhase(this.getActualPhase()).getStartDate());
-    fundingSource.setEndDate(project.getProjecInfoPhase(this.getActualPhase()).getEndDate());
-
-    // Setting the sync type (2 = MARLO-CRP)
-    CenterFundingSyncType fundingSyncType = fundingSyncTypeManager.getCenterFundingSyncTypeById(2);
-    fundingSource.setCenterFundingSyncType(fundingSyncType);
-
-    fundingSource.setActive(true);
-    fundingSource.setCreatedBy(this.getCurrentUser());
-    fundingSource.setModifiedBy(this.getCurrentUser());
-    fundingSource.setActiveSince(new Date());
-
-    centerProjectFudingSourceManager.saveProjectFundingSource(fundingSource);
 
   }
 

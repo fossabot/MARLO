@@ -444,7 +444,8 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
    */
   public boolean canAcessCenterImpactPathway() {
 
-    String permission = this.generatePermission(Permission.RESEARCH_AREA_FULL_PRIVILEGES, this.getCenterSession());
+    String permission =
+      this.generatePermissionCenter(Permission.RESEARCH_AREA_FULL_PRIVILEGES, this.getCenterSession());
     LOG.debug(permission);
     LOG.debug(String.valueOf(securityContext.hasPermission(permission)));
     return securityContext.hasPermission(permission);
@@ -1076,6 +1077,19 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
 
   }
 
+  /**
+   * ************************ CENTER METHOD ******************************
+   * Generate permissions String to Centers
+   * ********************************************************************
+   * 
+   * @return a permission String
+   */
+  public String generatePermissionCenter(String permission, String... params) {
+    return this.getText(permission, params);
+
+  }
+
+
   public String getActionName() {
     return ServletActionContext.getActionMapping().getName();
   }
@@ -1102,9 +1116,9 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
           }
           this.getSession().put(APConstants.ALL_PHASES, allPhasesMap);
         }
-        allPhases = (Map<Long, Phase>) this.getSession().get(APConstants.ALL_PHASES);
-      }
 
+      }
+      allPhases = (Map<Long, Phase>) this.getSession().get(APConstants.ALL_PHASES);
 
       Map<String, Parameter> parameters = this.getParameters();
       if (this.getPhaseID() != null) {
@@ -2695,6 +2709,22 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
     }
   }
 
+  /**
+   * ************************ CENTER METHOD *********************
+   * validation base method to check the permission in MARLO centers.
+   * ***************************************************************
+   * 
+   * @return true if the user have the permission
+   */
+  public boolean hasPermissionCenter(String fieldName) {
+    if (basePermission == null) {
+      return securityContext.hasPermission(fieldName);
+    } else {
+      return securityContext.hasPermission(this.getBasePermission() + ":" + fieldName);
+    }
+  }
+
+
   public boolean hasPermissionCrpIndicators(long liaisonID) {
     final String params[] = {this.getCrpSession(), liaisonID + "",};
     final boolean permission =
@@ -2755,7 +2785,7 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
     final CenterProject project = projectService.getCenterProjectById(projectID);
     final CenterProgram program = project.getResearchProgram();;
     final String permission =
-      this.generatePermission(Permission.PROJECT_SUBMISSION_PERMISSION, this.getCurrentCenter().getAcronym(),
+      this.generatePermissionCenter(Permission.PROJECT_SUBMISSION_PERMISSION, this.getCurrentCenter().getAcronym(),
         String.valueOf(program.getResearchArea().getId()), String.valueOf(program.getId()), String.valueOf(projectID));
     final boolean permissions = this.securityContext.hasPermission(permission);
     return permissions;
