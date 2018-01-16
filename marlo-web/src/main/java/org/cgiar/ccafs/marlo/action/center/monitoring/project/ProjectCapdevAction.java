@@ -97,11 +97,14 @@ public class ProjectCapdevAction extends BaseAction {
       CenterProject ProjectDB = projectService.getCenterProjectById(projectID);
       selectedProgram = ProjectDB.getResearchProgram();
       programID = selectedProgram.getId();
+      // TODO development in capDev branch.
+      if (capdevService.findAll() != null) {
+        capdevs = capdevService.findAll().stream()
+          .filter(c -> (c.getProject() != null) && (c.getProject().getId() == project.getId()) && c.isActive())
+          .collect(Collectors.toList());
+        Collections.sort(capdevs, (ra1, ra2) -> (int) (ra2.getId() - ra1.getId()));
+      }
 
-      capdevs = capdevService.findAll().stream()
-        .filter(c -> (c.getProject() != null) && (c.getProject().getId() == project.getId()) && c.isActive())
-        .collect(Collectors.toList());
-      Collections.sort(capdevs, (ra1, ra2) -> (int) (ra2.getId() - ra1.getId()));
 
     }
   }
