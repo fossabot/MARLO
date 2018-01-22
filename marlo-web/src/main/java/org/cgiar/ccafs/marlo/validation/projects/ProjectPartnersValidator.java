@@ -17,10 +17,10 @@ package org.cgiar.ccafs.marlo.validation.projects;
 
 import org.cgiar.ccafs.marlo.action.BaseAction;
 import org.cgiar.ccafs.marlo.config.APConstants;
-import org.cgiar.ccafs.marlo.data.manager.CrpManager;
+import org.cgiar.ccafs.marlo.data.manager.GlobalUnitManager;
 import org.cgiar.ccafs.marlo.data.manager.InstitutionManager;
 import org.cgiar.ccafs.marlo.data.manager.ProjectManager;
-import org.cgiar.ccafs.marlo.data.model.Crp;
+import org.cgiar.ccafs.marlo.data.model.GlobalUnit;
 import org.cgiar.ccafs.marlo.data.model.Institution;
 import org.cgiar.ccafs.marlo.data.model.Project;
 import org.cgiar.ccafs.marlo.data.model.ProjectPartner;
@@ -51,16 +51,21 @@ public class ProjectPartnersValidator extends BaseValidator {
 
   private static final Logger LOG = LoggerFactory.getLogger(ProjectPartnersValidator.class);
 
-  private final CrpManager crpManager;
-  private final ProjectManager projectManager;
-  private final InstitutionManager institutionManager;
-  private final ProjectValidator projectValidator;
+
+  // GlobalUnit Manager
+  private GlobalUnitManager crpManager;
+
+  private ProjectManager projectManager;
+
+  private ProjectValidator projectValidator;
+
+  private InstitutionManager institutionManager;
 
   // This is not thread safe
   private boolean hasErros;
 
   @Inject
-  public ProjectPartnersValidator(ProjectValidator projectValidator, CrpManager crpManager,
+  public ProjectPartnersValidator(ProjectValidator projectValidator, GlobalUnitManager crpManager,
     ProjectManager projectManager, InstitutionManager institutionManager) {
     super();
     this.projectValidator = projectValidator;
@@ -70,7 +75,7 @@ public class ProjectPartnersValidator extends BaseValidator {
   }
 
   private Path getAutoSaveFilePath(Project project, long crpID) {
-    Crp crp = crpManager.getCrpById(crpID);
+    GlobalUnit crp = crpManager.getGlobalUnitById(crpID);
     String composedClassName = project.getClass().getSimpleName();
     String actionFile = ProjectSectionStatusEnum.PARTNERS.getStatus().replace("/", "_");
     String autoSaveFile =

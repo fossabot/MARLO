@@ -19,9 +19,9 @@ import org.cgiar.ccafs.marlo.action.BaseAction;
 import org.cgiar.ccafs.marlo.config.APConstants;
 import org.cgiar.ccafs.marlo.data.manager.AuditLogManager;
 import org.cgiar.ccafs.marlo.data.manager.CenterFundingSyncTypeManager;
-import org.cgiar.ccafs.marlo.data.manager.CrpManager;
+import org.cgiar.ccafs.marlo.data.manager.GlobalUnitManager;
+import org.cgiar.ccafs.marlo.data.manager.GlobalUnitProjectManager;
 import org.cgiar.ccafs.marlo.data.manager.ICenterFundingSourceTypeManager;
-import org.cgiar.ccafs.marlo.data.manager.ICenterManager;
 import org.cgiar.ccafs.marlo.data.manager.ICenterOutputManager;
 import org.cgiar.ccafs.marlo.data.manager.ICenterProjectCrosscutingThemeManager;
 import org.cgiar.ccafs.marlo.data.manager.ICenterProjectFundingSourceManager;
@@ -32,7 +32,6 @@ import org.cgiar.ccafs.marlo.data.manager.ICenterProjectStatusManager;
 import org.cgiar.ccafs.marlo.data.manager.ICenterProjectTypeManager;
 import org.cgiar.ccafs.marlo.data.manager.LocElementManager;
 import org.cgiar.ccafs.marlo.data.manager.UserManager;
-import org.cgiar.ccafs.marlo.data.model.Center;
 import org.cgiar.ccafs.marlo.data.model.CenterArea;
 import org.cgiar.ccafs.marlo.data.model.CenterFundingSourceType;
 import org.cgiar.ccafs.marlo.data.model.CenterFundingSyncType;
@@ -48,9 +47,11 @@ import org.cgiar.ccafs.marlo.data.model.CenterProjectOutput;
 import org.cgiar.ccafs.marlo.data.model.CenterProjectStatus;
 import org.cgiar.ccafs.marlo.data.model.CenterProjectType;
 import org.cgiar.ccafs.marlo.data.model.CenterTopic;
-import org.cgiar.ccafs.marlo.data.model.Crp;
+import org.cgiar.ccafs.marlo.data.model.GlobalUnit;
+import org.cgiar.ccafs.marlo.data.model.GlobalUnitProject;
 import org.cgiar.ccafs.marlo.data.model.LocElement;
 import org.cgiar.ccafs.marlo.data.model.OutcomeOutputs;
+import org.cgiar.ccafs.marlo.data.model.Phase;
 import org.cgiar.ccafs.marlo.data.model.TopicOutcomes;
 import org.cgiar.ccafs.marlo.data.model.User;
 import org.cgiar.ccafs.marlo.security.Permission;
@@ -85,7 +86,8 @@ public class ProjectDescriptionAction extends BaseAction {
   private static final long serialVersionUID = 3034101967516313023L;
 
 
-  private ICenterManager centerService;
+  // GlobalUnit Manager
+  private GlobalUnitManager centerService;
 
   private ICenterProjectManager projectService;
 
@@ -115,7 +117,7 @@ public class ProjectDescriptionAction extends BaseAction {
   private CenterProjectDescriptionValidator validator;
 
 
-  private CrpManager crpService;
+  private GlobalUnitManager crpService;
 
   private ICenterProjectTypeManager projectTypeService;
 
@@ -130,7 +132,7 @@ public class ProjectDescriptionAction extends BaseAction {
   private CenterProgram selectedProgram;
 
 
-  private Center loggedCenter;
+  private GlobalUnit loggedCenter;
 
   private List<CenterArea> researchAreas;
 
@@ -149,8 +151,10 @@ public class ProjectDescriptionAction extends BaseAction {
 
   private List<LocElement> countryLists;
 
+  private GlobalUnitProjectManager globalUnitProjectManager;
 
-  private List<Crp> crps;
+
+  private List<GlobalUnit> crps;
   private List<CenterProjectType> projectTypes;
   private List<CenterProjectStatus> status;
   private boolean region;
@@ -162,14 +166,15 @@ public class ProjectDescriptionAction extends BaseAction {
   private String transaction;
 
   @Inject
-  public ProjectDescriptionAction(APConfig config, ICenterManager centerService, ICenterProjectManager projectService,
-    UserManager userService, ICenterFundingSourceTypeManager fundingSourceService,
+  public ProjectDescriptionAction(APConfig config, GlobalUnitManager centerService,
+    ICenterProjectManager projectService, UserManager userService, ICenterFundingSourceTypeManager fundingSourceService,
     CenterProjectDescriptionValidator validator, ICenterOutputManager outputService,
     ICenterProjectOutputManager projectOutputService, ICenterProjectFundingSourceManager projectFundingSourceService,
     ICenterProjectCrosscutingThemeManager projectCrosscutingThemeService,
     ICenterProjectLocationManager projectLocationService, LocElementManager locElementService,
-    AuditLogManager auditLogService, CrpManager crpService, ICenterProjectTypeManager projectTypeService,
-    ICenterProjectStatusManager projectStatusService, CenterFundingSyncTypeManager centerFundingSyncTypeManager) {
+    AuditLogManager auditLogService, GlobalUnitManager crpService, ICenterProjectTypeManager projectTypeService,
+    ICenterProjectStatusManager projectStatusService, CenterFundingSyncTypeManager centerFundingSyncTypeManager,
+    GlobalUnitProjectManager globalUnitProjectManager) {
     super(config);
     this.centerService = centerService;
     this.projectService = projectService;
@@ -187,6 +192,7 @@ public class ProjectDescriptionAction extends BaseAction {
     this.projectTypeService = projectTypeService;
     this.projectStatusService = projectStatusService;
     this.centerFundingSyncTypeManager = centerFundingSyncTypeManager;
+    this.globalUnitProjectManager = globalUnitProjectManager;
   }
 
   public Boolean bolValue(String value) {
@@ -236,7 +242,7 @@ public class ProjectDescriptionAction extends BaseAction {
     return countryLists;
   }
 
-  public List<Crp> getCrps() {
+  public List<GlobalUnit> getCrps() {
     return crps;
   }
 
@@ -244,9 +250,6 @@ public class ProjectDescriptionAction extends BaseAction {
     return fundingSourceTypes;
   }
 
-  public Center getLoggedCenter() {
-    return loggedCenter;
-  }
 
   public List<OutcomeOutputs> getOutputs() {
     return outputs;
@@ -344,11 +347,11 @@ public class ProjectDescriptionAction extends BaseAction {
 
   @Override
   public void prepare() throws Exception {
-    loggedCenter = (Center) this.getSession().get(APConstants.SESSION_CENTER);
-    loggedCenter = centerService.getCrpById(loggedCenter.getId());
+    loggedCenter = (GlobalUnit) this.getSession().get(APConstants.SESSION_CRP);
+    loggedCenter = centerService.getGlobalUnitById(loggedCenter.getId());
 
-    researchAreas = new ArrayList<>(
-      loggedCenter.getResearchAreas().stream().filter(ra -> ra.isActive()).collect(Collectors.toList()));
+    researchAreas =
+      new ArrayList<>(loggedCenter.getCenterAreas().stream().filter(ra -> ra.isActive()).collect(Collectors.toList()));
     region = false;
 
     // Regions List
@@ -515,6 +518,15 @@ public class ProjectDescriptionAction extends BaseAction {
 
         }
 
+        // Get The Crp/Center/Platform where the project was created
+        GlobalUnitProject globalUnitProject = globalUnitProjectManager.findByProjectId(ProjectDB.getId());
+
+        // TODO add phase call the parameters
+        GlobalUnit crp = globalUnitProject.getGlobalUnit();
+
+        // fill the project Info Phase
+        project.getProject().setProjectInfo(ProjectDB.getProject().getProjecInfoPhase(this.getCenterCrpPhase(crp)));
+
 
       }
 
@@ -522,9 +534,9 @@ public class ProjectDescriptionAction extends BaseAction {
       fundingSourceTypes = new ArrayList<>(
         fundingSourceService.findAll().stream().filter(fst -> fst.isActive()).collect(Collectors.toList()));
 
+      // Global Type Id 1 == Crps
       crps = new ArrayList<>(crpService.findAll().stream()
-        .filter(c -> c.isActive() && /* TODO temporally when the crp have category value */c.getCategory() == 1)
-        .collect(Collectors.toList()));
+        .filter(c -> c.isActive() && c.getGlobalUnitType().getId() == 1).collect(Collectors.toList()));
 
       projectTypes =
         new ArrayList<>(projectTypeService.findAll().stream().filter(pt -> pt.isActive()).collect(Collectors.toList()));
@@ -619,10 +631,19 @@ public class ProjectDescriptionAction extends BaseAction {
 
       CenterProject projectDB = projectService.getCenterProjectById(projectID);
 
-      projectDB.setName(project.getName());
-      projectDB.setStartDate(project.getStartDate());
-      projectDB.setEndDate(project.getEndDate());
-      projectDB.setDescription(project.getDescription());
+      // Get The Crp/Center/Platform where the project was created
+      GlobalUnitProject globalUnitProject = globalUnitProjectManager.findByProjectId(projectDB.getId());
+
+      // TODO add phase call the parameters
+      GlobalUnit crp = globalUnitProject.getGlobalUnit();
+
+      Phase phase = this.getCenterCrpPhase(crp);
+
+      projectDB.getProject().getProjecInfoPhase(phase).setTitle(project.getProject().getProjectInfo().getTitle());
+      projectDB.getProject().getProjecInfoPhase(phase)
+        .setStartDate(project.getProject().getProjectInfo().getStartDate());
+      projectDB.getProject().getProjecInfoPhase(phase).setEndDate(project.getProject().getProjectInfo().getEndDate());
+      projectDB.getProject().getProjecInfoPhase(phase).setSummary(project.getProject().getProjectInfo().getSummary());
       projectDB.setGlobal(this.bolValue(project.getsGlobal()));
       projectDB.setRegion(this.bolValue(project.getsRegion()));
       projectDB.setSuggestedName(project.getSuggestedName());
@@ -747,7 +768,7 @@ public class ProjectDescriptionAction extends BaseAction {
             .getCenterFundingSyncTypeById(projectFundingSource.getCenterFundingSyncType().getId());
 
           CenterProject project = projectService.getCenterProjectById(projectID);
-          Crp crp = crpService.getCrpById(projectFundingSource.getCrp().getId());
+          GlobalUnit crp = crpService.getGlobalUnitById(projectFundingSource.getCrp().getId());
 
           fundingSourceSave.setCenterProject(project);
           fundingSourceSave.setCrp(crp);
@@ -932,7 +953,7 @@ public class ProjectDescriptionAction extends BaseAction {
     this.countryLists = countryLists;
   }
 
-  public void setCrps(List<Crp> crps) {
+  public void setCrps(List<GlobalUnit> crps) {
     this.crps = crps;
   }
 
@@ -940,9 +961,6 @@ public class ProjectDescriptionAction extends BaseAction {
     this.fundingSourceTypes = fundingSourceTypes;
   }
 
-  public void setLoggedCenter(Center loggedCenter) {
-    this.loggedCenter = loggedCenter;
-  }
 
   public void setOutputs(List<OutcomeOutputs> outputs) {
     this.outputs = outputs;
