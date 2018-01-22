@@ -30,7 +30,7 @@
 			class="org.cgiar.ccafs.marlo.data.model.CenterArea" fetch="select">
 			<column name="research_area" />
 		</many-to-one>
-		<many-to-one name="crp" class="org.cgiar.ccafs.marlo.data.model.Crp"
+		<many-to-one name="crp" class="org.cgiar.ccafs.marlo.data.model.GlobalUnit"
 			fetch="select">
 			<column name="crp" />
 		</many-to-one>
