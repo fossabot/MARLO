@@ -3173,7 +3173,9 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
     if (sections.size() == 0) {
       return false;
     }
-
+    if (sections.size() < 2) {
+      return false;
+    }
     return true;
   }
 
