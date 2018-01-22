@@ -59,7 +59,10 @@ public class DeliveryAction extends BaseAction {
 
   // Managers
   private GlobalUnitManager crpManager;
+<<<<<<< HEAD
 
+=======
+>>>>>>> branch 'dev' of https://github.com/CCAFS/MARLO.git
   private LiaisonInstitutionManager liaisonInstitutionManager;
 
   // Model for the front-end

@@ -339,6 +339,10 @@ public class CapacityDevelopment implements java.io.Serializable, IAuditLog {
     return global;
   }
 
+  public GlobalUnit getGlobalUnit() {
+    return this.crp;
+  }
+
   @Override
   public Long getId() {
     return this.id;
@@ -608,6 +612,11 @@ public class CapacityDevelopment implements java.io.Serializable, IAuditLog {
 
   public void setGlobal(Boolean global) {
     this.global = global;
+  }
+
+
+  public void setGlobalUnit(GlobalUnit crp) {
+    this.crp = crp;
   }
 
 

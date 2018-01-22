@@ -254,8 +254,8 @@ public class CapdevDescriptionAction extends BaseAction {
   }
 
 
-  public List<Discipline> getDisciplines() {
-    return disciplines;
+  public List<GlobalUnit> getGlobalUnits() {
+    return crps;
   }
 
 
@@ -467,7 +467,7 @@ public class CapdevDescriptionAction extends BaseAction {
     if (this.isHttpPost()) {
       capdev.setResearchArea(null);
       capdev.setResearchProgram(null);
-      capdev.setCrp(null);
+      capdev.setGlobalUnit(null);
       capdev.setProject(null);
       capdev.setCapdevDiscipline(null);
       capdev.setCapdevDisciplineList(null);
@@ -520,10 +520,10 @@ public class CapdevDescriptionAction extends BaseAction {
     }
 
 
-    if (capdev.getCrp().getId() > -1) {
-      capdevDB.setCrp(capdev.getCrp());
+    if (capdev.getGlobalUnit().getId() > -1) {
+      capdevDB.setGlobalUnit(capdev.getGlobalUnit());
     } else {
-      capdevDB.setCrp(null);
+      capdevDB.setGlobalUnit(null);
     }
 
 
@@ -693,8 +693,8 @@ public class CapdevDescriptionAction extends BaseAction {
   }
 
 
-  public void setDisciplines(List<Discipline> disciplines) {
-    this.disciplines = disciplines;
+  public void setGlobalUnits(List<GlobalUnit> crps) {
+    this.crps = crps;
   }
 
 

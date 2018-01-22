@@ -24,8 +24,8 @@ import org.cgiar.ccafs.marlo.data.manager.CrpOutcomeSubIdoManager;
 import org.cgiar.ccafs.marlo.data.manager.CrpProgramManager;
 import org.cgiar.ccafs.marlo.data.manager.CrpProgramOutcomeIndicatorManager;
 import org.cgiar.ccafs.marlo.data.manager.CrpProgramOutcomeManager;
-import org.cgiar.ccafs.marlo.data.manager.GlobalUnitManager;
 import org.cgiar.ccafs.marlo.data.manager.FileDBManager;
+import org.cgiar.ccafs.marlo.data.manager.GlobalUnitManager;
 import org.cgiar.ccafs.marlo.data.manager.SrfIdoManager;
 import org.cgiar.ccafs.marlo.data.manager.SrfSubIdoManager;
 import org.cgiar.ccafs.marlo.data.manager.SrfTargetUnitManager;
@@ -98,7 +98,6 @@ public class OutcomesAction extends BaseAction {
 
   // GlobalUnit Manager
   private GlobalUnitManager crpManager;
-  private CrpProgramOutcomeIndicatorManager crpProgramOutcomeIndicatorManager;
   private CrpProgramOutcomeIndicatorManager crpProgramOutcomeIndicatorManager;
   private CrpMilestoneManager crpMilestoneManager;
 
@@ -706,7 +705,7 @@ public class OutcomesAction extends BaseAction {
   }
 
 
- public void saveIndicators(CrpProgramOutcome crpProgramOutcomeDB, CrpProgramOutcome crpProgramOutcomeDetached) {
+  public void saveIndicators(CrpProgramOutcome crpProgramOutcomeDB, CrpProgramOutcome crpProgramOutcomeDetached) {
 
     /*
      * Delete Indicators

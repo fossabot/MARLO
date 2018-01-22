@@ -503,8 +503,8 @@ public class CapdevSummaryAction extends BaseAction implements Summary {
       new Class[] {String.class, Integer.class, String.class});
 
     for (final CapacityDevelopment capdev : capDevs) {
-      if (capdev.getCrp() != null) {
-        model.addRow(new Object[] {capdev.getCrp().getName(), 1, capdev.getCrp().getName()});
+      if (capdev.getGlobalUnit() != null) {
+        model.addRow(new Object[] {capdev.getGlobalUnit().getName(), 1, capdev.getGlobalUnit().getName()});
       }
     }
 
