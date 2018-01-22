@@ -26,6 +26,7 @@ import org.cgiar.ccafs.marlo.data.manager.CrpProgramManager;
 import org.cgiar.ccafs.marlo.data.manager.CrpProgramOutcomeManager;
 import org.cgiar.ccafs.marlo.data.manager.DeliverableManager;
 import org.cgiar.ccafs.marlo.data.manager.FileDBManager;
+import org.cgiar.ccafs.marlo.data.manager.FundingSourceInstitutionManager;
 import org.cgiar.ccafs.marlo.data.manager.FundingSourceManager;
 import org.cgiar.ccafs.marlo.data.manager.GlobalUnitManager;
 import org.cgiar.ccafs.marlo.data.manager.GlobalUnitProjectManager;
@@ -690,11 +691,11 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
         ProjectBudget projectBudget = projectBudgetManager.getProjectBudgetById(id);
         FundingSource fundingSource =
           fundingSourceManager.getFundingSourceById(projectBudget.getFundingSource().getId());
-        List<DeliverableFundingSource> deliverableFundingSources = fundingSource.getDeliverableFundingSources().stream()
+              List<DeliverableFundingSource> deliverableFundingSources = fundingSource.getDeliverableFundingSources().stream()
           .filter(c -> c.isActive() && c.getDeliverable().isActive() && c.getPhase() != null
             && c.getPhase().getYear() == projectBudget.getYear() && c.getDeliverable().getProject() != null
             && c.getDeliverable().getProject().getId().longValue() == projectBudget.getProject().getId().longValue())
-            .collect(Collectors.toList());
+          .collect(Collectors.toList());
         List<Deliverable> onDeliverables = new ArrayList<>();
         for (DeliverableFundingSource deliverableFundingSource : deliverableFundingSources) {
           if (deliverableFundingSource.getDeliverable().getDeliverableInfo(this.getActualPhase())

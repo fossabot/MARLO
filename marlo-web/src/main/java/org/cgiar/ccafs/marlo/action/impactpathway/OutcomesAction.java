@@ -99,6 +99,7 @@ public class OutcomesAction extends BaseAction {
   // GlobalUnit Manager
   private GlobalUnitManager crpManager;
   private CrpProgramOutcomeIndicatorManager crpProgramOutcomeIndicatorManager;
+  private CrpProgramOutcomeIndicatorManager crpProgramOutcomeIndicatorManager;
   private CrpMilestoneManager crpMilestoneManager;
 
   private CrpOutcomeSubIdoManager crpOutcomeSubIdoManager;
@@ -678,14 +679,21 @@ public class OutcomesAction extends BaseAction {
       crpProgramOutcomeDB.setSrfTargetUnit(crpProgramOutcomeDetached.getSrfTargetUnit());
       crpProgramOutcomeDB.setValue(crpProgramOutcomeDetached.getValue());
       crpProgramOutcomeDB.setYear(crpProgramOutcomeDetached.getYear());
+      crpProgramOutcomeDB.setPhase(this.getActualPhase());
       crpProgramOutcomeDB.setCrpProgram(selectedProgram);
       if (crpProgramOutcomeDetached.getFile() != null && crpProgramOutcomeDetached.getFile().getId() == null) {
         crpProgramOutcomeDetached.setFile(null);
       }
       crpProgramOutcomeDB.setFile(crpProgramOutcomeDetached.getFile());
-      crpProgramOutcomeDB.setPhase(this.getActualPhase());
+      if (crpProgramOutcomeDetached.getFile() != null && crpProgramOutcomeDetached.getFile().getId() == null) {
+        crpProgramOutcomeDetached.setFile(null);
+      }
+      crpProgramOutcomeDB.setFile(crpProgramOutcomeDetached.getFile());
       crpProgramOutcomeDB.setModifiedBy(this.getCurrentUser());
       crpProgramOutcomeDB.setModificationJustification("");
+      crpProgramOutcomeDB.setIndicators(crpProgramOutcomeDetached.getIndicators());
+      crpProgramOutcomeDB.setMilestones(crpProgramOutcomeDetached.getMilestones());
+      crpProgramOutcomeDB.setSubIdos(crpProgramOutcomeDetached.getSubIdos());
 
       crpProgramOutcomeDB = crpProgramOutcomeManager.saveCrpProgramOutcome(crpProgramOutcomeDB);
 
@@ -698,7 +706,7 @@ public class OutcomesAction extends BaseAction {
   }
 
 
-  public void saveIndicators(CrpProgramOutcome crpProgramOutcomeDB, CrpProgramOutcome crpProgramOutcomeDetached) {
+ public void saveIndicators(CrpProgramOutcome crpProgramOutcomeDB, CrpProgramOutcome crpProgramOutcomeDetached) {
 
     /*
      * Delete Indicators
@@ -725,7 +733,7 @@ public class OutcomesAction extends BaseAction {
           crpProgramOutcomeIndicatorDB.setActive(true);
           crpProgramOutcomeIndicatorDB.setCreatedBy(this.getCurrentUser());
           crpProgramOutcomeIndicatorDB.setActiveSince(new Date());
-
+          crpProgramOutcomeIndicatorDB.setComposeID(crpProgramOutcomeIndicatorDetached.getComposeID());
         } else {
           crpProgramOutcomeIndicatorDB = crpProgramOutcomeIndicatorManager
             .getCrpProgramOutcomeIndicatorById(crpProgramOutcomeIndicatorDetached.getId());
