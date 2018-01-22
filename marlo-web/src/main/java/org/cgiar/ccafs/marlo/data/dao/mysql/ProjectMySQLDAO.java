@@ -166,8 +166,8 @@ public class ProjectMySQLDAO extends AbstractMarloDAO<Project, Long> implements 
   public List<Project> getCompletedProjects(long crpId) {
     StringBuilder query = new StringBuilder();
     query.append(
-      "select distinct p.id as projectId,pi.id as info  from projects p inner join projects_info pi on pi.project_id=p.id ");
-    query.append("where p.is_active=1 and p.global_unit_id =");
+      "select distinct p.id as projectId,pi.id as info  from projects p inner join projects_info pi on pi.project_id=p.id inner join global_unit_projects gup on gup.global_unit_id = p.id ");
+    query.append("where p.is_active=1 and gup.`origin`=1 and gup.global_unit_id=");
     query.append(crpId);
     query.append(" and pi.`status` in (" + ProjectStatusEnum.Cancelled.getStatusId() + " , "
       + ProjectStatusEnum.Complete.getStatusId() + " )");
