@@ -21,7 +21,6 @@ import java.util.List;
 /**
  * @author Christian Garcia
  */
-
 public interface CrpProgramOutcomeIndicatorManager {
 
 
