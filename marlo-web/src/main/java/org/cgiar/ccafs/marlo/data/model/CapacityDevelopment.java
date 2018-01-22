@@ -21,8 +21,10 @@ public class CapacityDevelopment implements java.io.Serializable, IAuditLog {
 
   private static final long serialVersionUID = 1L;
 
+
   @Expose
   private Long id;
+
 
   @Expose
   private CenterProject project;
@@ -37,7 +39,7 @@ public class CapacityDevelopment implements java.io.Serializable, IAuditLog {
   private CenterArea researchArea;
 
   @Expose
-  private Crp crp;
+  private GlobalUnit crp;
 
   @Expose
   private CenterProgram researchProgram;
@@ -127,7 +129,9 @@ public class CapacityDevelopment implements java.io.Serializable, IAuditLog {
   private String partnerSuggested;
 
   private Set<CapdevLocations> capdevLocations = new HashSet<CapdevLocations>(0);
+
   private List<CapdevLocations> capDevCountries;
+
   private List<CapdevLocations> capDevRegions;
   private Set<CapdevDiscipline> capdevDiscipline = new HashSet<CapdevDiscipline>(0);
   private List<CapdevDiscipline> capdevDisciplineList;
@@ -145,11 +149,11 @@ public class CapacityDevelopment implements java.io.Serializable, IAuditLog {
   public CapacityDevelopment() {
   }
 
-  public CapacityDevelopment(CenterProject project, User modifiedBy, User createdBy, CenterArea researchArea, Crp crp,
-    CenterProgram researchProgram, String title, CapacityDevelopmentType capdevType, int category, boolean active,
-    Date activeSince, String modificationJustification, String ctFirstName, String ctLastName, String ctEmail,
-    Date startDate, Date endDate, Long duration, String durationUnit, Participant participant, Boolean global,
-    Boolean regional, Integer numParticipants, Integer numMen, Integer numWomen, Integer numOther,
+  public CapacityDevelopment(CenterProject project, User modifiedBy, User createdBy, CenterArea researchArea,
+    GlobalUnit crp, CenterProgram researchProgram, String title, CapacityDevelopmentType capdevType, int category,
+    boolean active, Date activeSince, String modificationJustification, String ctFirstName, String ctLastName,
+    String ctEmail, Date startDate, Date endDate, Long duration, String durationUnit, Participant participant,
+    Boolean global, Boolean regional, Integer numParticipants, Integer numMen, Integer numWomen, Integer numOther,
     String otherDiscipline, String disciplineSuggested, String otherTargetGroup, String targetGroupSuggested,
     String otherPartner, String partnerSuggeste, Set<CapdevLocations> capdevLocations,
     Set<CapdevDiscipline> capdevDiscipline, Set<CapdevTargetgroup> capdevTargetgroup,
@@ -196,7 +200,6 @@ public class CapacityDevelopment implements java.io.Serializable, IAuditLog {
     this.capdevSupportingDocs = capdevSupportingDocs;
   }
 
-
   public CapacityDevelopment(String title, CapacityDevelopmentType capdevType, int category, boolean active,
     String ctFirstName, String ctLastName, String ctEmail, Date startDate) {
     this.title = title;
@@ -209,19 +212,19 @@ public class CapacityDevelopment implements java.io.Serializable, IAuditLog {
     this.startDate = startDate;
   }
 
-
   public Date getActiveSince() {
     return activeSince;
   }
+
 
   public List<CapdevLocations> getCapDevCountries() {
     return capDevCountries;
   }
 
+
   public Set<CapdevDiscipline> getCapdevDiscipline() {
     return capdevDiscipline;
   }
-
 
   public List<CapdevDiscipline> getCapdevDisciplineList() {
     return capdevDisciplineList;
@@ -230,6 +233,7 @@ public class CapacityDevelopment implements java.io.Serializable, IAuditLog {
   public Set<CapdevLocations> getCapdevLocations() {
     return capdevLocations;
   }
+
 
   public Set<CapdevOutputs> getCapdevOutputs() {
     return capdevOutputs;
@@ -243,11 +247,9 @@ public class CapacityDevelopment implements java.io.Serializable, IAuditLog {
     return capdevParticipant;
   }
 
-
   public Set<CapdevPartners> getCapdevPartners() {
     return capdevPartners;
   }
-
 
   public List<CapdevPartners> getCapdevPartnersList() {
     return capdevPartnersList;
@@ -268,9 +270,11 @@ public class CapacityDevelopment implements java.io.Serializable, IAuditLog {
     return capdevTargetgroup;
   }
 
+
   public List<CapdevTargetgroup> getCapdevTargetGroupList() {
     return capdevTargetGroupList;
   }
+
 
   public CapacityDevelopmentType getCapdevType() {
     return this.capdevType;
@@ -284,8 +288,8 @@ public class CapacityDevelopment implements java.io.Serializable, IAuditLog {
     return createdBy;
   }
 
-  public Crp getCrp() {
-    return this.crp;
+  public GlobalUnit getCrp() {
+    return crp;
   }
 
   public String getCtEmail() {
@@ -316,10 +320,10 @@ public class CapacityDevelopment implements java.io.Serializable, IAuditLog {
     return durationUnit;
   }
 
-
   public Date getEndDate() {
     return this.endDate;
   }
+
 
   public String getEndDateFormat() {
     final String pattern = "yyyy-MM-dd";
@@ -352,7 +356,6 @@ public class CapacityDevelopment implements java.io.Serializable, IAuditLog {
     return this.modificationJustification;
   }
 
-
   @Override
   public User getModifiedBy() {
     return modifiedBy;
@@ -363,10 +366,10 @@ public class CapacityDevelopment implements java.io.Serializable, IAuditLog {
     return numMen;
   }
 
+
   public Integer getNumOther() {
     return numOther;
   }
-
 
   public Integer getNumParticipants() {
     return this.numParticipants;
@@ -494,10 +497,10 @@ public class CapacityDevelopment implements java.io.Serializable, IAuditLog {
     this.capdevDisciplineList = capdevDisciplineList;
   }
 
+
   public void setCapdevLocations(Set<CapdevLocations> capdevLocations) {
     this.capdevLocations = capdevLocations;
   }
-
 
   public void setCapdevOutputs(Set<CapdevOutputs> capdevOutputs) {
     this.capdevOutputs = capdevOutputs;
@@ -543,10 +546,10 @@ public class CapacityDevelopment implements java.io.Serializable, IAuditLog {
     this.capdevTargetGroupList = capdevTargetGroupList;
   }
 
+
   public void setCapdevType(CapacityDevelopmentType capdevType) {
     this.capdevType = capdevType;
   }
-
 
   public void setCategory(int category) {
     this.category = category;
@@ -558,7 +561,7 @@ public class CapacityDevelopment implements java.io.Serializable, IAuditLog {
   }
 
 
-  public void setCrp(Crp crp) {
+  public void setCrp(GlobalUnit crp) {
     this.crp = crp;
   }
 

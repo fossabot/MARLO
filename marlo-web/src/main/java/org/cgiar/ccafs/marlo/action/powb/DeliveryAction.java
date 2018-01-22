@@ -18,12 +18,12 @@ package org.cgiar.ccafs.marlo.action.powb;
 import org.cgiar.ccafs.marlo.action.BaseAction;
 import org.cgiar.ccafs.marlo.config.APConstants;
 import org.cgiar.ccafs.marlo.data.manager.AuditLogManager;
-import org.cgiar.ccafs.marlo.data.manager.CrpManager;
 import org.cgiar.ccafs.marlo.data.manager.CrpProgramManager;
+import org.cgiar.ccafs.marlo.data.manager.GlobalUnitManager;
 import org.cgiar.ccafs.marlo.data.manager.LiaisonInstitutionManager;
 import org.cgiar.ccafs.marlo.data.manager.UserManager;
-import org.cgiar.ccafs.marlo.data.model.Crp;
 import org.cgiar.ccafs.marlo.data.model.CrpProgram;
+import org.cgiar.ccafs.marlo.data.model.GlobalUnit;
 import org.cgiar.ccafs.marlo.data.model.LiaisonInstitution;
 import org.cgiar.ccafs.marlo.data.model.LiaisonUser;
 import org.cgiar.ccafs.marlo.data.model.ProgramType;
@@ -56,25 +56,28 @@ public class DeliveryAction extends BaseAction {
 
   private static final long serialVersionUID = -1417643537265271428L;
 
+
   // Managers
-  private CrpManager crpManager;
+  private GlobalUnitManager crpManager;
+
   private LiaisonInstitutionManager liaisonInstitutionManager;
 
   // Model for the front-end
   private List<LiaisonInstitution> liaisonInstitutions;
   private String transaction;
+
   private AuditLogManager auditLogManager;
   private UserManager userManager;
   private LiaisonInstitution liaisonInstitution;
   private Long liaisonInstitutionID;
   private CrpProgramManager crpProgramManager;
-  private Crp loggedCrp;
+  private GlobalUnit loggedCrp;
   private CrpIndicatorsValidator validator;
 
   @Inject
-  public DeliveryAction(APConfig config, CrpManager crpManager, LiaisonInstitutionManager liaisonInstitutionManager,
-    CrpIndicatorsValidator validator, AuditLogManager auditLogManager, CrpProgramManager crpProgramManager,
-    UserManager userManager) {
+  public DeliveryAction(APConfig config, GlobalUnitManager crpManager,
+    LiaisonInstitutionManager liaisonInstitutionManager, CrpIndicatorsValidator validator,
+    AuditLogManager auditLogManager, CrpProgramManager crpProgramManager, UserManager userManager) {
     super(config);
     this.crpManager = crpManager;
     this.liaisonInstitutionManager = liaisonInstitutionManager;
@@ -97,7 +100,6 @@ public class DeliveryAction extends BaseAction {
     return Paths.get(config.getAutoSaveFolder() + autoSaveFile);
   }
 
-
   public LiaisonInstitution getLiaisonInstitution() {
     return liaisonInstitution;
   }
@@ -106,11 +108,12 @@ public class DeliveryAction extends BaseAction {
     return liaisonInstitutionID;
   }
 
+
   public List<LiaisonInstitution> getLiaisonInstitutions() {
     return liaisonInstitutions;
   }
 
-  public Crp getLoggedCrp() {
+  public GlobalUnit getLoggedCrp() {
     return loggedCrp;
   }
 
@@ -130,6 +133,7 @@ public class DeliveryAction extends BaseAction {
     }
     return isFP;
   }
+
 
   @Override
   public boolean isPMU() {
@@ -155,8 +159,8 @@ public class DeliveryAction extends BaseAction {
   public void prepare() throws Exception {
 
     // Get current CRP
-    loggedCrp = (Crp) this.getSession().get(APConstants.SESSION_CRP);
-    loggedCrp = crpManager.getCrpById(loggedCrp.getId());
+    loggedCrp = (GlobalUnit) this.getSession().get(APConstants.SESSION_CRP);
+    loggedCrp = crpManager.getGlobalUnitById(loggedCrp.getId());
 
     // Get Liaison institution ID Parameter
     try {
@@ -236,7 +240,6 @@ public class DeliveryAction extends BaseAction {
 
   }
 
-
   @Override
   public String save() {
     return SUCCESS;
@@ -247,6 +250,7 @@ public class DeliveryAction extends BaseAction {
     this.liaisonInstitution = liaisonInstitution;
   }
 
+
   public void setLiaisonInstitutionID(Long liaisonInstitutionID) {
     this.liaisonInstitutionID = liaisonInstitutionID;
   }
@@ -255,9 +259,10 @@ public class DeliveryAction extends BaseAction {
     this.liaisonInstitutions = liaisonInstitutions;
   }
 
-  public void setLoggedCrp(Crp loggedCrp) {
+  public void setLoggedCrp(GlobalUnit loggedCrp) {
     this.loggedCrp = loggedCrp;
   }
+
 
   public void setTransaction(String transaction) {
     this.transaction = transaction;
