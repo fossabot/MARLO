@@ -20,6 +20,7 @@ import org.cgiar.ccafs.marlo.action.BaseAction;
 import org.cgiar.ccafs.marlo.config.APConstants;
 import org.cgiar.ccafs.marlo.data.dao.ICenterProgramDAO;
 import org.cgiar.ccafs.marlo.data.manager.AuditLogManager;
+import org.cgiar.ccafs.marlo.data.manager.GlobalUnitManager;
 import org.cgiar.ccafs.marlo.data.manager.ICapacityDevelopmentService;
 import org.cgiar.ccafs.marlo.data.manager.ICapdevDisciplineService;
 import org.cgiar.ccafs.marlo.data.manager.ICapdevOutputsService;
@@ -41,6 +42,7 @@ import org.cgiar.ccafs.marlo.data.model.CenterOutput;
 import org.cgiar.ccafs.marlo.data.model.CenterProgram;
 import org.cgiar.ccafs.marlo.data.model.CenterProject;
 import org.cgiar.ccafs.marlo.data.model.Discipline;
+import org.cgiar.ccafs.marlo.data.model.GlobalUnit;
 import org.cgiar.ccafs.marlo.data.model.Institution;
 import org.cgiar.ccafs.marlo.data.model.TargetGroup;
 import org.cgiar.ccafs.marlo.data.model.User;
@@ -87,7 +89,7 @@ public class CapdevDescriptionAction extends BaseAction {
   private List<CenterProject> projects;
   private List<Map<String, Object>> jsonProjects;
   private List<Map<String, Object>> json;
-  private List<Crp> crps;
+  private List<GlobalUnit> crps;
   private List<Institution> partners;
   private List<CenterOutput> outputs;
   private List<Long> capdevdisciplines;
@@ -101,7 +103,7 @@ public class CapdevDescriptionAction extends BaseAction {
   private final ICenterAreaManager researchAreaService;
   private final ICenterProgramDAO researchProgramSercive;
   private final ICenterProjectManager projectService;
-  private final CrpManager crpService;
+  private final GlobalUnitManager crpService;
   private final InstitutionManager institutionService;
   private final ICenterOutputManager researchOutputService;
   private final IDisciplineService disciplineService;
@@ -116,7 +118,7 @@ public class CapdevDescriptionAction extends BaseAction {
 
   @Inject
   public CapdevDescriptionAction(APConfig config, ICenterAreaManager researchAreaService,
-    ICenterProgramDAO researchProgramSercive, ICenterProjectManager projectService, CrpManager crpService,
+    ICenterProgramDAO researchProgramSercive, ICenterProjectManager projectService, GlobalUnitManager crpService,
     IDisciplineService disciplineService, ITargetGroupService targetGroupService,
     ICapacityDevelopmentService capdevService, ICapdevDisciplineService capdevDisciplineService,
     ICapdevTargetgroupService capdevTargetgroupService, InstitutionManager institutionService,
@@ -246,12 +248,12 @@ public class CapdevDescriptionAction extends BaseAction {
   }
 
 
-  public List<Crp> getCrps() {
-    return crps;
-  }
-
   public List<Discipline> getDisciplines() {
     return disciplines;
+  }
+
+  public List<GlobalUnit> getGlobalUnits() {
+    return crps;
   }
 
 
@@ -463,7 +465,7 @@ public class CapdevDescriptionAction extends BaseAction {
     if (this.isHttpPost()) {
       capdev.setResearchArea(null);
       capdev.setResearchProgram(null);
-      capdev.setCrp(null);
+      capdev.setGlobalUnit(null);
       capdev.setProject(null);
       capdev.setCapdevDiscipline(null);
       capdev.setCapdevDisciplineList(null);
@@ -516,10 +518,10 @@ public class CapdevDescriptionAction extends BaseAction {
     }
 
 
-    if (capdev.getCrp().getId() > -1) {
-      capdevDB.setCrp(capdev.getCrp());
+    if (capdev.getGlobalUnit().getId() > -1) {
+      capdevDB.setGlobalUnit(capdev.getGlobalUnit());
     } else {
-      capdevDB.setCrp(null);
+      capdevDB.setGlobalUnit(null);
     }
 
 
@@ -684,13 +686,13 @@ public class CapdevDescriptionAction extends BaseAction {
   }
 
 
-  public void setCrps(List<Crp> crps) {
-    this.crps = crps;
+  public void setDisciplines(List<Discipline> disciplines) {
+    this.disciplines = disciplines;
   }
 
 
-  public void setDisciplines(List<Discipline> disciplines) {
-    this.disciplines = disciplines;
+  public void setGlobalUnits(List<GlobalUnit> crps) {
+    this.crps = crps;
   }
 
 
