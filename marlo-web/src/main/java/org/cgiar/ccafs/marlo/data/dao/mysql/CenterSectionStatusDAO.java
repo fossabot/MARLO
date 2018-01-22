@@ -22,8 +22,9 @@ import org.cgiar.ccafs.marlo.data.model.CenterSectionStatus;
 import java.util.List;
 import java.util.Map;
 
-import javax.inject.Named;
 import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.hibernate.SessionFactory;
 
 @Named
@@ -160,6 +161,18 @@ public class CenterSectionStatusDAO extends AbstractMarloDAO<CenterSectionStatus
   }
 
   @Override
+  public CenterSectionStatus getSectionStatusBySupDocs(long deliverableId, long capDevId, String sectionName,
+    int year) {
+    String query = "from " + CenterSectionStatus.class.getName() + " where section_name='" + sectionName
+      + "' and capdev_id=" + capDevId + " and deliverable_id=" + deliverableId + " and year=" + year;
+    List<CenterSectionStatus> list = super.findAll(query);
+    if (list.size() > 0) {
+      return list.get(0);
+    }
+    return null;
+  }
+
+  @Override
   public List<CenterSectionStatus> getSectionStatussByUserId(long userId) {
     String query = "from " + CenterSectionStatus.class.getName() + " where user_id=" + userId;
     return super.findAll(query);
@@ -174,6 +187,5 @@ public class CenterSectionStatusDAO extends AbstractMarloDAO<CenterSectionStatus
     }
     return sectionStatus;
   }
-
 
 }

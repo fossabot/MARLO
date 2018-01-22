@@ -142,6 +142,16 @@ public interface ICenterSectionStatusDAO {
 
 
   /**
+   * gets a CenterSectionStatus of the one section by a specific supporting document
+   * 
+   * @param deliverableId
+   * @param capDevId
+   * @param sectionName
+   * @return a CenterSectionStatus Object
+   */
+  public CenterSectionStatus getSectionStatusBySupDocs(long deliverableId, long capDevId, String sectionName, int year);
+
+  /**
    * This method gets a list of sectionStatuss belongs of the user
    * 
    * @param userId - the user id

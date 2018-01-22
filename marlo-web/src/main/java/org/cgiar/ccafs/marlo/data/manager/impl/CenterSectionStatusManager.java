@@ -23,8 +23,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import javax.inject.Named;
 import javax.inject.Inject;
+import javax.inject.Named;
 
 /**
  * @author Christian Garcia
@@ -132,6 +132,12 @@ public class CenterSectionStatusManager implements ICenterSectionStatusManager {
   @Override
   public CenterSectionStatus getSectionStatusByProject(long programId, long projectId, String sectionName, int year) {
     return sectionStatusDAO.getSectionStatusByProject(programId, projectId, sectionName, year);
+  }
+
+  @Override
+  public CenterSectionStatus getSectionStatusBySupDocs(long deliverableId, long capDevId, String sectionName,
+    int year) {
+    return sectionStatusDAO.getSectionStatusBySupDocs(deliverableId, capDevId, sectionName, year);
   }
 
   @Override
