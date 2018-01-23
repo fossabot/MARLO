@@ -79,10 +79,6 @@ public class FundingSourceValidator extends BaseValidator {
   }
 
   public void validate(BaseAction action, FundingSource fundingSource, boolean saving) {
-<<<<<<< HEAD
-
-=======
->>>>>>> refs/remotes/origin/dev-global-unit-anual
     if (fundingSource.getFundingSourceInfo().getBudgetType() != null
       && fundingSource.getFundingSourceInfo().getBudgetType().getId() == null) {
       fundingSource.getFundingSourceInfo().setBudgetType(null);
