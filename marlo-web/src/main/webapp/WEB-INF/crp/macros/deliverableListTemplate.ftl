@@ -145,6 +145,7 @@
         <th id="deliverableRF" width="0%"></th>
         <th id="deliverableRP" width="0%">Responsible partner</th>
         <th id="deliverableFS" width="70%">Funding source(s)</th>
+        <th id="deliverableActivities" width="0%">Activities</th>
       </tr>
     </thead>
     <tbody>
@@ -269,6 +270,18 @@
                    [#else] 
                      <span>[@utilities.letterCutter string=deliverableFundingSource.fundingSource.fundingSourceInfo.title maxPos=13 /]<span>
                    [/#if]
+                </div>
+              [/#list]
+            [#else]
+              <span>None<span>
+            [/#if]
+          </td>
+          [#-- Deliverable Activities --]
+          <td>
+            [#if deliverable.fundingSources?? && deliverable.fundingSources?size > 0]
+              [#list deliverable.fundingSources as deliverableFundingSource]
+                <div class="activity-container" title="Identification of mitigation options and low cost GHG quantification methods to support NAMA implementation">
+                 <div class="activity-id-window label label-default" title="Identification of mitigation options and low cost GHG quantification methods to support NAMA implementation">A86</div>
                 </div>
               [/#list]
             [#else]

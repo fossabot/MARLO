@@ -625,6 +625,12 @@ form#CCAFS_deliverableList {
   width: 30%;
 }
 
+.activity-container {
+  display: inline-block;
+  margin-bottom: 5%;
+  margin-right: 2px;
+}
+
 tr:hover td {
   background-color: #f0f0f0 !important;
 }
