@@ -401,6 +401,9 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
 
   @Inject
   private GlobalUnitProjectManager globalUnitProjectManager;
+  
+  @Inject
+  private GlobalUnitProjectManager globalUnitProjectManager;
 
   public BaseAction() {
     this.saveable = true;
@@ -712,7 +715,7 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
               c -> c.isActive() && c.getDeliverable().isActive() && c.getPhase() != null
                 && c.getPhase().getYear() == projectBudget.getYear() && c.getDeliverable().getProject() != null && c
                   .getDeliverable().getProject().getId().longValue() == projectBudget.getProject().getId().longValue())
-          .collect(Collectors.toList());
+            .collect(Collectors.toList());
         List<Deliverable> onDeliverables = new ArrayList<>();
         for (DeliverableFundingSource deliverableFundingSource : deliverableFundingSources) {
           if (deliverableFundingSource.getDeliverable().getDeliverableInfo(this.getActualPhase())
@@ -1194,6 +1197,7 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
   }
 
 
+
   public Phase getActualPhase(Map<String, Object> session, long crpID) {
 
 
@@ -1234,6 +1238,31 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
 
 
   }
+
+  /**
+   * ************************ CENTER METHOD ******************************
+   * This method calculates all the years between the start date and the end date.
+   * ********************************************************************
+   * 
+   * @return a List of numbers representing all the years, or an empty list if nothing found.
+   */
+  public List<Integer> getAllYears() {
+    List<Integer> allYears = new ArrayList<>();
+
+    Calendar calendarStart = Calendar.getInstance();
+    calendarStart.set(Calendar.YEAR, 2014);
+    Calendar calendarEnd = Calendar.getInstance();
+    calendarEnd.set(Calendar.YEAR, 2050);
+
+    while (calendarStart.get(Calendar.YEAR) <= calendarEnd.get(Calendar.YEAR)) {
+      // Adding the year to the list.
+      allYears.add(calendarStart.get(Calendar.YEAR));
+      // Adding a year (365 days) to the start date.
+      calendarStart.add(Calendar.YEAR, 1);
+    }
+    return allYears;
+  }
+
 
   /*
    * public Phase getActualPhase(Map<String, Object> session, long crpID) {
@@ -1782,6 +1811,7 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
     return this.currentCrp;
   }
 
+
   public String getCurrentCycle() {
     try {
       if (this.isReportingActive()) {
@@ -1805,6 +1835,7 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
       return null;
     }
   }
+
 
   public int getCurrentCycleYear() {
     return this.getActualPhase().getYear();
@@ -2199,6 +2230,7 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
   public String getNamespace() {
     return ServletActionContext.getActionMapping().getNamespace();
   }
+
 
   /**
    * get the number of users log in in the application
@@ -4402,6 +4434,7 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
   public void setPlanningYear(int planningYear) {
     this.planningYear = planningYear;
   }
+
 
   public void setReportingActive(boolean reportingActive) {
     this.reportingActive = reportingActive;
