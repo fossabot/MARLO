@@ -17,69 +17,75 @@
 package org.cgiar.ccafs.marlo.data.model.dto;
 
 import java.io.Serializable;
-import java.util.List;
+import java.util.Date;
 
 
-public class FundingSourceDTO implements Serializable {
+public class InstitutionDTO implements Serializable {
 
 
   private static final long serialVersionUID = 1L;
-
   private Long id;
-  private GlobalUnitDTO crp;
-  private boolean active;
+  private InstitutionTypeDTO institutionType;
+  private String name;
+  private String acronym;
+  private String websiteLink;
+  private Long programId;
+  private Date added;
 
-  private List<FundingSourceBudgetDTO> budgets;
-  private List<FundingSourceInstitutionDTO> institutions;
-
-
-  public List<FundingSourceBudgetDTO> getBudgets() {
-    return budgets;
+  public String getAcronym() {
+    return acronym;
   }
 
-
-  public GlobalUnitDTO getCrp() {
-    return crp;
+  public Date getAdded() {
+    return added;
   }
-
 
   public Long getId() {
     return id;
   }
 
-
-  public List<FundingSourceInstitutionDTO> getInstitutions() {
-    return institutions;
+  public InstitutionTypeDTO getInstitutionType() {
+    return institutionType;
   }
 
-
-  public boolean isActive() {
-    return active;
+  public String getName() {
+    return name;
   }
 
-
-  public void setActive(boolean active) {
-    this.active = active;
+  public Long getProgramId() {
+    return programId;
   }
 
-
-  public void setBudgets(List<FundingSourceBudgetDTO> budgets) {
-    this.budgets = budgets;
+  public String getWebsiteLink() {
+    return websiteLink;
   }
 
-
-  public void setCrp(GlobalUnitDTO crp) {
-    this.crp = crp;
+  public void setAcronym(String acronym) {
+    this.acronym = acronym;
   }
 
+  public void setAdded(Date added) {
+    this.added = added;
+  }
 
   public void setId(Long id) {
     this.id = id;
   }
 
+  public void setInstitutionType(InstitutionTypeDTO institutionType) {
+    this.institutionType = institutionType;
+  }
 
-  public void setInstitutions(List<FundingSourceInstitutionDTO> institutions) {
-    this.institutions = institutions;
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  public void setProgramId(Long programId) {
+    this.programId = programId;
+  }
+
+  public void setWebsiteLink(String websiteLink) {
+    this.websiteLink = websiteLink;
   }
 
 

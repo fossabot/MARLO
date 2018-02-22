@@ -17,29 +17,39 @@
 package org.cgiar.ccafs.marlo.data.model.dto;
 
 import java.io.Serializable;
-import java.util.List;
 
+import javax.validation.constraints.NotNull;
 
-public class FundingSourceDTO implements Serializable {
-
+public class GlobalUnitDTO implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
   private Long id;
-  private GlobalUnitDTO crp;
+
+  @NotNull
+  private String name;
+
+  @NotNull
+  private String acronym;
+
+  private Integer category;
+
   private boolean active;
 
-  private List<FundingSourceBudgetDTO> budgets;
-  private List<FundingSourceInstitutionDTO> institutions;
+  private boolean marlo;
+
+  private boolean hasRegions;
+
+  private String modificationJustification;
 
 
-  public List<FundingSourceBudgetDTO> getBudgets() {
-    return budgets;
+  public String getAcronym() {
+    return acronym;
   }
 
 
-  public GlobalUnitDTO getCrp() {
-    return crp;
+  public Integer getCategory() {
+    return category;
   }
 
 
@@ -48,8 +58,13 @@ public class FundingSourceDTO implements Serializable {
   }
 
 
-  public List<FundingSourceInstitutionDTO> getInstitutions() {
-    return institutions;
+  public String getModificationJustification() {
+    return modificationJustification;
+  }
+
+
+  public String getName() {
+    return name;
   }
 
 
@@ -58,18 +73,33 @@ public class FundingSourceDTO implements Serializable {
   }
 
 
+  public boolean isHasRegions() {
+    return hasRegions;
+  }
+
+
+  public boolean isMarlo() {
+    return marlo;
+  }
+
+
+  public void setAcronym(String acronym) {
+    this.acronym = acronym;
+  }
+
+
   public void setActive(boolean active) {
     this.active = active;
   }
 
 
-  public void setBudgets(List<FundingSourceBudgetDTO> budgets) {
-    this.budgets = budgets;
+  public void setCategory(Integer category) {
+    this.category = category;
   }
 
 
-  public void setCrp(GlobalUnitDTO crp) {
-    this.crp = crp;
+  public void setHasRegions(boolean hasRegions) {
+    this.hasRegions = hasRegions;
   }
 
 
@@ -78,8 +108,18 @@ public class FundingSourceDTO implements Serializable {
   }
 
 
-  public void setInstitutions(List<FundingSourceInstitutionDTO> institutions) {
-    this.institutions = institutions;
+  public void setMarlo(boolean marlo) {
+    this.marlo = marlo;
+  }
+
+
+  public void setModificationJustification(String modificationJustification) {
+    this.modificationJustification = modificationJustification;
+  }
+
+
+  public void setName(String name) {
+    this.name = name;
   }
 
 

@@ -17,29 +17,32 @@
 package org.cgiar.ccafs.marlo.data.model.dto;
 
 import java.io.Serializable;
-import java.util.List;
 
 
-public class FundingSourceDTO implements Serializable {
-
+public class FundingSourceBudgetDTO implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
   private Long id;
-  private GlobalUnitDTO crp;
+
+  private FundingSourceDTO fundingSource;
+
+  private Double budget;
+
+  private Integer year;
+
   private boolean active;
 
-  private List<FundingSourceBudgetDTO> budgets;
-  private List<FundingSourceInstitutionDTO> institutions;
+  private PhaseDTO phase;
 
 
-  public List<FundingSourceBudgetDTO> getBudgets() {
-    return budgets;
+  public Double getBudget() {
+    return budget;
   }
 
 
-  public GlobalUnitDTO getCrp() {
-    return crp;
+  public FundingSourceDTO getFundingSource() {
+    return fundingSource;
   }
 
 
@@ -48,8 +51,13 @@ public class FundingSourceDTO implements Serializable {
   }
 
 
-  public List<FundingSourceInstitutionDTO> getInstitutions() {
-    return institutions;
+  public PhaseDTO getPhase() {
+    return phase;
+  }
+
+
+  public Integer getYear() {
+    return year;
   }
 
 
@@ -63,13 +71,13 @@ public class FundingSourceDTO implements Serializable {
   }
 
 
-  public void setBudgets(List<FundingSourceBudgetDTO> budgets) {
-    this.budgets = budgets;
+  public void setBudget(Double budget) {
+    this.budget = budget;
   }
 
 
-  public void setCrp(GlobalUnitDTO crp) {
-    this.crp = crp;
+  public void setFundingSource(FundingSourceDTO fundingSource) {
+    this.fundingSource = fundingSource;
   }
 
 
@@ -78,8 +86,13 @@ public class FundingSourceDTO implements Serializable {
   }
 
 
-  public void setInstitutions(List<FundingSourceInstitutionDTO> institutions) {
-    this.institutions = institutions;
+  public void setPhase(PhaseDTO phase) {
+    this.phase = phase;
+  }
+
+
+  public void setYear(Integer year) {
+    this.year = year;
   }
 
 

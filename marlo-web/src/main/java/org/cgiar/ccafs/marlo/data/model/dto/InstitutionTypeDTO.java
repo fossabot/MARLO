@@ -17,69 +17,66 @@
 package org.cgiar.ccafs.marlo.data.model.dto;
 
 import java.io.Serializable;
-import java.util.List;
 
 
-public class FundingSourceDTO implements Serializable {
-
+public class InstitutionTypeDTO implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
   private Long id;
-  private GlobalUnitDTO crp;
-  private boolean active;
+  private String name;
+  private String acronym;
+  private String description;
+  private Boolean old;
+  private Boolean subDepartmentActive;
 
-  private List<FundingSourceBudgetDTO> budgets;
-  private List<FundingSourceInstitutionDTO> institutions;
 
-
-  public List<FundingSourceBudgetDTO> getBudgets() {
-    return budgets;
+  public String getAcronym() {
+    return acronym;
   }
 
-
-  public GlobalUnitDTO getCrp() {
-    return crp;
+  public String getDescription() {
+    return description;
   }
-
 
   public Long getId() {
     return id;
   }
 
-
-  public List<FundingSourceInstitutionDTO> getInstitutions() {
-    return institutions;
+  public String getName() {
+    return name;
   }
 
-
-  public boolean isActive() {
-    return active;
+  public Boolean getOld() {
+    return old;
   }
 
-
-  public void setActive(boolean active) {
-    this.active = active;
+  public Boolean getSubDepartmentActive() {
+    return subDepartmentActive;
   }
 
-
-  public void setBudgets(List<FundingSourceBudgetDTO> budgets) {
-    this.budgets = budgets;
+  public void setAcronym(String acronym) {
+    this.acronym = acronym;
   }
 
-
-  public void setCrp(GlobalUnitDTO crp) {
-    this.crp = crp;
+  public void setDescription(String description) {
+    this.description = description;
   }
-
 
   public void setId(Long id) {
     this.id = id;
   }
 
+  public void setName(String name) {
+    this.name = name;
+  }
 
-  public void setInstitutions(List<FundingSourceInstitutionDTO> institutions) {
-    this.institutions = institutions;
+  public void setOld(Boolean old) {
+    this.old = old;
+  }
+
+  public void setSubDepartmentActive(Boolean subDepartmentActive) {
+    this.subDepartmentActive = subDepartmentActive;
   }
 
 
