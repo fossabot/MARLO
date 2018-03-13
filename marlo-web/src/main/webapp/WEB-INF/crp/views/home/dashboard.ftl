@@ -47,15 +47,23 @@
     <div id="decisionTree">
       [#-- Add new Project --]
       <div class="flex-container">
-      [#if !crpClosed && canEditPhase && !reportingActive]<a href="[@s.url namespace="/projects" action='${crpSession}/addNewCoreProject'][#include "/WEB-INF/global/pages/urlGlobalParams.ftl" /][/@s.url]">[/#if]
-        <div id="newProject" class="hvr-float option ${(crpClosed && !canEditPhase)?string('disabled','')}" ><p>[@s.text name="dashboard.decisionTree.newProject" /]</p></div>
-      [#if !crpClosed && canEditPhase && !reportingActive]</a>[/#if]</div>
+      [#assign canAddCoreProject = (action.canAddCoreProject()) && (!crpClosed) && (!reportingActive) && (action.getActualPhase().editable)]
+      [#if canAddCoreProject]<a href="[@s.url namespace="/projects" action='${crpSession}/addNewCoreProject'][#include "/WEB-INF/global/pages/urlGlobalParams.ftl" /][/@s.url]">[/#if]
+        <div id="newProject" class="hvr-float option ${(!canAddCoreProject)?string('disabled','')}" ${(!canAddCoreProject)?string('title="This link is disabled"','')}>
+          <p>[@s.text name="dashboard.decisionTree.newProject" /]</p>
+        </div>
+      [#if canAddCoreProject]</a>[/#if]
+      </div>
       
       [#-- Update an ongoing Project --]
       <div class="flex-container">
-      [#if !crpClosed && canEditPhase]<a href="[@s.url namespace="/projects" action='${crpSession}/projectsList'][#include "/WEB-INF/global/pages/urlGlobalParams.ftl" /][/@s.url]"> [/#if]
-        <div id="updatePlanning" class="hvr-float option ${(crpClosed && !canEditPhase)?string('disabled','')}" ><p>[@s.text name="dashboard.decisionTree.updateProject" /]</p></div>
-      [#if !crpClosed && canEditPhase]</a>[/#if]</div>
+      [#assign canUpdateOngoingProjects = !crpClosed && canEditPhase ]
+      [#if canUpdateOngoingProjects]<a href="[@s.url namespace="/projects" action='${crpSession}/projectsList'][#include "/WEB-INF/global/pages/urlGlobalParams.ftl" /][/@s.url]"> [/#if]
+        <div id="updatePlanning" class="hvr-float option ${(!canUpdateOngoingProjects)?string('disabled','')}" ${(!canUpdateOngoingProjects)?string('title="This link is disabled"','')}>
+          <p>[@s.text name="dashboard.decisionTree.updateProject" /]</p>
+        </div>
+      [#if canUpdateOngoingProjects]</a>[/#if]
+      </div>
       
       [#-- Evaluate Project --]
       <div class="flex-container">
@@ -69,7 +77,8 @@
     
     [#-- Shorcuts --]    
     <div id="shorcuts"  class="col-md-5">
-    [#if crpSession?contains("CCAFS")]
+    [#-- if crpSession?contains("CCAFS")  --]
+    [#if false ]
       <div class="homeTitle"><strong>Timeline</strong></div>   
       <div class="borderBox col-md-12">
         <div id="timeline">

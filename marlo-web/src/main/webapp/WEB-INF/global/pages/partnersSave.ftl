@@ -1,5 +1,5 @@
 [#ftl]
-[#assign title = "Insert a partner" /]
+[#assign title = "Request new institution" /]
 [#assign pageLibs = ["jquery", "noty","select2"] /]
 [#assign customJS = ["${baseUrl}/global/js/partnersSave.js"] /]
 [#assign customCSS = ["${baseUrl}/global/css/partnersSave.css"] /]
@@ -67,7 +67,7 @@
         <input type="hidden" id="message.success" value="[@s.text name="partnersSave.successMessage" /]"/>
         [#if projectID??]<input type="hidden" name="projectID" value="${projectID}"/>[/#if]
         [#if fundingSourceID??]<input type="hidden" name="fundingSourceID" value="${fundingSourceID}"/>[/#if]
-
+        <input type="hidden" name="phaseID" value="${actualPhase.id}"/>
         <div class="clearfix"></div>
         <br />
         <div class="form-group text-center">

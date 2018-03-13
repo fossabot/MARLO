@@ -23,8 +23,8 @@
           <many-to-one name="phase" class="org.cgiar.ccafs.marlo.data.model.Phase" fetch="select">
             <column name="id_phase" />
         </many-to-one>
-        <property name="expectedValue" type="big_decimal">
-            <column name="expected_value" precision="20" scale="5" not-null="false" />
+        <property name="expectedValue" type="java.lang.Double">
+            <column name="expected_value" precision="20" />
         </property>
   
         
@@ -105,6 +105,13 @@
       </key>
       <one-to-many class="org.cgiar.ccafs.marlo.data.model.SectionStatus" />
     </set>
+    
+    <set name="projectOutcomeIndicators" table="project_outcome_indicators" inverse="true" lazy="true" fetch="select">
+            <key>
+                <column name="project_outcome_id" />
+            </key>
+            <one-to-many class="org.cgiar.ccafs.marlo.data.model.ProjectOutcomeIndicator" />
+        </set>
     
     </class>
 </hibernate-mapping>

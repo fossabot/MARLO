@@ -16,8 +16,8 @@
 package org.cgiar.ccafs.marlo.action.summaries;
 
 import org.cgiar.ccafs.marlo.config.APConstants;
-import org.cgiar.ccafs.marlo.data.manager.CrpManager;
 import org.cgiar.ccafs.marlo.data.manager.CrpProgramManager;
+import org.cgiar.ccafs.marlo.data.manager.GlobalUnitManager;
 import org.cgiar.ccafs.marlo.data.manager.InstitutionManager;
 import org.cgiar.ccafs.marlo.data.manager.PhaseManager;
 import org.cgiar.ccafs.marlo.data.manager.ProjectBudgetManager;
@@ -28,8 +28,10 @@ import org.cgiar.ccafs.marlo.data.model.Project;
 import org.cgiar.ccafs.marlo.data.model.ProjectBudget;
 import org.cgiar.ccafs.marlo.data.model.ProjectClusterActivity;
 import org.cgiar.ccafs.marlo.data.model.ProjectFocus;
+import org.cgiar.ccafs.marlo.data.model.ProjectInfo;
 import org.cgiar.ccafs.marlo.data.model.ProjectPartner;
 import org.cgiar.ccafs.marlo.data.model.ProjectPhase;
+import org.cgiar.ccafs.marlo.data.model.ProjectStatusEnum;
 import org.cgiar.ccafs.marlo.utils.APConfig;
 
 import java.io.ByteArrayInputStream;
@@ -101,7 +103,7 @@ public class BudgetPerPartnersSummaryAction extends BaseSummariesAction implemen
   InputStream inputStream;
 
   @Inject
-  public BudgetPerPartnersSummaryAction(APConfig config, CrpManager crpManager,
+  public BudgetPerPartnersSummaryAction(APConfig config, GlobalUnitManager crpManager,
     ProjectBudgetManager projectBudgetManager, CrpProgramManager programManager, InstitutionManager institutionManager,
     PhaseManager phaseManager) {
     super(config, crpManager, phaseManager);
@@ -335,8 +337,8 @@ public class BudgetPerPartnersSummaryAction extends BaseSummariesAction implemen
     ResourceManager manager = new ResourceManager();
     manager.registerDefaults();
     try {
-      Resource reportResource = manager.createDirectly(
-        this.getClass().getResource("/pentaho/budgetperpartner-Annualization.prpt"), MasterReport.class);
+      Resource reportResource =
+        manager.createDirectly(this.getClass().getResource("/pentaho/crp/BudgetPerPartners.prpt"), MasterReport.class);
 
       MasterReport masterReport = (MasterReport) reportResource.getResource();
 
@@ -408,27 +410,44 @@ public class BudgetPerPartnersSummaryAction extends BaseSummariesAction implemen
     subReport.setDataFactory(cdf);
   }
 
-
   private TypedTableModel getBudgetPerPartnersTableModel() {
     TypedTableModel model = new TypedTableModel(
       new String[] {"projectId", "projectTitle", "ppaPartner", "flagships", "coas", "regions", "budgetW1W2",
         "genderPeW1W2", "genderW1W2", "budgetW3", "genderPeW3", "genderW3", "budgetBilateral", "genderPeBilateral",
         "genderBilateral", "budgetCenter", "genderPeCenter", "genderCenter", "budgetW1W2Co", "genderPeW1W2Co",
-        "genderW1W2Co"},
+        "genderW1W2Co", "phaseID"},
       new Class[] {Long.class, String.class, String.class, String.class, String.class, String.class, Double.class,
         Double.class, Double.class, Double.class, Double.class, Double.class, Double.class, Double.class, Double.class,
-        Double.class, Double.class, Double.class, Double.class, Double.class, Double.class},
+        Double.class, Double.class, Double.class, Double.class, Double.class, Double.class, Long.class},
       0);
 
     List<Project> projects = new ArrayList<>();
 
-    for (ProjectPhase projectPhase : this.getSelectedPhase().getProjectPhases()) {
-      projects.add((projectPhase.getProject()));
+    for (ProjectPhase projectPhase : this.getSelectedPhase().getProjectPhases().stream()
+      .filter(p -> p.isActive() && p.getProject() != null && p.getProject().isActive()
+        && p.getProject().getProjectPhases() != null && p.getProject().getProjectPhases().size() > 0
+        && p.getProject().getProjecInfoPhase(this.getSelectedPhase()) != null
+        && p.getProject().getProjectInfo().isActive() && p.getProject().getProjectInfo().getStatus() != null
+        && p.getProject().getProjectInfo().getStartDate() != null
+        && p.getProject().getProjectInfo().getEndDate() != null
+        && (p.getProject().getProjectInfo().getStatus().intValue() == Integer
+          .parseInt(ProjectStatusEnum.Ongoing.getStatusId())
+          || p.getProject().getProjectInfo().getStatus().intValue() == Integer
+            .parseInt(ProjectStatusEnum.Extended.getStatusId())))
+      .collect(Collectors.toList())) {
+      ProjectInfo projectInfo = projectPhase.getProject().getProjectInfo();
+      Date endDate = projectInfo.getEndDate();
+      Date startDate = projectInfo.getStartDate();
+      int endYear = this.getIntYearFromDate(endDate);
+      int startYear = this.getIntYearFromDate(startDate);
+      if (startYear <= this.getSelectedYear() && endYear >= this.getSelectedYear()) {
+        projects.add((projectPhase.getProject()));
+      }
     }
+
     // sort projects by id
     projects.sort((p1, p2) -> p1.getId().compareTo(p2.getId()));
     for (Project project : projects) {
-      // System.out.println(project.getId());
       // Get PPA institutions with budgets
       List<Institution> institutionsList = new ArrayList<>();
 
@@ -451,7 +470,7 @@ public class BudgetPerPartnersSummaryAction extends BaseSummariesAction implemen
             && pp.getPhase() != null && pp.getPhase().equals(this.getSelectedPhase()))
           .collect(Collectors.toList())) {
           String projectTitle = null, ppaPartner = null, flagships = "", coas = "", regions = "";
-          Long projectId = null;
+          Long projectId = null, phaseID = null;
           Double budgetW1W2 = null, genderPeW1W2 = null, genderW1W2 = null, budgetW3 = null, genderPeW3 = null,
             genderW3 = null, budgetBilateral = null, genderPeBilateral = null, genderBilateral = null,
             budgetCenter = null, genderPeCenter = null, genderCenter = null, budgetW1W2Co = null, genderPeW1W2Co = null,
@@ -459,6 +478,7 @@ public class BudgetPerPartnersSummaryAction extends BaseSummariesAction implemen
 
           projectId = project.getId();
           projectTitle = project.getProjecInfoPhase(this.getSelectedPhase()).getTitle();
+          phaseID = this.getSelectedPhase().getId();
           ppaPartner = pp.getComposedName();
 
           // get Flagships related to the project sorted by acronym
@@ -646,9 +666,10 @@ public class BudgetPerPartnersSummaryAction extends BaseSummariesAction implemen
           allProjectsBudgets.put(project, projectBudgetList);
           // End projects fill
 
-          model.addRow(new Object[] {projectId, projectTitle, ppaPartner, flagships, coas, regions, budgetW1W2,
-            genderPeW1W2, genderW1W2, budgetW3, genderPeW3, genderW3, budgetBilateral, genderPeBilateral,
-            genderBilateral, budgetCenter, genderPeCenter, genderCenter, budgetW1W2Co, genderPeW1W2Co, genderW1W2Co});
+          model.addRow(
+            new Object[] {projectId, projectTitle, ppaPartner, flagships, coas, regions, budgetW1W2, genderPeW1W2,
+              genderW1W2, budgetW3, genderPeW3, genderW3, budgetBilateral, genderPeBilateral, genderBilateral,
+              budgetCenter, genderPeCenter, genderCenter, budgetW1W2Co, genderPeW1W2Co, genderW1W2Co, phaseID});
         }
       }
     }
@@ -672,12 +693,13 @@ public class BudgetPerPartnersSummaryAction extends BaseSummariesAction implemen
 
     TypedTableModel model = new TypedTableModel(
       new String[] {"projectID", "projectTitle", "budgetw1w2", "budgetW1W2Co", "totalw3bilateralcenter",
-        "genderBudgetW1W2", "genderBudgetW1W2Co", "totalw1w2Gender", "totalw3Gender", "totalAllGender"},
+        "genderBudgetW1W2", "genderBudgetW1W2Co", "totalw1w2Gender", "totalw3Gender", "totalAllGender", "phaseID"},
       new Class[] {String.class, String.class, Double.class, Double.class, Double.class, Double.class, Double.class,
-        Double.class, Double.class, Double.class},
+        Double.class, Double.class, Double.class, Long.class},
       0);
     for (Project project : allProjectsBudgets.keySet()) {
       String projectID = project.getId().toString();
+      Long phaseID = this.getSelectedPhase().getId();
       String projectTitle = null;
       if (project.getProjectInfo().getTitle() != null && !project.getProjectInfo().getTitle().trim().isEmpty()) {
         projectTitle = project.getProjectInfo().getTitle();
@@ -693,7 +715,7 @@ public class BudgetPerPartnersSummaryAction extends BaseSummariesAction implemen
       Double totalAllGender = totalw1w2Gender + totalw3Gender;
 
       model.addRow(new Object[] {projectID, projectTitle, budgetw1w2, budgetW1W2Co, totalw3bilateralcenter,
-        genderBudgetW1W2, genderBudgetW1W2Co, totalw1w2Gender, totalw3Gender, totalAllGender});
+        genderBudgetW1W2, genderBudgetW1W2Co, totalw1w2Gender, totalw3Gender, totalAllGender, phaseID});
     }
     return model;
   }
@@ -703,11 +725,11 @@ public class BudgetPerPartnersSummaryAction extends BaseSummariesAction implemen
     return bytesXLSX.length;
   }
 
-
   @Override
   public String getContentType() {
     return "application/xlsx";
   }
+
 
   @SuppressWarnings("unused")
   private File getFile(String fileName) {
@@ -716,7 +738,6 @@ public class BudgetPerPartnersSummaryAction extends BaseSummariesAction implemen
     File file = new File(classLoader.getResource(fileName).getFile());
     return file;
   }
-
 
   @Override
   public String getFileName() {
@@ -734,6 +755,7 @@ public class BudgetPerPartnersSummaryAction extends BaseSummariesAction implemen
     return hasGender;
   }
 
+
   @Override
   public InputStream getInputStream() {
     if (inputStream == null) {
@@ -741,6 +763,7 @@ public class BudgetPerPartnersSummaryAction extends BaseSummariesAction implemen
     }
     return inputStream;
   }
+
 
   private TypedTableModel getMasterTableModel() {
     // Initialization of Model

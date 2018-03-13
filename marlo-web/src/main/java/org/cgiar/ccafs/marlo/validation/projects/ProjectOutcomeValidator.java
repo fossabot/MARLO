@@ -18,14 +18,16 @@ package org.cgiar.ccafs.marlo.validation.projects;
 
 import org.cgiar.ccafs.marlo.action.BaseAction;
 import org.cgiar.ccafs.marlo.config.APConstants;
-import org.cgiar.ccafs.marlo.data.manager.CrpManager;
+import org.cgiar.ccafs.marlo.data.manager.CrpMilestoneManager;
 import org.cgiar.ccafs.marlo.data.manager.CrpProgramOutcomeManager;
+import org.cgiar.ccafs.marlo.data.manager.GlobalUnitManager;
 import org.cgiar.ccafs.marlo.data.manager.ProjectManager;
-import org.cgiar.ccafs.marlo.data.model.Crp;
+import org.cgiar.ccafs.marlo.data.model.GlobalUnit;
 import org.cgiar.ccafs.marlo.data.model.Project;
 import org.cgiar.ccafs.marlo.data.model.ProjectMilestone;
 import org.cgiar.ccafs.marlo.data.model.ProjectNextuser;
 import org.cgiar.ccafs.marlo.data.model.ProjectOutcome;
+import org.cgiar.ccafs.marlo.data.model.ProjectOutcomeIndicator;
 import org.cgiar.ccafs.marlo.data.model.ProjectSectionStatusEnum;
 import org.cgiar.ccafs.marlo.utils.InvalidFieldsMessages;
 import org.cgiar.ccafs.marlo.validation.BaseValidator;
@@ -46,23 +48,28 @@ public class ProjectOutcomeValidator extends BaseValidator {
 
   private final ProjectManager projectManager;
   private final CrpProgramOutcomeManager crpProgramOutcomeManager;
-  private final CrpManager crpManager;
+  private final CrpMilestoneManager crpMilestoneManager;
+
+
+  // GlobalUnit Manager
+  private GlobalUnitManager crpManager;
 
   @Inject
   public ProjectOutcomeValidator(ProjectManager projectManager, CrpProgramOutcomeManager crpProgramOutcomeManager,
-    CrpManager crpManager) {
-    super();
-    this.crpManager = crpManager;
+    GlobalUnitManager crpManager, CrpMilestoneManager crpMilestoneManager) {
+
     this.projectManager = projectManager;
     this.crpProgramOutcomeManager = crpProgramOutcomeManager;
+    this.crpManager = crpManager;
+    this.crpMilestoneManager = crpMilestoneManager;
   }
 
-  private Path getAutoSaveFilePath(ProjectOutcome project, long crpID) {
-    Crp crp = crpManager.getCrpById(crpID);
+  private Path getAutoSaveFilePath(ProjectOutcome project, long crpID, BaseAction action) {
+    GlobalUnit crp = crpManager.getGlobalUnitById(crpID);
     String composedClassName = project.getClass().getSimpleName();
     String actionFile = ProjectSectionStatusEnum.OUTCOME.getStatus().replace("/", "_");
-    String autoSaveFile =
-      project.getId() + "_" + composedClassName + "_" + crp.getAcronym() + "_" + actionFile + ".json";
+    String autoSaveFile = project.getId() + "_" + composedClassName + "_" + action.getActualPhase().getDescription()
+      + "_" + action.getActualPhase().getYear() + "_" + crp.getAcronym() + "_" + actionFile + ".json";
 
     return Paths.get(config.getAutoSaveFolder() + autoSaveFile);
   }
@@ -79,7 +86,7 @@ public class ProjectOutcomeValidator extends BaseValidator {
   public void validate(BaseAction action, ProjectOutcome projectOutcome, boolean saving) {
     action.setInvalidFields(new HashMap<>());
     if (!saving) {
-      Path path = this.getAutoSaveFilePath(projectOutcome, action.getCrpID());
+      Path path = this.getAutoSaveFilePath(projectOutcome, action.getCrpID(), action);
 
       if (path.toFile().exists()) {
         action.addMissingField("draft");
@@ -114,7 +121,9 @@ public class ProjectOutcomeValidator extends BaseValidator {
     int counter = i + 1;
     params.add(String.valueOf(counter));
     if (projectMilestone != null) {
-      if (projectMilestone.getYear() == action.getCurrentCycleYear()) {
+      projectMilestone
+        .setCrpMilestone(crpMilestoneManager.getCrpMilestoneById(projectMilestone.getCrpMilestone().getId()));
+      if (projectMilestone.getCrpMilestone().getYear() == action.getCurrentCycleYear()) {
 
         if (projectMilestone.getExpectedUnit() == null || projectMilestone.getExpectedUnit().getId() == null
           || projectMilestone.getExpectedUnit().getId() == -1) {
@@ -176,6 +185,7 @@ public class ProjectOutcomeValidator extends BaseValidator {
 
   }
 
+
   public void validateProjectOutcome(BaseAction action, ProjectOutcome projectOutcome) {
     Project project = projectManager.getProjectById(projectOutcome.getProject().getId());
     int startYear = 0;
@@ -188,7 +198,7 @@ public class ProjectOutcomeValidator extends BaseValidator {
     endDate.setTime(project.getProjecInfoPhase(action.getActualPhase()).getEndDate());
     endYear = endDate.get(Calendar.YEAR);
 
-    if (!action.isProjectNew(project.getId())) {
+    if (!action.isProjectNew(project.getId()) && action.isReportingActive()) {
       this.validateLessonsLearnOutcome(action, projectOutcome);
       if (action.getValidationMessage().toString().contains("Lessons")) {
         this.replaceAll(action.getValidationMessage(), "Lessons",
@@ -263,6 +273,16 @@ public class ProjectOutcomeValidator extends BaseValidator {
     }
 
 
+    if (action.hasSpecificities(APConstants.CRP_BASELINE_INDICATORS)) {
+      if (projectOutcome.getIndicators() != null) {
+        for (int i = 0; i < projectOutcome.getIndicators().size(); i++) {
+          this.validateProjectOutcomeIndicator(action, projectOutcome.getIndicators().get(i), i);
+        }
+      }
+
+    }
+
+
     if (action.hasSpecificities(APConstants.CRP_NEXT_USERS)) {
       if (projectOutcome.getNextUsers() != null && projectOutcome.getNextUsers().size() > 0) {
         for (int i = 0; i < projectOutcome.getNextUsers().size(); i++) {
@@ -273,6 +293,27 @@ public class ProjectOutcomeValidator extends BaseValidator {
         action.getInvalidFields().put("input-projectOutcome.nextUsers",
           action.getText(InvalidFieldsMessages.EMPTYLIST, new String[] {"Next User"}));
       }
+    }
+
+
+  }
+
+  public void validateProjectOutcomeIndicator(BaseAction action, ProjectOutcomeIndicator projectOutcomeIndicator,
+    int i) {
+    List<String> params = new ArrayList<String>();
+    params.add(String.valueOf(i + 1));
+
+
+    if (!(this.isValidString(projectOutcomeIndicator.getNarrative())
+      && this.wordCount(projectOutcomeIndicator.getNarrative()) <= 100)) {
+      action.addMessage(action.getText("projectOutcomeIndicator.requeried.narrative", params));
+      action.getInvalidFields().put("input-projectOutcome.indicators[" + i + "].narrative",
+        InvalidFieldsMessages.EMPTYFIELD);
+    }
+    if (projectOutcomeIndicator.getValue() == null || projectOutcomeIndicator.getValue().longValue() < 0) {
+      action.addMessage(action.getText("projectOutcomeIndicator.value"));
+      action.getInvalidFields().put("input-projectOutcome.indicators[" + i + "].value",
+        InvalidFieldsMessages.EMPTYFIELD);
     }
 
 

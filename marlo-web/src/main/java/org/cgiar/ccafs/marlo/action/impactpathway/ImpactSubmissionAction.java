@@ -182,10 +182,10 @@ public class ImpactSubmissionAction extends BaseAction {
       .filter(ur -> ur.getUser() != null && ur.getUser().isActive()).collect(Collectors.toList());
     for (UserRole userRole : userRoles) {
       if (crpAdmins.isEmpty()) {
-        crpAdmins += userRole.getUser().getFirstName() + " (" + userRole.getUser().getEmail() + ")";
+        crpAdmins += userRole.getUser().getComposedCompleteName() + " (" + userRole.getUser().getEmail() + ")";
         crpAdminsEmail += userRole.getUser().getEmail();
       } else {
-        crpAdmins += ", " + userRole.getUser().getFirstName() + " (" + userRole.getUser().getEmail() + ")";
+        crpAdmins += ", " + userRole.getUser().getComposedCompleteName() + " (" + userRole.getUser().getEmail() + ")";
         crpAdminsEmail += ", " + userRole.getUser().getEmail();
       }
     }
@@ -210,17 +210,16 @@ public class ImpactSubmissionAction extends BaseAction {
     }
     // BBC will be our gmail notification email.
     String bbcEmails = this.config.getEmailNotification();
-
-    // subject
-    String subject = null;
-    subject = this.getText("impact.submit.email.subject",
-      new String[] {crpProgram.getCrp().getName(), crpProgram.getAcronym()});
-    // Building the email message
     String crp = crpProgram.getCrp().getAcronym() != null && !crpProgram.getCrp().getAcronym().isEmpty()
       ? crpProgram.getCrp().getAcronym() : crpProgram.getCrp().getName();
+    // subject
+    String subject = null;
+    subject = this.getText("impact.submit.email.subject", new String[] {crp, crpProgram.getAcronym()});
+    // Building the email message
+
     StringBuilder message = new StringBuilder();
     String[] values = new String[4];
-    values[0] = this.getCurrentUser().getFirstName();
+    values[0] = this.getCurrentUser().getComposedCompleteName();
     values[1] = crpProgram.getAcronym();
     values[2] = crp;
     values[3] = crpProgram.getName();

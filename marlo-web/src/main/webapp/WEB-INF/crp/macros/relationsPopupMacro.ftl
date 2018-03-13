@@ -8,8 +8,10 @@
   
   [#if className == "ProjectPartner"] 
     [#local deliverables = deliverablesPartner /]
+  [#elseif (className == "ProjectOutcome") || (className == "ProjectBudget")]
+    [#local deliverables = deliverablesProject /]
   [#else]
-    [#local deliverables = ((deliverablesImpact)!deliverablesProject)!deliverablesPartner /]
+    [#local deliverables = ((deliverablesImpact)!deliverablesPartner)! /]
   [/#if]
   [#local projects = (action.getProjectRelationsImpact(element.id, element.class.name))! /]
   

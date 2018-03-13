@@ -16,6 +16,7 @@
 
 [#assign breadCrumb = [
   {"label":"projectsList", "nameSpace":"/projects", "action":"${(crpSession)!}/projectsList"},
+  {"text":"P${project.id}", "nameSpace":"/projects", "action":"${crpSession}/description", "param": "projectID=${project.id?c}&edit=true&phaseID=${(actualPhase.id)!}"},
   {"label":"projectPartners", "nameSpace":"/projects", "action":""}
 ] /]
 
@@ -58,11 +59,17 @@
             [#-- Other fields --]
             [#if project.projectInfo.isProjectEditLeader()]
             <div class="${(!action.isProjectNew(project.id) || reportingActive)?string('simpleBox','')} ${reportingActive?string('fieldFocus','')}">
+              
+              [#if !reportingActive]
+              <div class="form-group">
+                [@customForm.textArea name="project.projectInfo.newPartnershipsPlanned" i18nkey="projectPartners.partnershipsPlanned" paramText="${currentCycleYear}" className="limitWords-100" required=true editable=editable /]
+              </div>
+              [/#if]
+              
               [#-- -- -- REPORTING BLOCK -- -- --]
               [#if reportingActive]
-              <br />
-              <div class="fullBlock">
-                [@customForm.textArea name="project.overall" i18nkey="projectPartners.partnershipsOverall" className="limitWords-100" editable=editable /]
+              <div class="form-group">
+                [@customForm.textArea name="project.projectInfo.overall" i18nkey="projectPartners.partnershipsOverall" className="limitWords-100" editable=editable /]
               </div>
               [/#if]
               
@@ -77,11 +84,13 @@
                   </div>
                   [/#if]
                   [#-- Planning/Reporting lessons --]
+                   [#if (action.isReportingActive())]
                   <div class="fullBlock">
                     <input type="hidden" name="project.projectComponentLesson.id" value=${(project.projectComponentLesson.id)!"-1"} />
                     <input type="hidden" name="project.projectComponentLesson.year" value=${reportingActive?string(reportingYear,planningYear)} />
                     <input type="hidden" name="project.projectComponentLesson.componentName" value="${actionName}">
                     [@customForm.textArea name="project.projectComponentLesson.lessons" i18nkey="projectPartners.lessons.${reportingActive?string('reporting','planning')}" className="limitWords-100" editable=editable /]
+                  [/#if]
                   </div>
                 </div>
               [/#if]

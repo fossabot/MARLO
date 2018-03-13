@@ -248,10 +248,14 @@ ul.fieldError {
   padding: 0;
 }
 
-ul.fieldError li {
+ul.fieldError li, a.fieldError {
   color: red;
   list-style-type: none;
   text-align: left;
+}
+
+span.badge.fieldError{
+  background-color:red;
 }
 
 .radios {
@@ -357,14 +361,14 @@ p.fieldChecked{
 }
 
 span.fieldError{
-  background-color: #F59898;
-  color: #fff !important;
-  padding: 1px 6px 1px 6px;
-  margin-right: 4px;
-  margin-top: 2px;
-  border-radius: 2px;
-  font-size: 0.85em;
-  float: left;
+  /* background-color: #F59898; */
+  /* color: #fff !important; */
+  /* padding: 1px 6px 1px 6px; */
+  /* margin-right: 4px; */
+  /* margin-top: 2px; */
+  /* border-radius: 2px; */
+  /* font-size: 0.85em; */
+  /* float: left; */
 }
 
 p.warning-info {
@@ -467,6 +471,7 @@ textarea#justification {
 .fileUploaded {
   border: 1px dashed #ccc;
   position: relative;
+  padding-left: 6px;
 }
 
 input[type="radio"] {
@@ -779,6 +784,7 @@ img.icon {
 
 .removeElement.disable {
   opacity:0.4;
+  cursor: not-allowed;
 }
 
 .removeElement.sm {
@@ -794,6 +800,11 @@ img.icon {
   top: 0;
   right: 0;
   cursor: pointer;
+}
+
+.removeIcon.disable{
+  opacity:0.4;
+  cursor: not-allowed;
 }
 
 .removeLink img, .removeLink a {
@@ -855,6 +866,7 @@ ul.horizontalSubMenu{
   list-style: none;
   margin: 23px 0px 11px 0;
   padding: 0;
+  font-size: 0.9em;
 }
 
 ul.horizontalSubMenu li{
@@ -1092,7 +1104,7 @@ select#partnerSave_activityPartner_partner_type_id {
     background-color: #F7F7F7;
     border: 1px solid #E0E0E0 !important;
     box-shadow: 1px 1px 0px rgba(0, 0, 0, 0.1);
-    border-radius: 4px;
+    border-radius: 2px;
     margin-bottom: 5px;
     position: relative;
 }
@@ -1803,7 +1815,7 @@ a.currentReportingSection li, a.currentSection li {
 #secondaryMenu ul li ul li {
   margin: 2px 0 5px 0;
   list-style: none;
-  font-size: 0.95em;
+  font-size: 0.9em;
   border: 1px solid #e8e7e7;
   box-shadow: 0px 0px 5px rgba(0,0,0,0.1);
   background: #fff;
@@ -1841,8 +1853,7 @@ a.currentReportingSection li, a.currentSection li {
   display: block;
   text-decoration: none;
   color: #5E5E5E;
-  padding: 5px 0 9px 28px;
-  padding: 4px 9px;
+  padding: 5px 19px 5px 10px !important;
   /* border-left: 5px solid; */
 }
 
@@ -2597,7 +2608,7 @@ input.userName {
 }
 
 #newProject{
-  cursor: pointer;
+  /* cursor: pointer; */
   background-image: url(../../global/images/decision-tree-1.png);
 }
 #updatePlanning{
@@ -4267,6 +4278,10 @@ li.fileUploaded span {
   background: url('../../global/images/sprite-icons-activities.png') 0 -150px;
 }
 
+.icon-neutral{
+  background: url('../../global/images/sprite-icons-activities.png') 0 -88px;
+}
+
 /*** Project next users  ***/
 
 #nextUsersBlock .nextUser {
@@ -4903,6 +4918,10 @@ ul#deliverablesFilesMessages > li {
   background: #81af81;
 }
 
+.leftHead.gray span.index{
+  background: #ababab;
+}
+
 span.index{
   background: #b0b99d;
   color: #FFF;
@@ -5289,9 +5308,13 @@ table.evaluationRank thead th{
 }
 
 .radio-label {
-    overflow: hidden;
-    cursor: pointer;
-    /* margin: 0 10px !important; */
+  overflow: hidden;
+  cursor: pointer;
+  /* margin: 0 10px !important; */
+}
+
+.radio-label.fieldError {
+  color:red;
 }
 
 .radio-label .onoffswitch-radio:checked + label{ 
@@ -5509,6 +5532,7 @@ h4.testEnvironment {
 
 #superadminBlock ul li ul.subMenu {
   display:none; 
+  min-width: 170px;
 }
 #superadminBlock ul li ul.subMenu:hover {
   display:block; 
@@ -5921,7 +5945,7 @@ textarea{
 }
 
 input.fieldChecked {
-    background: url(../../../global/images/icon-check-tiny.png) no-repeat;
+    background: url(../../../marlo-web/global/images/icon-check-tiny.png) no-repeat;
     background-position: 97% 50%;
     background-size: 12px;
     border-color: #8ea786 !important;
@@ -5960,6 +5984,10 @@ span.errorTag {
 
 .missingSelect{
   border-bottom: 1px solid #F44;
+}
+
+.missingSelect .select2-container--default .select2-selection--single{
+  border: 1px solid #F44;
 }
 
 div#projectsList {
@@ -6414,6 +6442,11 @@ img#crpSelectedImage {
   background: url(../../global/images/calendar.png) no-repeat scroll 99% 2px;
 }
 
+p.dateLabel.fieldError {
+  border-color: #F52626 !important;
+  color: #F52626 !important;
+}
+
 .dateLabel.disabled {
   background-color: #eee;
   opacity: 1;
@@ -6438,6 +6471,7 @@ img#crpSelectedImage {
   height: 1.2em;
   position: relative;
   /* top: -0.2em; */
+  left: 0.1em;
   margin-right: 0.3em;
   vertical-align: top;
   cursor: pointer;
@@ -6494,7 +6528,11 @@ img#crpSelectedImage {
 .elementRelations  {
   margin: 7px 0 0 15px;
 }
-/* END Radio Flat*/
+
+.elementRelations.ProjectBudget  {
+  padding: 0 7px 15px 0;
+}
+
 
 /* Select2 show and hide animation in dropdowns*/
 .select2-results__option.loading-results,
@@ -6523,4 +6561,20 @@ img#crpSelectedImage {
     transform: scale(1.0);
     opacity: 0;
   }
+}
+
+/* Datatables button*/
+
+a.dt-button {
+    padding: 0px 10px;
+    border: 1px solid #ccc;
+    border-radius: 2px;
+    margin-right: 3px;
+    background: #fff;
+}
+
+i.helpLabel {
+  font-weight: normal;
+  font-size: 0.9em;
+  opacity: 0.7;
 }

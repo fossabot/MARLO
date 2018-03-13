@@ -17,17 +17,18 @@ package org.cgiar.ccafs.marlo.validation.projects;
 
 import org.cgiar.ccafs.marlo.action.BaseAction;
 import org.cgiar.ccafs.marlo.config.APConstants;
-import org.cgiar.ccafs.marlo.data.manager.CrpManager;
+import org.cgiar.ccafs.marlo.data.manager.GlobalUnitManager;
 import org.cgiar.ccafs.marlo.data.manager.ProjectManager;
 import org.cgiar.ccafs.marlo.data.manager.ProjectPartnerPersonManager;
-import org.cgiar.ccafs.marlo.data.model.Crp;
 import org.cgiar.ccafs.marlo.data.model.Deliverable;
 import org.cgiar.ccafs.marlo.data.model.DeliverableDissemination;
 import org.cgiar.ccafs.marlo.data.model.DeliverableMetadataElement;
 import org.cgiar.ccafs.marlo.data.model.DeliverablePartnership;
 import org.cgiar.ccafs.marlo.data.model.DeliverablePublicationMetadata;
+import org.cgiar.ccafs.marlo.data.model.GlobalUnit;
 import org.cgiar.ccafs.marlo.data.model.LicensesTypeEnum;
 import org.cgiar.ccafs.marlo.data.model.Project;
+import org.cgiar.ccafs.marlo.data.model.ProjectPartnerPerson;
 import org.cgiar.ccafs.marlo.data.model.ProjectSectionStatusEnum;
 import org.cgiar.ccafs.marlo.data.model.ProjectStatusEnum;
 import org.cgiar.ccafs.marlo.utils.InvalidFieldsMessages;
@@ -52,24 +53,26 @@ public class DeliverableValidator extends BaseValidator {
 
   private static final Logger LOG = LoggerFactory.getLogger(DeliverableValidator.class);
 
-  private final CrpManager crpManager;
+
+  // GlobalUnit Manager
+  private GlobalUnitManager crpManager;
   private ProjectManager projectManager;
   private ProjectPartnerPersonManager projectPartnerPersonManager;
 
   @Inject
-  public DeliverableValidator(CrpManager crpManager, ProjectManager projectManager,
+  public DeliverableValidator(GlobalUnitManager crpManager, ProjectManager projectManager,
     ProjectPartnerPersonManager projectPartnerPersonManager) {
     this.crpManager = crpManager;
     this.projectManager = projectManager;
     this.projectPartnerPersonManager = projectPartnerPersonManager;
   }
 
-  private Path getAutoSaveFilePath(Deliverable deliverable, long crpID) {
-    Crp crp = crpManager.getCrpById(crpID);
+  private Path getAutoSaveFilePath(Deliverable deliverable, long crpID, BaseAction action) {
+    GlobalUnit crp = crpManager.getGlobalUnitById(crpID);
     String composedClassName = deliverable.getClass().getSimpleName();
     String actionFile = ProjectSectionStatusEnum.DELIVERABLE.getStatus().replace("/", "_");
-    String autoSaveFile =
-      deliverable.getId() + "_" + composedClassName + "_" + crp.getAcronym() + "_" + actionFile + ".json";
+    String autoSaveFile = deliverable.getId() + "_" + composedClassName + "_" + action.getActualPhase().getDescription()
+      + "_" + action.getActualPhase().getYear() + "_" + crp.getAcronym() + "_" + actionFile + ".json";
 
     return Paths.get(config.getAutoSaveFolder() + autoSaveFile);
   }
@@ -86,7 +89,12 @@ public class DeliverableValidator extends BaseValidator {
       }
       if (deliverable.getDeliverableInfo().getStatus() != null
         && deliverable.getDeliverableInfo().getStatus() == Integer.parseInt(ProjectStatusEnum.Extended.getStatusId())) {
-        validate = true;
+        if (deliverable.getDeliverableInfo().getNewExpectedYear() != null) {
+          if (deliverable.getDeliverableInfo().getNewExpectedYear() >= action.getActualPhase().getYear()) {
+            validate = true;
+          }
+        }
+
       }
 
     } else {
@@ -97,7 +105,7 @@ public class DeliverableValidator extends BaseValidator {
       Project project = projectManager.getProjectById(deliverable.getProject().getId());
 
       if (!saving) {
-        Path path = this.getAutoSaveFilePath(deliverable, action.getCrpID());
+        Path path = this.getAutoSaveFilePath(deliverable, action.getCrpID(), action);
 
         if (path.toFile().exists()) {
           action.addMissingField("draft");
@@ -137,8 +145,8 @@ public class DeliverableValidator extends BaseValidator {
 
           } else {
             if (deliverable.getDeliverableInfo(action.getActualPhase()).getDeliverableType()
-              .getDeliverableType() != null) {
-              if (deliverable.getDeliverableInfo(action.getActualPhase()).getDeliverableType().getDeliverableType()
+              .getDeliverableCategory() != null) {
+              if (deliverable.getDeliverableInfo(action.getActualPhase()).getDeliverableType().getDeliverableCategory()
                 .getId() == -1) {
                 action.addMessage(action.getText("project.deliverable.generalInformation.type"));
                 action.getInvalidFields().put("input-deliverable.deliverableInfo.deliverableType.deliverableType.id",
@@ -224,15 +232,18 @@ public class DeliverableValidator extends BaseValidator {
               action.getText(InvalidFieldsMessages.EMPTYLIST, new String[] {"Funding Sources"}));
           }
         }
-        if (deliverable.getDeliverableInfo(action.getActualPhase()).getCrossCuttingGender() != null
-          && deliverable.getDeliverableInfo(action.getActualPhase()).getCrossCuttingGender().booleanValue() == true) {
 
-          if (deliverable.getGenderLevels() == null || deliverable.getGenderLevels().isEmpty()) {
-            action.addMessage(action.getText("project.deliverable.generalInformation.genderLevels"));
-            action.getInvalidFields().put("list-deliverable.genderLevels",
-              action.getText(InvalidFieldsMessages.EMPTYLIST, new String[] {"Gender Levels"}));
-          }
-        }
+
+        /*
+         * if (deliverable.getDeliverableInfo(action.getActualPhase()).getCrossCuttingGender() != null
+         * && deliverable.getDeliverableInfo(action.getActualPhase()).getCrossCuttingGender().booleanValue() == true) {
+         * if (deliverable.getGenderLevels() == null || deliverable.getGenderLevels().isEmpty()) {
+         * action.addMessage(action.getText("project.deliverable.generalInformation.genderLevels"));
+         * action.getInvalidFields().put("list-deliverable.genderLevels",
+         * action.getText(InvalidFieldsMessages.EMPTYLIST, new String[] {"Gender Levels"}));
+         * }
+         * }
+         */
       }
 
 
@@ -268,8 +279,8 @@ public class DeliverableValidator extends BaseValidator {
 
         // Deliverable Publication Meta-data
         if (deliverable.getDeliverableInfo(action.getActualPhase()).getDeliverableType() != null && deliverable
-          .getDeliverableInfo(action.getActualPhase()).getDeliverableType().getDeliverableType() != null) {
-          if (deliverable.getDeliverableInfo(action.getActualPhase()).getDeliverableType().getDeliverableType()
+          .getDeliverableInfo(action.getActualPhase()).getDeliverableType().getDeliverableCategory() != null) {
+          if (deliverable.getDeliverableInfo(action.getActualPhase()).getDeliverableType().getDeliverableCategory()
             .getId() == 49) {
             this.validatePublicationMetadata(deliverable, action);
           }
@@ -321,6 +332,48 @@ public class DeliverableValidator extends BaseValidator {
     } else if (action.getValidationMessage().length() > 0) {
       action.addActionMessage(
         " " + action.getText("saving.missingFields", new String[] {action.getValidationMessage().toString()}));
+    }
+
+
+    // cross cutting missing fields validation
+
+    if (deliverable.getDeliverableInfo(action.getActualPhase()).getCrossCuttingGender() != null) {
+      if (deliverable.getDeliverableInfo(action.getActualPhase()).getCrossCuttingGender()) {
+        if (deliverable.getDeliverableInfo(action.getActualPhase()).getCrossCuttingScoreGender() != null) {
+          if (deliverable.getDeliverableInfo(action.getActualPhase()).getCrossCuttingScoreGender() == -1) {
+            action.addMessage(action.getText("saving.fields.required"));
+            action.getInvalidFields().put("input-deliverable.deliverableInfo.crossCuttingScoreGender",
+              InvalidFieldsMessages.EMPTYFIELD);
+          }
+        }
+      }
+    }
+
+
+    if (deliverable.getDeliverableInfo(action.getActualPhase()).getCrossCuttingYouth() != null) {
+      if (deliverable.getDeliverableInfo(action.getActualPhase()).getCrossCuttingYouth()) {
+        if (deliverable.getDeliverableInfo(action.getActualPhase()).getCrossCuttingScoreYouth() != null) {
+          if (deliverable.getDeliverableInfo(action.getActualPhase()).getCrossCuttingScoreYouth() == -1)
+
+          {
+            action.addMessage(action.getText("saving.fields.required"));
+            action.getInvalidFields().put("input-deliverable.deliverableInfo.crossCuttingScoreYouth",
+              InvalidFieldsMessages.EMPTYFIELD);
+          }
+        }
+      }
+    }
+
+    if (deliverable.getDeliverableInfo(action.getActualPhase()).getCrossCuttingCapacity() != null) {
+      if (deliverable.getDeliverableInfo(action.getActualPhase()).getCrossCuttingCapacity()) {
+        if (deliverable.getDeliverableInfo(action.getActualPhase()).getCrossCuttingScoreCapacity() != null) {
+          if (deliverable.getDeliverableInfo(action.getActualPhase()).getCrossCuttingScoreCapacity() == -1) {
+            action.addMessage(action.getText("saving.fields.required"));
+            action.getInvalidFields().put("input-deliverable.deliverableInfo.crossCuttingScoreCapacity",
+              InvalidFieldsMessages.EMPTYFIELD);
+          }
+        }
+      }
     }
 
     this.saveMissingFields(deliverable, action.getActualPhase().getDescription(), action.getActualPhase().getYear(),
@@ -634,11 +687,13 @@ public class DeliverableValidator extends BaseValidator {
       } else {
         if (deliverable.getResponsiblePartner() != null
           && deliverable.getResponsiblePartner().getProjectPartnerPerson() != null) {
+          ProjectPartnerPerson projectPartnerPerson = projectPartnerPersonManager
+            .getProjectPartnerPersonById(deliverable.getResponsiblePartner().getProjectPartnerPerson().getId());
 
-
-          if (projectPartnerPersonManager
-            .getProjectPartnerPersonById(deliverable.getResponsiblePartner().getProjectPartnerPerson().getId())
-            .getProjectPartner().getInstitution().getAcronym().equalsIgnoreCase("IFPRI")) {
+          if (projectPartnerPerson.getProjectPartner() != null
+            && projectPartnerPerson.getProjectPartner().getInstitution() != null
+            && projectPartnerPerson.getProjectPartner().getInstitution().getAcronym() != null
+            && projectPartnerPerson.getProjectPartner().getInstitution().getAcronym().equalsIgnoreCase("IFPRI")) {
             if (action.hasSpecificities(APConstants.CRP_DIVISION_FS)) {
               if (deliverable.getResponsiblePartner().getPartnerDivision() == null) {
                 action.addMessage(action.getText("deliverable.division"));

@@ -17,9 +17,10 @@ package org.cgiar.ccafs.marlo.validation.projects;
 
 import org.cgiar.ccafs.marlo.action.BaseAction;
 import org.cgiar.ccafs.marlo.config.APConstants;
-import org.cgiar.ccafs.marlo.data.manager.CrpManager;
+import org.cgiar.ccafs.marlo.data.manager.GlobalUnitManager;
 import org.cgiar.ccafs.marlo.data.manager.InstitutionManager;
-import org.cgiar.ccafs.marlo.data.model.Crp;
+import org.cgiar.ccafs.marlo.data.manager.ProjectManager;
+import org.cgiar.ccafs.marlo.data.model.GlobalUnit;
 import org.cgiar.ccafs.marlo.data.model.Institution;
 import org.cgiar.ccafs.marlo.data.model.Project;
 import org.cgiar.ccafs.marlo.data.model.ProjectPartner;
@@ -50,12 +51,18 @@ public class ProjectPartnersValidator extends BaseValidator {
 
   private static final Logger LOG = LoggerFactory.getLogger(ProjectPartnersValidator.class);
 
-  private final CrpManager crpManager;
-  private final InstitutionManager institutionManager;
-  private final ProjectValidator projectValidator;
+
+  // GlobalUnit Manager
+  private GlobalUnitManager crpManager;
+
+  private ProjectManager projectManager;
+
+  private ProjectValidator projectValidator;
+
+  private InstitutionManager institutionManager;
 
   @Inject
-  public ProjectPartnersValidator(ProjectValidator projectValidator, CrpManager crpManager,
+  public ProjectPartnersValidator(ProjectValidator projectValidator, GlobalUnitManager crpManager,
     InstitutionManager institutionManager) {
     super();
     this.projectValidator = projectValidator;
@@ -63,12 +70,12 @@ public class ProjectPartnersValidator extends BaseValidator {
     this.institutionManager = institutionManager;
   }
 
-  private Path getAutoSaveFilePath(Project project, long crpID) {
-    Crp crp = crpManager.getCrpById(crpID);
+  private Path getAutoSaveFilePath(Project project, long crpID, BaseAction action) {
+    GlobalUnit crp = crpManager.getGlobalUnitById(crpID);
     String composedClassName = project.getClass().getSimpleName();
     String actionFile = ProjectSectionStatusEnum.PARTNERS.getStatus().replace("/", "_");
-    String autoSaveFile =
-      project.getId() + "_" + composedClassName + "_" + crp.getAcronym() + "_" + actionFile + ".json";
+    String autoSaveFile = project.getId() + "_" + composedClassName + "_" + action.getActualPhase().getDescription()
+      + "_" + action.getActualPhase().getYear() + "_" + crp.getAcronym() + "_" + actionFile + ".json";
 
     return Paths.get(config.getAutoSaveFolder() + autoSaveFile);
   }
@@ -97,7 +104,7 @@ public class ProjectPartnersValidator extends BaseValidator {
 
     if (project != null) {
       if (!saving) {
-        Path path = this.getAutoSaveFilePath(project, action.getCrpID());
+        Path path = this.getAutoSaveFilePath(project, action.getCrpID(), action);
 
         if (path.toFile().exists()) {
           action.addMissingField("draft");
@@ -124,29 +131,34 @@ public class ProjectPartnersValidator extends BaseValidator {
           action.getText(InvalidFieldsMessages.EMPTYLIST, new String[] {"Partners"}));
       }
       if (project.getProjecInfoPhase(action.getActualPhase()).isProjectEditLeader()) {
-        if (!action.isProjectNew(project.getId())) {
-          this.validateLessonsLearn(action, project);
-          if (action.getValidationMessage().toString().contains("Lessons")) {
-            this.replaceAll(action.getValidationMessage(), "Lessons",
-              "Lessons regarding partnerships and possible implications for the coming planning cycle");
-            action.getInvalidFields().put("input-project.projectComponentLesson.lessons",
-              InvalidFieldsMessages.EMPTYFIELD);
-          }
-        }
+        /*
+         * if (!action.isProjectNew(project.getId())) {
+         * this.validateLessonsLearn(action, project);
+         * if (action.getValidationMessage().toString().contains("Lessons")) {
+         * this.replaceAll(action.getValidationMessage(), "Lessons",
+         * "Lessons regarding partnerships and possible implications for the coming planning cycle");
+         * action.getInvalidFields().put("input-project.projectComponentLesson.lessons",
+         * InvalidFieldsMessages.EMPTYFIELD);
+         * }
+         * }/
+         */
 
+        if (project.getProjectInfo().getNewPartnershipsPlanned() == null
+          || project.getProjectInfo().getNewPartnershipsPlanned().trim().isEmpty()) {
+          action.addMissingField("project.projectInfo.newPartnershipsPlanned");
+          action.getInvalidFields().put("input-project.projectInfo.newPartnershipsPlanned",
+            action.getText("Please provide new partnerships  planned for " + action.getActualPhase().getYear()));
+        }
       }
+
       this.validateCCAFSProject(action, project);
 
       if (!action.getFieldErrors().isEmpty()) {
         hasErros = true;
         action.addActionError(action.getText("saving.fields.required"));
-        System.out.println(action.getFieldErrors());
-
-
       } else if (action.getValidationMessage().length() > 0) {
         action.addActionMessage(
           " " + action.getText("saving.missingFields", new String[] {action.getValidationMessage().toString()}));
-
       }
 
       this.saveMissingFields(project, action.getActualPhase().getDescription(), action.getActualPhase().getYear(),
@@ -236,11 +248,11 @@ public class ProjectPartnersValidator extends BaseValidator {
         }
       }
     } catch (Exception e) {
-      LOG.error("unable to validate contact persons for project " + project, e);
-      /**
-       * Original code swallows the exception and didn't even log it. Now we at least log it,
-       * but we need to revisit to see if we should continue processing or re-throw the exception.
-       */
+      LOG.error("unable to validate contact persons for project " + project,
+        e);/**
+            * Original code swallows the exception and didn't even log it. Now we at least log it,
+            * but we need to revisit to see if we should continue processing or re-throw the exception.
+            */
     }
   }
 

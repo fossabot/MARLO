@@ -5,12 +5,13 @@
       'items': [
       { 'slug': 'description',  'name': 'projects.menu.description',  'action': 'description',  'active': true  },
       { 'slug': 'partners',  'name': 'projects.menu.partners',  'action': 'partners',  'active': true  },
-      { 'slug': 'budgetByPartners',  'name': 'Budget',  'action': 'budgetByPartners',  'active': true  }
+      { 'slug': 'budgetByPartners',  'name': 'Budget',  'action': 'budgetByPartners',  'active': true  },
+      { 'slug': 'budgetByFlagships',  'name': 'projects.menu.budgetByFlagships',  'action': 'budgetByFlagship',  'active': true , 'show': action.getCountProjectFlagships(project.id) && !reportingActive}
       ]
     }
     
   ]/]
-[#else] 
+[#else]
   [#assign menus= [
     { 'title': 'General Information', 'show': true,
       'items': [
@@ -19,13 +20,14 @@
       { 'slug': 'locations',  'name': 'projects.menu.locations',  'action': 'locations',  'active': true  }
       ]
     },
-    { 'title': 'Outcomes', 'show': !project.projectInfo.administrative,
+    { 'title': 'Outcomes', 'show': true,
       'items': [
-      { 'slug': 'contributionsCrpList',  'name': 'projects.menu.contributionsCrpList',  'action': 'contributionsCrpList',  'active': true, 'show':!phaseOne },
-      { 'slug': 'projectOutcomes',  'name': 'projects.menu.projectOutcomes',  'action': 'outcomesPandR',  'active': true, 'show':  phaseOne  },
-      { 'slug': 'ccafsOutcomes',  'name': 'projects.menu.ccafsOutcomes',  'action': 'ccafsOutcomes',  'active': true, 'show': phaseOne },
-      { 'slug': 'otherContributions',  'name': 'projects.menu.otherContributions',  'action': 'otherContributions',  'active': phaseOne, 'show': reportingActive  },
-      { 'slug': 'caseStudies',  'name': 'Outcome Case Studies',  'action': 'caseStudies',  'active': false, 'show': reportingActive }
+      { 'slug': 'contributionsCrpList',  'name': 'projects.menu.contributionsCrpList',  'action': 'contributionsCrpList',  'active': true, 'show':!phaseOne && !project.projectInfo.administrative },
+      { 'slug': 'projectOutcomes',  'name': 'projects.menu.projectOutcomes',  'action': 'outcomesPandR',  'active': true, 'show':  phaseOne && !project.projectInfo.administrative },
+      { 'slug': 'ccafsOutcomes',  'name': 'projects.menu.ccafsOutcomes',  'action': 'ccafsOutcomes',  'active': true, 'show': phaseOne && !project.projectInfo.administrative },
+      { 'slug': 'otherContributions',  'name': 'projects.menu.otherContributions',  'action': 'otherContributions',  'active': phaseOne, 'show': reportingActive && !project.projectInfo.administrative },
+      { 'slug': 'caseStudies',  'name': 'Outcome Case Studies',  'action': 'caseStudies',  'active': false, 'show': reportingActive && !project.projectInfo.administrative },
+      { 'slug': 'expectedStudies',  'name': 'projects.menu.expectedStudies',  'action': 'expectedStudies',  'active': true, 'show': !reportingActive }
       ]
     },
     { 'title': 'Outputs', 'show': true,
@@ -45,6 +47,7 @@
       { 'slug': 'budgetByPartners',  'name': 'projects.menu.budgetByPartners',  'action': 'budgetByPartners',  'active': true, 'show':true },
 
       { 'slug': 'budgetByCoAs',  'name': 'projects.menu.budgetByCoAs',  'action': 'budgetByCoAs', 'show': action.canEditBudgetByCoAs(project.id) && !project.projectInfo.administrative && !reportingActive && !phaseOne, 'active': true  },
+      { 'slug': 'budgetByFlagships',  'name': 'projects.menu.budgetByFlagships',  'action': 'budgetByFlagship',  'active': true, 'show': action.getCountProjectFlagships(project.id) && !reportingActive},
       { 'slug': 'leverages',  'name': 'Leverages',  'action': 'leverages',  'active': false, 'show': reportingActive && action.hasSpecificities("crp_leverages_module")}
 
       ]
@@ -69,7 +72,7 @@
 
 [#-- Menu--]
 <nav id="secondaryMenu" class="">
-  <p>Project Menu <br /><small> [#if (project.projectInfo.administrative)!false]Program Management [#else] Research Project [/#if]</small> </p> 
+  <p>[@s.text name="projects.menu.project" /]<br /><small> [#if (project.projectInfo.administrative)!false]Program Management [#else] Research Project [/#if]</small> </p> 
   <ul>
     [#list menus as menu]
       [#if menu.show]
@@ -133,17 +136,14 @@
  
   
 
-  [#-- Check button --]
-  [#if canEdit && !completed && !submission  && ((project.projectInfo.projectEditLeader)!false)]
+    [#-- Check button --]
+   [#if canEdit && !completed && !submission  && ((project.projectInfo.projectEditLeader)!false)]
     <p class="projectValidateButton-message text-center">Check for missing fields.<br /></p>
     <div id="validateProject-${projectID}" class="projectValidateButton ${(project.type)!''}">[@s.text name="form.buttons.check" /]</div>
     <div id="progressbar-${projectID}" class="progressbar" style="display:none"></div>
   [/#if]
-
- 
-
-
- [#-- Submit button --]
+  
+  [#-- Submit button --]
   [#if canEdit]
     [#assign showSubmit=(canSubmit && !submission && completed)]
     <a id="submitProject-${projectID}" class="projectSubmitButton" style="display:${showSubmit?string('block','none')}" href="[@s.url action="${crpSession}/submit"][@s.param name='projectID']${projectID}[/@s.param][/@s.url]" >

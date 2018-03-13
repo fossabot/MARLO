@@ -45,6 +45,10 @@
                 [@s.text name="projectsList.title.none" /]
               </a>
             [/#if]
+            [#-- Funding Source Dates --]
+            [#if ((project.fundingSourceInfo.startDate??)!false) && ((project.fundingSourceInfo.startDate??)!false) ]
+              <p><small class="text-gray">(${(project.fundingSourceInfo.startDate)!} - [#if (project.fundingSourceInfo.extensionDate??)!false] ${(project.fundingSourceInfo.extensionDate)!} [#else] ${(project.fundingSourceInfo.endDate)!}[/#if])</small></p>
+            [/#if]
           </td>
           [#-- Project Budget Type --]
           <td class=""> 
@@ -52,8 +56,16 @@
             [#if action.hasSpecificities('crp_fs_w1w2_cofinancing')] ${(project.fundingSourceInfo.w1w2?string('<br /> <span class="programTag">Co-Financing</span> ',''))!}[/#if]
           </td>
           [#-- Finance Code --]
-          <td>
-            [#if project.fundingSourceInfo.financeCode?has_content]${project.fundingSourceInfo.financeCode}[#else] <p class="text-muted">Not defined</p>  [/#if]
+          <td style="position:relative">
+            [#if project.fundingSourceInfo.financeCode?has_content]
+              [#assign isSynced = (project.fundingSourceInfo.synced)!false ]
+              [#-- Icon --]
+              [#if isSynced]<span title="Synced on ${(project.fundingSourceInfo.syncedDate)!''}" class="glyphicon glyphicon-retweet" style="color: #2aa4c9;"></span>[/#if]
+              [#-- Code --]
+              <span [#if isSynced]style="color: #2aa4c9;"[/#if]>${project.fundingSourceInfo.financeCode}</span>
+            [#else]
+              <p class="text-muted">Not defined</p>
+            [/#if]
           </td>
           [#-- Project Status 
           <td>
@@ -75,7 +87,8 @@
             [/#if]
           </td>
           
-           <td class=""> 
+           <td class="">
+            <span class="hidden">${project?index}</span>
             ${(project.fundingSourceInfo.endDate)!'Not defined'}
           </td>
           
@@ -104,7 +117,7 @@
         
           [#-- Delete Project--]
           <td class="text-center">
-            [#if (action.canBeDeleted(project.id, project.class.name) && action.canAddFunding() && !crpClosed) ||action.canAccessSuperAdmin()  && action.getActualPhase().editable]
+            [#if (action.canBeDeleted(project.id, project.class.name) && action.canAddFunding() && !crpClosed)   && action.getActualPhase().editable]
               <a id="removeDeliverable-${project.id}" class="removeProject" href="[@s.url namespace=namespace action="${(crpSession)!}/deleteFundingSources"][@s.param name='fundingSourceID']${project.id?c}[/@s.param][#include "/WEB-INF/global/pages/urlGlobalParams.ftl" /][/@s.url]" title="">
                 <img src="${baseUrl}/global/images/trash.png"/> 
               </a>
@@ -163,6 +176,10 @@
               <a href="[@s.url namespace=namespace action=defaultAction includeParams='get'] [@s.param name='fundingSourceID']${project.id}[/@s.param][#include "/WEB-INF/global/pages/urlGlobalParams.ftl" /][/@s.url] ">
                 [@s.text name="projectsList.title.none" /]
               </a>
+            [/#if]
+            [#-- Funding Source Dates --]
+            [#if ((project.fundingSourceInfo.startDate??)!false) && ((project.fundingSourceInfo.startDate??)!false) ]
+              <p><small class="text-gray">(${(project.fundingSourceInfo.startDate)!} - [#if (project.fundingSourceInfo.extensionDate??)!false] ${(project.fundingSourceInfo.extensionDate)!} [#else] ${(project.fundingSourceInfo.endDate)!}[/#if])</small></p>
             [/#if]
           </td>
           [#-- Project Budget Type --]

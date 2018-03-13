@@ -31,7 +31,7 @@ $(window).on('keydown', function(e) {
 });
 
 function autoSave() {
-  if(isChanged()) {
+  if(isChanged() && editable) {
     $.ajax({
         dataType: 'json',
         method: 'POST',
@@ -49,7 +49,6 @@ function autoSave() {
         },
         success: function(data) {
           if(data.status.status) {
-
             successNotification('Draft saved...');
             // $draftTag.text('Confirm changes').addClass('animated flipInX');
             // $cancelButton.css('display', 'inline-block');
@@ -159,6 +158,20 @@ function validateThisSection() {
     validateService = "/validateProject.do";
   }
 
+  // validate CapDev
+  if(isCapDevSection()) {
+    sectionData.capdevID = $('input[name="capdevID"]').val();
+    sectionData.deliverableID = $('input[name="deliverableID"]').val();
+    validateService = "/validateCenterCapdev.do";
+  }
+
+  // Validate POWB Synthesis section
+  if(isPOWBSection()) {
+    sectionData.liaisonInstitutionID = $('input[name="liaisonInstitutionID"]').val();
+    sectionData.powbSynthesisID = $('input[name="powbSynthesisID"]').val() || $('#powbSynthesisID').text();
+    validateService = "/validatePowbSynthesisSection.do";
+  }
+
   $.ajax({
       url: baseURL + validateService,
       data: sectionData,
@@ -174,7 +187,6 @@ function validateThisSection() {
             $sectionMenu.addClass('submitted').removeClass('toSubmit');
           } else {
             $sectionMenu.removeClass('submitted').addClass('toSubmit');
-
           }
         }
         $sectionMenu.removeClass('loadingSection');

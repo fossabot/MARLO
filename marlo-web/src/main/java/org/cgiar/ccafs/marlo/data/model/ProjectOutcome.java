@@ -4,7 +4,6 @@ package org.cgiar.ccafs.marlo.data.model;
 
 import org.cgiar.ccafs.marlo.data.IAuditLog;
 
-import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -34,7 +33,7 @@ public class ProjectOutcome implements java.io.Serializable, IAuditLog {
   @Expose
   private User createdBy;
   @Expose
-  private BigDecimal expectedValue;
+  private Double expectedValue;
   @Expose
   private SrfTargetUnit expectedUnit;
   @Expose
@@ -86,15 +85,18 @@ public class ProjectOutcome implements java.io.Serializable, IAuditLog {
   private ProjectComponentLesson projectComponentLesson;
   private ProjectComponentLesson projectComponentLessonPreview;
   private Set<SectionStatus> sectionStatuses = new HashSet<SectionStatus>(0);
+  private Set<ProjectOutcomeIndicator> projectOutcomeIndicators = new HashSet<ProjectOutcomeIndicator>(0);
+  private List<ProjectOutcomeIndicator> indicators;
+
 
   public ProjectOutcome() {
   }
 
+
   public ProjectOutcome(CrpProgramOutcome crpProgramOutcome, Project project, User usersByModifiedBy,
-    User usersByCreatedBy, BigDecimal expectedValue, SrfTargetUnit expectedUnit, Long achievedValue,
-    String narrativeTarget, String narrativeAchieved, boolean isActive, Date activeSince,
-    String modificationJustification, Set<ProjectMilestone> projectMilestoneses,
-    Set<ProjectCommunication> projectCommunicationses) {
+    User usersByCreatedBy, Double expectedValue, SrfTargetUnit expectedUnit, Long achievedValue, String narrativeTarget,
+    String narrativeAchieved, boolean isActive, Date activeSince, String modificationJustification,
+    Set<ProjectMilestone> projectMilestoneses, Set<ProjectCommunication> projectCommunicationses) {
     this.crpProgramOutcome = crpProgramOutcome;
     this.project = project;
     this.modifiedBy = usersByModifiedBy;
@@ -112,9 +114,10 @@ public class ProjectOutcome implements java.io.Serializable, IAuditLog {
     this.projectCommunications = projectCommunicationses;
   }
 
+
   public ProjectOutcome(CrpProgramOutcome crpProgramOutcome, Project project, User usersByModifiedBy,
-    User usersByCreatedBy, BigDecimal expectedValue, SrfTargetUnit expectedUnit, String narrativeTarget,
-    boolean isActive, Date activeSince, String modificationJustification) {
+    User usersByCreatedBy, Double expectedValue, SrfTargetUnit expectedUnit, String narrativeTarget, boolean isActive,
+    Date activeSince, String modificationJustification) {
     this.crpProgramOutcome = crpProgramOutcome;
     this.project = project;
     this.modifiedBy = usersByModifiedBy;
@@ -128,6 +131,7 @@ public class ProjectOutcome implements java.io.Serializable, IAuditLog {
     this.modificationJustification = modificationJustification;
   }
 
+
   public SrfTargetUnit getAchievedUnit() {
     return achievedUnit;
   }
@@ -140,28 +144,24 @@ public class ProjectOutcome implements java.io.Serializable, IAuditLog {
     return activeSince;
   }
 
-
   public List<ProjectCommunication> getCommunications() {
     return communications;
   }
-
 
   public User getCreatedBy() {
     return createdBy;
   }
 
-
   public CrpProgramOutcome getCrpProgramOutcome() {
     return crpProgramOutcome;
   }
-
 
   public SrfTargetUnit getExpectedUnit() {
     return expectedUnit;
   }
 
 
-  public BigDecimal getExpectedValue() {
+  public Double getExpectedValue() {
     return expectedValue;
   }
 
@@ -174,6 +174,11 @@ public class ProjectOutcome implements java.io.Serializable, IAuditLog {
   @Override
   public Long getId() {
     return id;
+  }
+
+
+  public List<ProjectOutcomeIndicator> getIndicators() {
+    return indicators;
   }
 
 
@@ -219,9 +224,12 @@ public class ProjectOutcome implements java.io.Serializable, IAuditLog {
     return nextUsers;
   }
 
+
   public Phase getPhase() {
     return phase;
   }
+
+
   public Project getProject() {
     return project;
   }
@@ -231,11 +239,9 @@ public class ProjectOutcome implements java.io.Serializable, IAuditLog {
     return projectCommunications;
   }
 
-
   public ProjectComponentLesson getProjectComponentLesson() {
     return projectComponentLesson;
   }
-
 
   public ProjectComponentLesson getProjectComponentLessonPreview() {
     return projectComponentLessonPreview;
@@ -256,6 +262,12 @@ public class ProjectOutcome implements java.io.Serializable, IAuditLog {
     return projectNextusers;
   }
 
+
+  public Set<ProjectOutcomeIndicator> getProjectOutcomeIndicators() {
+    return projectOutcomeIndicators;
+  }
+
+
   public Set<SectionStatus> getSectionStatuses() {
     return sectionStatuses;
   }
@@ -264,7 +276,6 @@ public class ProjectOutcome implements java.io.Serializable, IAuditLog {
   public String getYouthComponent() {
     return youthComponent;
   }
-
 
   @Override
   public boolean isActive() {
@@ -312,7 +323,7 @@ public class ProjectOutcome implements java.io.Serializable, IAuditLog {
   }
 
 
-  public void setExpectedValue(BigDecimal expectedValue) {
+  public void setExpectedValue(Double expectedValue) {
     this.expectedValue = expectedValue;
   }
 
@@ -324,6 +335,11 @@ public class ProjectOutcome implements java.io.Serializable, IAuditLog {
 
   public void setId(Long id) {
     this.id = id;
+  }
+
+
+  public void setIndicators(List<ProjectOutcomeIndicator> indicators) {
+    this.indicators = indicators;
   }
 
 
@@ -394,6 +410,11 @@ public class ProjectOutcome implements java.io.Serializable, IAuditLog {
 
   public void setProjectNextusers(Set<ProjectNextuser> projectNextusers) {
     this.projectNextusers = projectNextusers;
+  }
+
+
+  public void setProjectOutcomeIndicators(Set<ProjectOutcomeIndicator> projectOutcomeIndicators) {
+    this.projectOutcomeIndicators = projectOutcomeIndicators;
   }
 
 

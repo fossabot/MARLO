@@ -10,10 +10,6 @@ import com.google.gson.annotations.Expose;
  */
 public class DeliverableInfo implements java.io.Serializable, IAuditLog {
 
-
-  /**
-   * 
-   */
   private static final long serialVersionUID = -8647145762226231826L;
   @Expose
   private Long id;
@@ -61,6 +57,12 @@ public class DeliverableInfo implements java.io.Serializable, IAuditLog {
   private String otherLicense;
   @Expose
   private Boolean allowModifications;
+  @Expose
+  private Long crossCuttingScoreGender;
+  @Expose
+  private Long crossCuttingScoreYouth;
+  @Expose
+  private Long crossCuttingScoreCapacity;
 
   public DeliverableInfo() {
   }
@@ -70,7 +72,8 @@ public class DeliverableInfo implements java.io.Serializable, IAuditLog {
     String typeOther, Integer newExpectedYear, int year, Integer status, String statusDescription,
     String modificationJustification, Boolean crossCuttingGender, Boolean crossCuttingYouth,
     Boolean crossCuttingCapacity, Boolean crossCuttingNa, Boolean adoptedLicense, String license, String otherLicense,
-    Boolean allowModifications) {
+    Boolean allowModifications, Long crossCuttingScoreGender, Long crossCuttingScoreYouth,
+    Long crossCuttingScoreCapacity) {
     this.crpClusterKeyOutput = crpClusterKeyOutput;
     this.crpProgramOutcome = crpProgramOutcome;
     this.deliverableType = deliverableType;
@@ -93,6 +96,9 @@ public class DeliverableInfo implements java.io.Serializable, IAuditLog {
     this.license = license;
     this.otherLicense = otherLicense;
     this.allowModifications = allowModifications;
+    this.crossCuttingScoreGender = crossCuttingScoreGender;
+    this.crossCuttingScoreYouth = crossCuttingScoreYouth;
+    this.crossCuttingScoreCapacity = crossCuttingScoreCapacity;
   }
 
   public DeliverableInfo(User modifiedBy, int year, String modificationJustification) {
@@ -109,17 +115,44 @@ public class DeliverableInfo implements java.io.Serializable, IAuditLog {
     return allowModifications;
   }
 
+  public String getCapDevScoreName() {
+    if (this.crossCuttingScoreCapacity != null) {
+      if (this.crossCuttingScoreCapacity == Long.valueOf(CrossCuttingScoreEnum.SIGNIFICANT.getScoreId())) {
+        return CrossCuttingScoreEnum.SIGNIFICANT.getScore();
+      }
+
+      if (this.crossCuttingScoreCapacity == Long.valueOf(CrossCuttingScoreEnum.PRINCIPAL.getScoreId())) {
+        return CrossCuttingScoreEnum.PRINCIPAL.getScore();
+      }
+    }
+    return null;
+  }
+
+
   public Boolean getCrossCuttingCapacity() {
     return crossCuttingCapacity;
   }
-
 
   public Boolean getCrossCuttingGender() {
     return crossCuttingGender;
   }
 
+
   public Boolean getCrossCuttingNa() {
     return crossCuttingNa;
+  }
+
+  public Long getCrossCuttingScoreCapacity() {
+    return crossCuttingScoreCapacity;
+  }
+
+  public Long getCrossCuttingScoreGender() {
+    return crossCuttingScoreGender;
+  }
+
+
+  public Long getCrossCuttingScoreYouth() {
+    return crossCuttingScoreYouth;
   }
 
 
@@ -127,9 +160,11 @@ public class DeliverableInfo implements java.io.Serializable, IAuditLog {
     return crossCuttingYouth;
   }
 
+
   public CrpClusterKeyOutput getCrpClusterKeyOutput() {
     return crpClusterKeyOutput;
   }
+
 
   public CrpProgramOutcome getCrpProgramOutcome() {
     return crpProgramOutcome;
@@ -150,6 +185,18 @@ public class DeliverableInfo implements java.io.Serializable, IAuditLog {
     return description;
   }
 
+  public String getGenderScoreName() {
+    if (this.crossCuttingScoreGender != null) {
+      if (this.crossCuttingScoreGender == Long.valueOf(CrossCuttingScoreEnum.SIGNIFICANT.getScoreId())) {
+        return CrossCuttingScoreEnum.SIGNIFICANT.getScore();
+      }
+
+      if (this.crossCuttingScoreGender == Long.valueOf(CrossCuttingScoreEnum.PRINCIPAL.getScoreId())) {
+        return CrossCuttingScoreEnum.PRINCIPAL.getScore();
+      }
+    }
+    return null;
+  }
 
   @Override
   public Long getId() {
@@ -257,6 +304,20 @@ public class DeliverableInfo implements java.io.Serializable, IAuditLog {
   }
 
 
+  public String getYouthScoreName() {
+    if (this.crossCuttingScoreYouth != null) {
+      if (this.crossCuttingScoreYouth == Long.valueOf(CrossCuttingScoreEnum.SIGNIFICANT.getScoreId())) {
+        return CrossCuttingScoreEnum.SIGNIFICANT.getScore();
+      }
+
+      if (this.crossCuttingScoreYouth == Long.valueOf(CrossCuttingScoreEnum.PRINCIPAL.getScoreId())) {
+        return CrossCuttingScoreEnum.PRINCIPAL.getScore();
+      }
+    }
+    return null;
+  }
+
+
   @Override
   public boolean isActive() {
     return true;
@@ -292,7 +353,7 @@ public class DeliverableInfo implements java.io.Serializable, IAuditLog {
       if (this.getDeliverableType().getFair()) {
         return true;
       }
-      if (this.getDeliverableType().getDeliverableType().getFair()) {
+      if (this.getDeliverableType().getDeliverableCategory().getFair()) {
         return true;
       }
     } catch (Exception e) {
@@ -324,6 +385,21 @@ public class DeliverableInfo implements java.io.Serializable, IAuditLog {
 
   public void setCrossCuttingNa(Boolean crossCuttingNa) {
     this.crossCuttingNa = crossCuttingNa;
+  }
+
+
+  public void setCrossCuttingScoreCapacity(Long crossCuttingScoreCapacity) {
+    this.crossCuttingScoreCapacity = crossCuttingScoreCapacity;
+  }
+
+
+  public void setCrossCuttingScoreGender(Long crossCuttingScoreGender) {
+    this.crossCuttingScoreGender = crossCuttingScoreGender;
+  }
+
+
+  public void setCrossCuttingScoreYouth(Long crossCuttingScoreYouth) {
+    this.crossCuttingScoreYouth = crossCuttingScoreYouth;
   }
 
 
@@ -396,7 +472,6 @@ public class DeliverableInfo implements java.io.Serializable, IAuditLog {
     this.status = status;
   }
 
-
   public void setStatusDescription(String statusDescription) {
     this.statusDescription = statusDescription;
   }
@@ -415,7 +490,6 @@ public class DeliverableInfo implements java.io.Serializable, IAuditLog {
   public void setYear(int year) {
     this.year = year;
   }
-
 
   public void updateDeliverableInfo(DeliverableInfo update) {
     this.setAdoptedLicense(update.getAdoptedLicense());
@@ -439,6 +513,9 @@ public class DeliverableInfo implements java.io.Serializable, IAuditLog {
     this.setCrossCuttingGender(update.getCrossCuttingGender());
     this.setYear(update.getYear());
     this.setStatusDescription(update.getStatusDescription());
+    this.setCrossCuttingScoreGender(update.getCrossCuttingScoreGender());
+    this.setCrossCuttingScoreYouth(update.getCrossCuttingScoreYouth());
+    this.setCrossCuttingScoreCapacity(update.getCrossCuttingScoreCapacity());
 
 
   }

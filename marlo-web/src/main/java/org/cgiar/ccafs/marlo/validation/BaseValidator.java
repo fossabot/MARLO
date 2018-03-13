@@ -4,6 +4,7 @@ package org.cgiar.ccafs.marlo.validation;
 import org.cgiar.ccafs.marlo.action.BaseAction;
 import org.cgiar.ccafs.marlo.data.manager.ICenterSectionStatusManager;
 import org.cgiar.ccafs.marlo.data.manager.SectionStatusManager;
+import org.cgiar.ccafs.marlo.data.model.CapacityDevelopment;
 import org.cgiar.ccafs.marlo.data.model.CaseStudy;
 import org.cgiar.ccafs.marlo.data.model.CenterDeliverable;
 import org.cgiar.ccafs.marlo.data.model.CenterOutcome;
@@ -16,6 +17,7 @@ import org.cgiar.ccafs.marlo.data.model.Deliverable;
 import org.cgiar.ccafs.marlo.data.model.FundingSource;
 import org.cgiar.ccafs.marlo.data.model.IpLiaisonInstitution;
 import org.cgiar.ccafs.marlo.data.model.IpProgram;
+import org.cgiar.ccafs.marlo.data.model.PowbSynthesis;
 import org.cgiar.ccafs.marlo.data.model.Project;
 import org.cgiar.ccafs.marlo.data.model.ProjectComponentLesson;
 import org.cgiar.ccafs.marlo.data.model.ProjectHighlight;
@@ -92,6 +94,71 @@ public class BaseValidator {
       return !string.trim().isEmpty();
     }
     return false;
+  }
+
+  /**
+   * ******************************************************************************************
+   * ************************* CENTER METHOD **************************************************
+   * *******************************************************************************************
+   * This method saves the missing fields into the database for a section at CapDev.
+   * 
+   * @param program is a CenterProgram.
+   * @param sectionName is the name of the section (researchImpact, researchTopics, etc.).
+   */
+  protected void saveMissingFields(CapacityDevelopment capacityDevelopment, String sectionName, BaseAction action) {
+
+    int year = Calendar.getInstance().get(Calendar.YEAR);
+
+    CenterSectionStatus status =
+      centerSectionStatusManager.getSectionStatusByCapdev(capacityDevelopment.getId(), sectionName, year);
+    if (status == null) {
+
+      status = new CenterSectionStatus();
+      status.setSectionName(sectionName);
+      status.setCapacityDevelopment(capacityDevelopment);
+      status.setYear(year);
+    }
+    if (action.getMissingFields().length() > 0) {
+      status.setMissingFields(action.getMissingFields().toString());
+    } else {
+      status.setMissingFields("");
+    }
+
+    centerSectionStatusManager.saveSectionStatus(status);
+  }
+
+  /**
+   * * ******************************************************************************************
+   * ************************* CENTER METHOD **************************************************
+   * *******************************************************************************************
+   * This method saves the missing fields into the database for a section at CapDev - Supporting Documents.
+   * 
+   * @param deliverable is a CenterDeliverable.
+   * @param capacityDevelopment is a CapacityDevelopment.
+   * @param sectionName is the name of the section (researchImpact, researchTopics, etc.).
+   */
+  protected void saveMissingFields(CenterDeliverable deliverable, CapacityDevelopment capacityDevelopment,
+    String sectionName, BaseAction action) {
+    int year = Calendar.getInstance().get(Calendar.YEAR);
+
+    CenterSectionStatus status = centerSectionStatusManager.getSectionStatusBySupDocs(deliverable.getId(),
+      capacityDevelopment.getId(), sectionName, year);
+    if (status == null) {
+
+      status = new CenterSectionStatus();
+      status.setSectionName(sectionName);
+      status.setDeliverable(deliverable);
+      status.setCapacityDevelopment(capacityDevelopment);
+      status.setYear(year);
+    }
+    if (action.getMissingFields().length() > 0) {
+      status.setMissingFields(action.getMissingFields().toString());
+    } else {
+      status.setMissingFields("");
+    }
+
+
+    centerSectionStatusManager.saveSectionStatus(status);
   }
 
   /**
@@ -378,6 +445,42 @@ public class BaseValidator {
   }
 
   /**
+   * This method saves the missing fields into the database for a section at powb synthesis level.
+   * 
+   * @param powbSynthesis is a powbSynthesis.
+   * @param cycle could be 'Planning' or 'Reporting'
+   * @param sectionName is the name of the section inside deliverables.
+   */
+  protected void saveMissingFields(PowbSynthesis powbSynthesis, String cycle, int year, String sectionName,
+    BaseAction action) {
+    // Reporting missing fields into the database.
+
+    SectionStatus status =
+      sectionStatusManager.getSectionStatusByPowbSynthesis(powbSynthesis.getId(), cycle, year, sectionName);
+    if (status == null) {
+
+      status = new SectionStatus();
+      status.setCycle(cycle);
+      status.setYear(year);
+      status.setPowbSynthesis(powbSynthesis);
+      status.setSectionName(sectionName);
+
+
+    }
+
+    // Validate if the form have missing fileds in project sections issue #1209
+    String sMissingField = action.getMissingFields().toString();
+    if (sMissingField.length() > 0) {
+      status.setMissingFields(sMissingField);
+    } else {
+      status.setMissingFields("");
+    }
+
+    sectionStatusManager.saveSectionStatus(status);
+
+  }
+
+  /**
    * This method saves the missing fields into the database for a section at project Case Study level.
    * 
    * @param caseStudy is a Case Study.
@@ -404,6 +507,7 @@ public class BaseValidator {
     // Not sure if this is still required to set the missingFields to length zero???
     action.getMissingFields().setLength(0);
   }
+
 
   /**
    * This method saves the missing fields into the database for a section at project Case Study level.
@@ -432,6 +536,7 @@ public class BaseValidator {
     // Not sure if this is still required to set the missingFields to length zero???
     action.getMissingFields().setLength(0);
   }
+
 
   /**
    * This method saves the missing fields into the database for a section at project level.
@@ -557,7 +662,7 @@ public class BaseValidator {
   protected void validateLessonsLearn(BaseAction action, IpProgram program) {
     if (program.getProjectComponentLesson() != null) {
       ProjectComponentLesson lesson = program.getProjectComponentLesson();
-      if (!(this.isValidString(lesson.getLessons()) && this.wordCount(lesson.getLessons()) <= 100)) {
+      if (!(this.isValidString(lesson.getLessons()) && (this.wordCount(lesson.getLessons()) <= 100))) {
         // Let them save.
         action.addMessage("Lessons");
 
@@ -571,7 +676,7 @@ public class BaseValidator {
   protected void validateLessonsLearn(BaseAction action, Project project) {
     if (project.getProjectComponentLesson() != null) {
       ProjectComponentLesson lesson = project.getProjectComponentLesson();
-      if (!(this.isValidString(lesson.getLessons()) && this.wordCount(lesson.getLessons()) <= 100)) {
+      if (!(this.isValidString(lesson.getLessons()) && (this.wordCount(lesson.getLessons()) <= 100))) {
         // Let them save.
         action.addMessage("Lessons");
 
@@ -585,7 +690,7 @@ public class BaseValidator {
   protected void validateLessonsLearnOutcome(BaseAction action, ProjectOutcome project) {
     if (project.getProjectComponentLesson() != null) {
       ProjectComponentLesson lesson = project.getProjectComponentLesson();
-      if (!(this.isValidString(lesson.getLessons()) && this.wordCount(lesson.getLessons()) <= 100)) {
+      if (!(this.isValidString(lesson.getLessons()) && (this.wordCount(lesson.getLessons()) <= 100))) {
         // Let them save.
         action.addMessage("Lessons");
 

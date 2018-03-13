@@ -18,6 +18,7 @@
 
 [#assign breadCrumb = [
   {"label":"projectsList", "nameSpace":"/projects", "action":"${(crpSession)!}/projectsList"},
+  {"text":"P${project.id}", "nameSpace":"/projects", "action":"${crpSession}/description", "param": "projectID=${project.id?c}&edit=true&phaseID=${(actualPhase.id)!}"},
   {"label":"projectDescription", "nameSpace":"/projects", "action":""}
 ] /]
 
@@ -168,8 +169,8 @@
                     <p><label>[@s.text name="projectDescription.regions" /]:[@customForm.req required=editable && action.hasPermission("regions") /]</label></p>
                     [#if editable && action.hasPermission("regions")]
                       [@s.fielderror cssClass="fieldError" fieldName="project.regionsValue"/]
-                      [#assign noRegionalLabel]<i>[@s.text name="project.noRegional" /]</i>[/#assign]
-                      [@customForm.checkBoxFlat id="projectNoRegional" name="project.projectInfo.noRegional" label="${noRegionalLabel}" disabled=false editable=editable value="true" checked=((project.projectInfo.noRegional)!false) cssClass="checkboxInput" /]
+                      [#assign noRegionalLabel][@s.text name="project.noRegional" /][/#assign]
+                      [@customForm.checkBoxFlat id="projectNoRegional" name="project.projectInfo.noRegional" label="${noRegionalLabel}" disabled=false editable=editable value="true" checked=((project.projectInfo.noRegional)!false) cssClass="checkboxInput" cssClassLabel="font-italic" /]
                       [#if regionFlagships??]
                         [#list regionFlagships as element]
                           [@customForm.checkBoxFlat id="projectRegion-${element.id}" name="project.regionsValue" label="${element.composedName}" disabled=false editable=editable value="${element.id}" checked=((regionsIds?seq_contains(element.id))!false) cssClass="checkboxInput rpInput" /]
@@ -177,15 +178,15 @@
                       [/#if]
                        
                     [#else]
-                      [#if (project.projectInfo.isNoRegional())!false ]
+                      [#if (project.projectInfo.getNoRegional())!false ]
                         <input type="hidden" name="project.projectInfo.noRegional" value="true" />
-                        <p class="checked"> [@s.text name="project.projectInfo.noRegional" /]</p>
+                        <p class="checked"> [@s.text name="project.noRegional" /]</p>
                       [/#if]
                       <input type="hidden" name="project.regionsValue" value="${(project.regionsValue)!}"/>
                       [#if project.regions?has_content]
                         [#list project.regions as element]<p class="checked">${element.composedName}</p>[/#list]
                       [#else]
-                        <p>[@s.text name="form.values.fieldEmpty" /]</p>
+                        
                         [#--  --if !((project.bilateralProject)!false)]<span class="fieldError">[@s.text name="form.values.required" /]</span>[/#if--]
                       [/#if]
                     [/#if]

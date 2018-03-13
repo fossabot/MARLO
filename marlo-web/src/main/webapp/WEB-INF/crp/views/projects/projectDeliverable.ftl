@@ -17,6 +17,7 @@
 
 [#assign breadCrumb = [
   {"label":"projectsList", "nameSpace":"/projects", "action":"${(crpSession)!}/projectsList"},
+  {"text":"P${project.id}", "nameSpace":"/projects", "action":"${crpSession}/description", "param": "projectID=${project.id?c}&edit=true&phaseID=${(actualPhase.id)!}"},
   {"label":"deliverableList", "nameSpace":"/projects", "action":"${(crpSession)!}/deliverableList" ,"param":"projectID=${projectID}"},
   {"label":"deliverableInformation", "nameSpace":"/projects", "action":""}
 ]/]
@@ -166,6 +167,17 @@
     <div class="fileFormat">- -</div>
     <div class="fileSize">- -</div>
     <img class="removeInput" src="${baseUrl}/global/images/icon-remove.png" alt="Remove"/>
+  </li>
+</ul>
+
+[#-- Gender level list template --]
+<ul style="display:none">
+  <li id="genderLevel-template" class="genderLevel clearfix" style="display:none;">
+    <div class="removeGenderLevel removeIcon" title="Remove Gender Level"></div>
+    <input class="id" type="hidden" name="deliverable.genderLevels[-1].id" value="" />
+    <input class="fId" type="hidden" name="deliverable.genderLevels[-1].genderLevel" value="" />
+    <span class="name"></span>
+    <div class="clearfix"></div>
   </li>
 </ul>
 

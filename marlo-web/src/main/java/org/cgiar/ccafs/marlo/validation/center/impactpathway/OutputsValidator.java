@@ -16,11 +16,11 @@
 package org.cgiar.ccafs.marlo.validation.center.impactpathway;
 
 import org.cgiar.ccafs.marlo.action.BaseAction;
-import org.cgiar.ccafs.marlo.data.manager.ICenterManager;
-import org.cgiar.ccafs.marlo.data.model.Center;
+import org.cgiar.ccafs.marlo.data.manager.GlobalUnitManager;
 import org.cgiar.ccafs.marlo.data.model.CenterOutput;
 import org.cgiar.ccafs.marlo.data.model.CenterOutputsNextUser;
 import org.cgiar.ccafs.marlo.data.model.CenterProgram;
+import org.cgiar.ccafs.marlo.data.model.GlobalUnit;
 import org.cgiar.ccafs.marlo.data.model.ImpactPathwaySectionsEnum;
 import org.cgiar.ccafs.marlo.utils.InvalidFieldsMessages;
 import org.cgiar.ccafs.marlo.validation.BaseValidator;
@@ -31,7 +31,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import javax.inject.Inject;
 import javax.inject.Named;
 
 /**
@@ -40,15 +39,16 @@ import javax.inject.Named;
 @Named
 public class OutputsValidator extends BaseValidator {
 
-  private final ICenterManager centerService;
+  // GlobalUnit Manager
+  private GlobalUnitManager centerService;
 
-  @Inject
-  public OutputsValidator(ICenterManager centerService) {
+
+  public OutputsValidator(GlobalUnitManager centerService) {
     this.centerService = centerService;
   }
 
   private Path getAutoSaveFilePath(CenterOutput output, long centerID) {
-    Center center = centerService.getCrpById(centerID);
+    GlobalUnit center = centerService.getGlobalUnitById(centerID);
     String composedClassName = output.getClass().getSimpleName();
     String actionFile = ImpactPathwaySectionsEnum.OUTPUT.getStatus().replace("/", "_");
     String autoSaveFile =
@@ -131,6 +131,13 @@ public class OutputsValidator extends BaseValidator {
       baseAction.getInvalidFields().put("input-output.title", InvalidFieldsMessages.EMPTYFIELD);
     }
 
+    if (output.getOutcomes() != null) {
+      if (output.getOutcomes().size() == 0) {
+        baseAction.addMessage(baseAction.getText("output.action.outcomes"));
+        baseAction.getInvalidFields().put("list-output.outcomeList",
+          baseAction.getText(InvalidFieldsMessages.EMPTYLIST, new String[] {"Outcomes"}));
+      }
+    }
 
     if (output.getNextUsers() != null) {
       if (output.getNextUsers().size() == 0) {

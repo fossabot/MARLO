@@ -18,19 +18,18 @@ package org.cgiar.ccafs.marlo.interceptor.funding;
 
 import org.cgiar.ccafs.marlo.action.BaseAction;
 import org.cgiar.ccafs.marlo.config.APConstants;
-import org.cgiar.ccafs.marlo.data.manager.CrpManager;
 import org.cgiar.ccafs.marlo.data.manager.FundingSourceManager;
+import org.cgiar.ccafs.marlo.data.manager.GlobalUnitManager;
 import org.cgiar.ccafs.marlo.data.manager.PhaseManager;
-import org.cgiar.ccafs.marlo.data.model.Crp;
 import org.cgiar.ccafs.marlo.data.model.FundingSource;
+import org.cgiar.ccafs.marlo.data.model.FundingStatusEnum;
+import org.cgiar.ccafs.marlo.data.model.GlobalUnit;
 import org.cgiar.ccafs.marlo.data.model.Phase;
-import org.cgiar.ccafs.marlo.data.model.ProjectStatusEnum;
 import org.cgiar.ccafs.marlo.data.model.User;
 import org.cgiar.ccafs.marlo.security.Permission;
 
 import java.io.Serializable;
 import java.util.Calendar;
-import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -45,15 +44,15 @@ public class FundingSourceInterceptor extends AbstractInterceptor implements Ser
 
   private Map<String, Parameter> parameters;
   private Map<String, Object> session;
-  private Crp crp;
+  private GlobalUnit crp;
   private long fundingSourceID = 0;
   private Phase phase;
   private PhaseManager phaseManager;
-  private final CrpManager crpManager;
+  private final GlobalUnitManager crpManager;
   private final FundingSourceManager fundingSourceManager;
 
   @Inject
-  public FundingSourceInterceptor(CrpManager crpManager, FundingSourceManager fundingSourceManager,
+  public FundingSourceInterceptor(GlobalUnitManager crpManager, FundingSourceManager fundingSourceManager,
     PhaseManager phaseManager) {
     this.crpManager = crpManager;
     this.fundingSourceManager = fundingSourceManager;
@@ -65,8 +64,8 @@ public class FundingSourceInterceptor extends AbstractInterceptor implements Ser
 
     parameters = invocation.getInvocationContext().getParameters();
     session = invocation.getInvocationContext().getSession();
-    crp = (Crp) session.get(APConstants.SESSION_CRP);
-    crp = crpManager.getCrpById(crp.getId());
+    crp = (GlobalUnit) session.get(APConstants.SESSION_CRP);
+    crp = crpManager.getGlobalUnitById(crp.getId());
     try {
       this.setPermissionParameters(invocation);
       return invocation.invoke();
@@ -102,8 +101,8 @@ public class FundingSourceInterceptor extends AbstractInterceptor implements Ser
       if (baseAction.canAccessSuperAdmin() || baseAction.canEditCrpAdmin()) {
         canEdit = true;
       } else {
-        List<FundingSource> fundingSources = fundingSourceManager.getFundingSource(user.getId(), crp.getAcronym());
-        if (fundingSources.contains(fundingSource) && (baseAction
+        // List<FundingSource> fundingSources = fundingSourceManager.getFundingSource(user.getId(), crp.getAcronym());
+        if ((baseAction
           .hasPermission(baseAction.generatePermission(Permission.PROJECT_FUNDING_SOURCE_BASE_PERMISSION, params))
           || baseAction
             .hasPermission(baseAction.generatePermission(Permission.PROJECT_FUNDING_W1_BASE_PERMISSION, params)))) {
@@ -120,25 +119,23 @@ public class FundingSourceInterceptor extends AbstractInterceptor implements Ser
 
 
       Calendar cal = Calendar.getInstance();
-      if (fundingSource.getFundingSourceInfo(baseAction.getActualPhase()).getEndDate() != null
-        && fundingSource.getFundingSourceInfo(baseAction.getActualPhase()).getStatus() != null) {
-
-
-        cal.setTime(fundingSource.getFundingSourceInfo(baseAction.getActualPhase()).getEndDate());
-        if (fundingSource.getFundingSourceInfo(baseAction.getActualPhase()).getStatus().longValue() == Long
-          .parseLong(ProjectStatusEnum.Ongoing.getStatusId())
-          && baseAction.getActualPhase().getYear() > cal.get(Calendar.YEAR)) {
-          canEdit = false;
-
-          baseAction.setEditStatus(true);
-
-        }
-      }
+      /*
+       * if (fundingSource.getFundingSourceInfo(baseAction.getActualPhase()).getEndDate() != null
+       * && fundingSource.getFundingSourceInfo(baseAction.getActualPhase()).getStatus() != null) {
+       * cal.setTime(fundingSource.getFundingSourceInfo(baseAction.getActualPhase()).getEndDate());
+       * if (fundingSource.getFundingSourceInfo(baseAction.getActualPhase()).getStatus().longValue() == Long
+       * .parseLong(FundingStatusEnum.Ongoing.getStatusId())
+       * && baseAction.getActualPhase().getYear() > cal.get(Calendar.YEAR)) {
+       * canEdit = false;
+       * baseAction.setEditStatus(true);
+       * }
+       * }
+       */
       if (fundingSource.getFundingSourceInfo(baseAction.getActualPhase()).getStatus().longValue() == Long
-        .parseLong(ProjectStatusEnum.Cancelled.getStatusId())
+        .parseLong(FundingStatusEnum.Cancelled.getStatusId())
 
         || fundingSource.getFundingSourceInfo(baseAction.getActualPhase()).getStatus().longValue() == Long
-          .parseLong(ProjectStatusEnum.Complete.getStatusId())) {
+          .parseLong(FundingStatusEnum.Complete.getStatusId())) {
         canEdit = false;
         baseAction.setEditStatus(true);
       }
@@ -186,6 +183,9 @@ public class FundingSourceInterceptor extends AbstractInterceptor implements Ser
         editParameter = false;
         // If the user is not asking for edition privileges we don't need to validate them.
 
+      }
+      if (!editParameter) {
+        baseAction.setEditStatus(false);
       }
       baseAction.setEditableParameter(editParameter && canEdit);
       baseAction.setCanEdit(canEdit);

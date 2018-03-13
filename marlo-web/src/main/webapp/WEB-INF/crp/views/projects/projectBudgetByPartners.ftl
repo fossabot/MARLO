@@ -3,7 +3,7 @@
 [#assign currentSectionString = "project-${actionName?replace('/','-')}-${projectID}-phase-${(actualPhase.id)!}" /]
 [#assign pageLibs = ["select2", "dropzone", "blueimp-file-upload"] /]
 [#assign customJS = [
-  "${baseUrlMedia}/js/projects/projectBudgetByPartners.js", 
+  "${baseUrlMedia}/js/projects/projectBudgetByPartners.js?20180223", 
   "${baseUrl}/global/js/autoSave.js",
   "${baseUrl}/global/js/fieldsValidation.js"
   ] 
@@ -14,6 +14,7 @@
 
 [#assign breadCrumb = [
   {"label":"projectsList", "nameSpace":"/projects", "action":"${(crpSession)!}/projectsList"},
+  {"text":"P${project.id}", "nameSpace":"/projects", "action":"${crpSession}/description", "param": "projectID=${project.id?c}&edit=true&phaseID=${(actualPhase.id)!}"},
   {"label":"projectBudgetByPartners", "nameSpace":"/projects", "action":""}
 ] /]
 
@@ -100,12 +101,13 @@
                     
                     [#if projectPPAPartners?has_content]
                       [#list projectPPAPartners as projectPartner]
+                       [#if action.existOnYear(projectPartner.id,year)]
                         [@projectPartnerMacro element=projectPartner name="project.partners[${projectPartner_index}]" index=projectPartner_index selectedYear=year/]
+                         [/#if]
                       [/#list]
                     [#else]
-                      <div class="simpleBox emptyMessage text-center">Before entering budget information, you need to add project partner in <a href="[@s.url action="${crpSession}/partners"][@s.param name="projectID" value=projectID /][#include "/WEB-INF/global/pages/urlGlobalParams.ftl" /][/@s.url]">partners section</a></div>
+                      <div class="simpleBox emptyMessage text-center">[@s.text name="projectBudgetByPartners.beforeEnteringBudgetInformation" /] <a href="[@s.url action="${crpSession}/partners"][@s.param name="projectID" value=projectID /][#include "/WEB-INF/global/pages/urlGlobalParams.ftl" /][/@s.url]">partners section</a></div>
                     [/#if]
-
                 
                 </div>
               [/#list]  
@@ -258,24 +260,24 @@
     [#local customName = "${name}[${index}]" /]
     [#-- Remove --]
  
-    [#if (editable && isYearEditable(selectedYear) && action.canEditFunding(((element.fundingSource.budgetType.id)!-1),(element.institution.id)!-1) ) || isTemplate]
-     [#if action.canBeDeleted((element.id)!-1,(element.class.name)!"")]
-       <div class="removeIcon removeW3bilateralFund" title="Remove"></div>
-     [/#if]  
-          [#if !isTemplate]
-      <div class="pull-right">
-        [@popUps.relationsMacro element=element /]
-      </div>
-    [/#if]
+    [#if (editable && isYearEditable(selectedYear) && action.canEditFunding(((element.fundingSource.fundingSourceInfo.budgetType.id)!-1),(element.institution.id)!-1) ) || isTemplate]
+      [#if action.canBeDeleted((element.id)!-1,(element.class.name)!"")]
+        <div class="removeIcon removeW3bilateralFund" title="Remove"></div>
+      [#else]
+        <div class="removeIcon disable text-right" title="Project Budget cannot be deleted"></div>
+      [/#if]  
+      [#if !isTemplate]
+      <div class="pull-right">[@popUps.relationsMacro element=element /] </div>
+      [/#if]
     [/#if]
     
     [#-- Project Title --]
     <p class="checked">
       [#assign fsRemaining = ((element.fundingSource.getRemaining(selectedYear,action.getActualPhase()))!0)?number /]
       <small>Funding source #<span class="titleId">${(element.fundingSource.id)!}</span></small> -
-     [#if isYearEditable(selectedYear)]
-      <small class="grayLabel [#if fsRemaining lt 0]fieldError[/#if]"> (Remaining budget US$ <span class="projectAmount">${fsRemaining?string(",##0.00")}</span>) </small>
-    [/#if]
+      [#if (isYearEditable(selectedYear)) || isTemplate]
+        <small class="grayLabel [#if fsRemaining lt 0]fieldError[/#if]"> (Remaining budget US$ <span class="projectAmount">${fsRemaining?string(",##0.00")}</span>) </small>
+      [/#if]
     </p> 
     
     [#if !isTemplate]
@@ -310,8 +312,8 @@
         <div class="row col-md-9">
         [#-- TODO: Allow to add funding sources when there is no aggregate (problem with permissions)  --]
         [#-- Added action.canSearchFunding to allow to modify gender depending on institution  --]
-        [#if (editable && isYearEditable(selectedYear) && (action.canEditFunding(((element.fundingSource.budgetType.id)!-1),(element.institution.id)!-1) ))|| isTemplate]
-          [@customForm.input name="${customName}.amount"    i18nkey="budget.amount" showTitle=false className="currencyInput fundInput type-${(element.fundingSource.budgetType.id)!'none'}" required=true /]
+        [#if (editable && isYearEditable(selectedYear) && (action.canEditFunding(((element.fundingSource.fundingSourceInfo.budgetType.id)!-1),(element.institution.id)!-1) ))|| isTemplate]
+          [@customForm.input name="${customName}.amount"    i18nkey="budget.amount" showTitle=false className="currencyInput fundInput type-${(element.fundingSource.fundingSourceInfo.budgetType.id)!'none'}" required=true /]
         [#else]
           
            <div class="${customForm.changedField(customName+'.amount')}">
@@ -327,8 +329,8 @@
           <div class="row col-md-7">
           [#-- TODO: Allow to add funding sources when there is no aggregate (problem with permissions)  --]
           [#-- Added action.canSearchFunding to allow to modify gender depending on institution  --]
-          [#if (editable && isYearEditable(selectedYear) && action.canSearchFunding(element.institution.id)) || isTemplate]
-            [@customForm.input name="${customName}.genderPercentage" i18nkey="budget.genderPercentage" showTitle=false className="percentageInput type-${(element.fundingSource.budgetType.id)!'none'}" required=true   /]
+          [#if (editable && isYearEditable(selectedYear) && action.canSearchFunding(element.institution.id) && action.canEditGender()) || isTemplate]
+            [@customForm.input name="${customName}.genderPercentage" i18nkey="budget.genderPercentage" showTitle=false className="percentageInput type-${(element.fundingSource.fundingSourceInfo.budgetType.id)!'none'}" required=true   /]
           [#else]  
             <div class="${customForm.changedField(customName+'.genderPercentage')}">
             <div class="input"><p><span>${((element.genderPercentage)!0)}%</span></p></div>

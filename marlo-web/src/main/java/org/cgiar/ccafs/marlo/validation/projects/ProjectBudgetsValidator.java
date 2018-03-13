@@ -16,10 +16,10 @@ package org.cgiar.ccafs.marlo.validation.projects;
 
 
 import org.cgiar.ccafs.marlo.action.BaseAction;
-import org.cgiar.ccafs.marlo.data.manager.CrpManager;
 import org.cgiar.ccafs.marlo.data.manager.FundingSourceManager;
-import org.cgiar.ccafs.marlo.data.model.Crp;
+import org.cgiar.ccafs.marlo.data.manager.GlobalUnitManager;
 import org.cgiar.ccafs.marlo.data.model.FundingSource;
+import org.cgiar.ccafs.marlo.data.model.GlobalUnit;
 import org.cgiar.ccafs.marlo.data.model.Project;
 import org.cgiar.ccafs.marlo.data.model.ProjectBudget;
 import org.cgiar.ccafs.marlo.data.model.ProjectSectionStatusEnum;
@@ -43,22 +43,22 @@ public class ProjectBudgetsValidator extends BaseValidator {
   // This is not thread safe
   private boolean hasErros;
 
-  private final CrpManager crpManager;
+  private final GlobalUnitManager crpManager;
   private final FundingSourceManager fundingSourceManager;
 
   @Inject
-  public ProjectBudgetsValidator(CrpManager crpManager, FundingSourceManager fundingSourceManager) {
+  public ProjectBudgetsValidator(GlobalUnitManager crpManager, FundingSourceManager fundingSourceManager) {
     super();
     this.crpManager = crpManager;
     this.fundingSourceManager = fundingSourceManager;
   }
 
-  private Path getAutoSaveFilePath(Project project, long crpID) {
-    Crp crp = crpManager.getCrpById(crpID);
+  private Path getAutoSaveFilePath(Project project, long crpID, BaseAction action) {
+    GlobalUnit crp = crpManager.getGlobalUnitById(crpID);
     String composedClassName = project.getClass().getSimpleName();
     String actionFile = ProjectSectionStatusEnum.BUDGET.getStatus().replace("/", "_");
     String autoSaveFile =
-      project.getId() + "_" + composedClassName + "_" + crp.getAcronym() + "_" + actionFile + ".json";
+      project.getId() + "_" + composedClassName + "_" + action.getActualPhase().getDescription() + "_" + action.getActualPhase().getYear() +"_"+crp.getAcronym() +"_"+ actionFile + ".json";
 
     return Paths.get(config.getAutoSaveFolder() + autoSaveFile);
   }
@@ -86,7 +86,7 @@ public class ProjectBudgetsValidator extends BaseValidator {
     hasErros = false;
     if (project != null) {
       if (!saving) {
-        Path path = this.getAutoSaveFilePath(project, action.getCrpID());
+        Path path = this.getAutoSaveFilePath(project, action.getCrpID(),action);
 
         if (path.toFile().exists()) {
           action.addMissingField("draft");

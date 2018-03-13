@@ -18,29 +18,30 @@ package org.cgiar.ccafs.marlo.action.funding;
 
 import org.cgiar.ccafs.marlo.action.BaseAction;
 import org.cgiar.ccafs.marlo.config.APConstants;
-import org.cgiar.ccafs.marlo.data.manager.CrpManager;
 import org.cgiar.ccafs.marlo.data.manager.FundingSourceInfoManager;
 import org.cgiar.ccafs.marlo.data.manager.FundingSourceInstitutionManager;
 import org.cgiar.ccafs.marlo.data.manager.FundingSourceManager;
+import org.cgiar.ccafs.marlo.data.manager.GlobalUnitManager;
 import org.cgiar.ccafs.marlo.data.manager.InstitutionManager;
 import org.cgiar.ccafs.marlo.data.manager.LiaisonUserManager;
 import org.cgiar.ccafs.marlo.data.manager.ProjectManager;
 import org.cgiar.ccafs.marlo.data.manager.RoleManager;
-import org.cgiar.ccafs.marlo.data.model.Crp;
 import org.cgiar.ccafs.marlo.data.model.FundingSource;
 import org.cgiar.ccafs.marlo.data.model.FundingSourceBudget;
 import org.cgiar.ccafs.marlo.data.model.FundingSourceInfo;
 import org.cgiar.ccafs.marlo.data.model.FundingSourceInstitution;
+import org.cgiar.ccafs.marlo.data.model.FundingStatusEnum;
+import org.cgiar.ccafs.marlo.data.model.GlobalUnit;
 import org.cgiar.ccafs.marlo.data.model.Institution;
 import org.cgiar.ccafs.marlo.data.model.LiaisonInstitution;
 import org.cgiar.ccafs.marlo.data.model.LiaisonUser;
 import org.cgiar.ccafs.marlo.data.model.Phase;
-import org.cgiar.ccafs.marlo.data.model.ProjectStatusEnum;
 import org.cgiar.ccafs.marlo.data.model.Role;
 import org.cgiar.ccafs.marlo.security.Permission;
 import org.cgiar.ccafs.marlo.utils.APConfig;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -56,37 +57,38 @@ public class FundingSourceListAction extends BaseAction {
 
   private static final long serialVersionUID = -8858893084495492581L;
 
+
   private final Logger logger = LoggerFactory.getLogger(FundingSourceListAction.class);
 
-  private Crp loggedCrp;
+  private GlobalUnit loggedCrp;
 
   private List<FundingSource> myProjects;
-
 
   private List<FundingSource> allProjects;
 
   private FundingSourceManager fundingSourceManager;
+
+
   private FundingSourceInfoManager fundingSourceInfoManager;
 
   private FundingSourceInstitutionManager fundingSourceInstitutionManager;
-  private CrpManager crpManager;
+  private GlobalUnitManager crpManager;
+
   private RoleManager roleManager;
   private LiaisonUserManager liaisonUserManager;
   private InstitutionManager institutionManager;
-
   private List<FundingSource> closedProjects;
-
-
   private long fundingSourceID;
-
 
   private long fundingSourceInfoID;
 
+
   private String justification;
+
 
   @Inject
   public FundingSourceListAction(APConfig config, RoleManager roleManager, FundingSourceManager fundingSourceManager,
-    CrpManager crpManager, ProjectManager projectManager, LiaisonUserManager liaisonUserManager,
+    GlobalUnitManager crpManager, ProjectManager projectManager, LiaisonUserManager liaisonUserManager,
     InstitutionManager institutionManager, FundingSourceInstitutionManager fundingSourceInstitutionManager,
     FundingSourceInfoManager fundingSourceInfoManager) {
     super(config);
@@ -99,7 +101,6 @@ public class FundingSourceListAction extends BaseAction {
     this.fundingSourceInfoManager = fundingSourceInfoManager;
   }
 
-
   @Override
   public String add() {
     FundingSource fundingSource = new FundingSource();
@@ -110,7 +111,7 @@ public class FundingSourceListAction extends BaseAction {
     fundingSource.setActive(true);
     fundingSource.setActiveSince(new Date());
     fundingSource.setCrp(loggedCrp);
-
+    fundingSource.setCreateDate(new Date());
     // project.setCrp(loggedCrp);
     fundingSource = fundingSourceManager.saveFundingSource(fundingSource);
 
@@ -125,7 +126,7 @@ public class FundingSourceListAction extends BaseAction {
       fundingSourceInfo.setModifiedBy(this.getCurrentUser());
       fundingSourceInfo.setModificationJustification("New expected project bilateral cofunded created");
       fundingSourceInfo.setPhase(phase);
-      fundingSourceInfo.setStatus(Integer.parseInt(ProjectStatusEnum.Ongoing.getStatusId()));
+      fundingSourceInfo.setStatus(Integer.parseInt(FundingStatusEnum.Ongoing.getStatusId()));
       fundingSourceInfo.setFundingSource(fundingSourceManager.getFundingSourceById(fundingSourceID));
       fundingSourceInfoID = fundingSourceInfoManager.saveFundingSourceInfo(fundingSourceInfo).getId();
 
@@ -172,7 +173,6 @@ public class FundingSourceListAction extends BaseAction {
     return INPUT;
   }
 
-
   public boolean canAddFunding() {
     boolean permission = this.hasPermissionNoBase(
       this.generatePermission(Permission.PROJECT_FUNDING_W1_BASE_PERMISSION, loggedCrp.getAcronym()))
@@ -185,6 +185,7 @@ public class FundingSourceListAction extends BaseAction {
 
     return permission;
   }
+
 
   @Override
   public String delete() {
@@ -243,7 +244,7 @@ public class FundingSourceListAction extends BaseAction {
     return justification;
   }
 
-  public Crp getLoggedCrp() {
+  public GlobalUnit getLoggedCrp() {
     return loggedCrp;
   }
 
@@ -254,8 +255,8 @@ public class FundingSourceListAction extends BaseAction {
   @Override
   public void prepare() throws Exception {
 
-    loggedCrp = (Crp) this.getSession().get(APConstants.SESSION_CRP);
-    loggedCrp = crpManager.getCrpById(loggedCrp.getId());
+    loggedCrp = (GlobalUnit) this.getSession().get(APConstants.SESSION_CRP);
+    loggedCrp = crpManager.getGlobalUnitById(loggedCrp.getId());
 
     if (fundingSourceManager.findAll() != null) {
 
@@ -273,10 +274,17 @@ public class FundingSourceListAction extends BaseAction {
             && (fs.getFundingSourceInfo(this.getActualPhase()).getStatus() == null
               || (fs.getFundingSourceInfo(this.getActualPhase()).getStatus() != null
                 && (fs.getFundingSourceInfo(this.getActualPhase()).getStatus() == Integer
-                  .parseInt(ProjectStatusEnum.Ongoing.getStatusId())
+                  .parseInt(FundingStatusEnum.Ongoing.getStatusId()) || fs.getFundingSourceInfo(this.getActualPhase())
+                    .getStatus() == Integer.parseInt(FundingStatusEnum.Extended.getStatusId())
+
+
                   || fs.getFundingSourceInfo(this.getActualPhase()).getStatus() == Integer
-                    .parseInt(ProjectStatusEnum.Extended.getStatusId())))))
-          .collect(Collectors.toList());
+                    .parseInt(FundingStatusEnum.Pipeline.getStatusId())
+                  || fs.getFundingSourceInfo(this.getActualPhase()).getStatus() == Integer
+                    .parseInt(FundingStatusEnum.Informally.getStatusId())
+
+
+                )))).collect(Collectors.toList());
 
 
         myProjects.addAll(fundingSourceManager.findAll().stream()
@@ -286,10 +294,16 @@ public class FundingSourceListAction extends BaseAction {
             && (fs.getFundingSourceInfo(this.getActualPhase()).getStatus() == null
               || (fs.getFundingSourceInfo(this.getActualPhase()).getStatus() != null
                 && (fs.getFundingSourceInfo(this.getActualPhase()).getStatus() == Integer
-                  .parseInt(ProjectStatusEnum.Ongoing.getStatusId())
+                  .parseInt(FundingStatusEnum.Ongoing.getStatusId())
                   || fs.getFundingSourceInfo(this.getActualPhase()).getStatus() == Integer
-                    .parseInt(ProjectStatusEnum.Extended.getStatusId())))))
-          .collect(Collectors.toList()));
+                    .parseInt(FundingStatusEnum.Extended.getStatusId())
+                  || fs.getFundingSourceInfo(this.getActualPhase()).getStatus() == Integer
+                    .parseInt(FundingStatusEnum.Pipeline.getStatusId())
+                  || fs.getFundingSourceInfo(this.getActualPhase()).getStatus() == Integer
+                    .parseInt(FundingStatusEnum.Informally.getStatusId())
+
+
+                )))).collect(Collectors.toList()));
       } else {
         /*
          * allProjects = loggedCrp.getFundingSources().stream().filter(p -> p.isActive()).collect(Collectors.toList());
@@ -304,10 +318,16 @@ public class FundingSourceListAction extends BaseAction {
             && (fs.getFundingSourceInfo(this.getActualPhase()).getStatus() == null
               || (fs.getFundingSourceInfo(this.getActualPhase()).getStatus() != null
                 && (fs.getFundingSourceInfo(this.getActualPhase()).getStatus() == Integer
-                  .parseInt(ProjectStatusEnum.Ongoing.getStatusId())
+                  .parseInt(FundingStatusEnum.Ongoing.getStatusId())
                   || fs.getFundingSourceInfo(this.getActualPhase()).getStatus() == Integer
-                    .parseInt(ProjectStatusEnum.Extended.getStatusId())))))
-          .collect(Collectors.toList());
+                    .parseInt(FundingStatusEnum.Extended.getStatusId())
+
+                  || fs.getFundingSourceInfo(this.getActualPhase()).getStatus() == Integer
+                    .parseInt(FundingStatusEnum.Pipeline.getStatusId())
+                  || fs.getFundingSourceInfo(this.getActualPhase()).getStatus() == Integer
+                    .parseInt(FundingStatusEnum.Informally.getStatusId())
+
+                )))).collect(Collectors.toList());
 
       }
     }
@@ -318,9 +338,9 @@ public class FundingSourceListAction extends BaseAction {
         && fs.getFundingSourceInfo(this.getActualPhase()).getPhase().equals(this.getActualPhase())
         && ((fs.getFundingSourceInfo(this.getActualPhase()).getStatus() != null
           && (fs.getFundingSourceInfo(this.getActualPhase()).getStatus() == Integer
-            .parseInt(ProjectStatusEnum.Complete.getStatusId())
+            .parseInt(FundingStatusEnum.Complete.getStatusId())
             || fs.getFundingSourceInfo(this.getActualPhase()).getStatus() == Integer
-              .parseInt(ProjectStatusEnum.Cancelled.getStatusId())))))
+              .parseInt(FundingStatusEnum.Cancelled.getStatusId())))))
       .collect(Collectors.toList());
 
     List<FundingSource> fundingSources = new ArrayList<>();
@@ -351,6 +371,12 @@ public class FundingSourceListAction extends BaseAction {
     }
 
 
+    closedProjects
+      .sort(Comparator.comparing(FundingSource::getEndDatePhase, Comparator.nullsFirst(Comparator.naturalOrder())));
+    myProjects
+      .sort(Comparator.comparing(FundingSource::getEndDatePhase, Comparator.nullsFirst(Comparator.naturalOrder())));
+
+
   }
 
   public void setAllProjects(List<FundingSource> allProjects) {
@@ -361,17 +387,17 @@ public class FundingSourceListAction extends BaseAction {
     this.closedProjects = closedProjects;
   }
 
-
   public void setFundingSourceID(long projectID) {
     this.fundingSourceID = projectID;
   }
+
 
   @Override
   public void setJustification(String justification) {
     this.justification = justification;
   }
 
-  public void setLoggedCrp(Crp loggedCrp) {
+  public void setLoggedCrp(GlobalUnit loggedCrp) {
     this.loggedCrp = loggedCrp;
   }
 

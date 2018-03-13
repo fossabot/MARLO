@@ -9,9 +9,9 @@
 			<column name="id" />
 			<generator class="identity" />
 		</id>
-		<many-to-one name="crp" class="org.cgiar.ccafs.marlo.data.model.Crp"
+		<many-to-one name="crp" class="org.cgiar.ccafs.marlo.data.model.GlobalUnit"
 			fetch="select">
-			<column name="crp_id" />
+			<column name="global_unit_id" />
 		</many-to-one>
 		<many-to-one name="locElementType"
 			class="org.cgiar.ccafs.marlo.data.model.LocElementType" fetch="select">
@@ -89,5 +89,13 @@
             </key>
             <one-to-many class="org.cgiar.ccafs.marlo.data.model.InstitutionLocation" />
         </set>
+         <set name="fundingSourceLocations" table="funding_source_locations"
+      inverse="true" lazy="false" fetch="select">
+      <key>
+        <column name="loc_element_id" not-null="true" />
+      </key>
+      <one-to-many
+        class="org.cgiar.ccafs.marlo.data.model.FundingSourceLocation" />
+    </set>
 	</class>
 </hibernate-mapping>

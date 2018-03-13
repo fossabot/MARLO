@@ -22,6 +22,13 @@ function init() {
 
   // Change deliverable type
   $(".typeSelect").on("change", changeDeliverableType);
+
+
+// disable existing capdev intervention field
+  $(".capdevDeliverableRadio").on("change", enable_disable_capdev);
+
+  //enable  existing capdev intervention field
+  enable_disable_capdev();
 }
 
 /** FUNCTIONS documents * */
@@ -99,8 +106,6 @@ function addOutput() {
           var $item = $("#output-template").clone(true).removeAttr("id");
           $item.find("span.index").text("O" + m.outputInfo.id);
           $item.find("div.oStatement").text(option.text());
-          $item.find("div.rTopic").text(m.outputInfo.topicName);
-          $item.find("div.outcome").text(m.outputInfo.outcomeName);
           $item.find(".outputId").val(m.outputInfo.id);
           $list.append($item);
           $item.show('slow');
@@ -238,4 +243,17 @@ function changeDeliverableType() {
       }
   });
 
+}
+
+
+//enable or disable existing capdev intervention field
+function enable_disable_capdev(){
+  
+  if($('#no-radio').is(':checked')) { 
+    $(".capdevDeliverableSelect").attr('disabled', 'disabled');
+  }
+  else{
+    $('.capdevDeliverableSelect').removeAttr('disabled');
+    
+  }
 }
