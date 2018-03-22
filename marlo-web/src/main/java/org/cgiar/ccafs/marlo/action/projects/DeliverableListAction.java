@@ -406,6 +406,9 @@ public class DeliverableListAction extends BaseAction {
             }
 
             deliverable.setFundingSources(fundingSources);
+            deliverable.setActivitiesList(deliverable.getDeliverableActivities().stream()
+              .filter(c -> c.isActive() && c.getPhase().equals(this.getActualPhase())).collect(Collectors.toList()));
+
           }
         }
       }
