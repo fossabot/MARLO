@@ -1152,6 +1152,24 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
 
   }
 
+  /**
+   * ***********************CENTER METHOD********************
+   * Check if the Monitoring Outcomes section is Active
+   * ************************************************************
+   * 
+   * @return true if the section is Active.
+   */
+  public boolean centerMonitoringOutcomeActive() {
+    try {
+      boolean sectionActive =
+        Boolean.parseBoolean(this.getSession().get(APConstants.CENTER_MONITORING_OUTCOME_ACTIVE).toString());
+      return sectionActive;
+    } catch (Exception e) {
+      return false;
+    }
+
+  }
+
 
   /**
    * ***********************CENTER METHOD********************
@@ -4039,6 +4057,7 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
         if (sectionStatus.getCycle().equals(this.getCurrentCycle())
           && sectionStatus.getYear().intValue() == this.getCurrentCycleYear()) {
 
+
           if (sectionStatus.getSectionName().equals(ProjectSectionStatusEnum.DELIVERABLES.getStatus())) {
             Deliverable a = deliverableManager.getDeliverableById(sectionStatus.getDeliverable().getId());
 
@@ -4051,8 +4070,22 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
 
 
           } else {
+
+
             if (sectionStatus.getMissingFields().length() > 0) {
-              return false;
+              if (sectionStatus.getSectionName().equals(ProjectSectionStatusEnum.ACTIVITIES.getStatus())) {
+                if (this.hasSpecificities(APConstants.CRP_ACTIVITES_MODULE)) {
+                  if (sectionStatus.getMissingFields().length() > 0) {
+                    return false;
+                  }
+
+                }
+              } else {
+                if (sectionStatus.getMissingFields().length() > 0) {
+                  return false;
+                }
+              }
+
             }
           }
 
@@ -4142,7 +4175,13 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
             return totalSections == 8;
           }
         } else if (budgetCoASection == 0 && budgetFlagshipSection == 1) {
-          return totalSections == 9;
+          if (this.hasSpecificities(APConstants.CRP_ACTIVITES_MODULE)) {
+            return totalSections == 9;
+
+          } else {
+            return totalSections == 8;
+
+          }
         } else if (budgetCoASection == 1 && budgetFlagshipSection == 1) {
           if (this.hasSpecificities(APConstants.CRP_ACTIVITES_MODULE)) {
             return totalSections == 10;
@@ -4179,9 +4218,9 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
               totalSections++;
             }
             if (this.hasSpecificities(APConstants.CRP_ACTIVITES_MODULE)) {
-              return totalSections == 7;
+              return totalSections == 8;
             } else {
-              return totalSections == 6;
+              return totalSections == 7;
             }
 
           }
