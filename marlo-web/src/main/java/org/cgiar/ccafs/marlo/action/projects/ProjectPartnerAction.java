@@ -1075,8 +1075,8 @@ public class ProjectPartnerAction extends BaseAction {
           List<ProjectPartnerContribution> contributors = new ArrayList<>();
 
 
-          List<ProjectPartnerContribution> partnerContributions =
-            pp.getProjectPartnerContributions().stream().filter(c -> c.isActive()).collect(Collectors.toList());
+          List<ProjectPartnerContribution> partnerContributions = pp.getProjectPartnerContributions().stream()
+            .filter(c -> c.isActive() && c.getProjectPartner().isActive()).collect(Collectors.toList());
           for (ProjectPartnerContribution projectPartnerContribution : partnerContributions) {
             contributors.add(projectPartnerContribution);
           }
@@ -1269,6 +1269,7 @@ public class ProjectPartnerAction extends BaseAction {
             projectPartnerDB.setActiveSince(projectPartnerDB.getActiveSince());
             projectPartnerDB.setPartnerPersons(projectPartnerClient.getPartnerPersons());
             projectPartnerDB.setSelectedLocations(projectPartnerClient.getSelectedLocations());
+            projectPartnerDB.setSubDepartment(projectPartnerClient.getSubDepartment());
             projectPartnerDB.setPartnerContributors(projectPartnerDB.getPartnerContributors());
             projectPartnerDB = projectPartnerManager.saveProjectPartner(projectPartnerDB);
           }
