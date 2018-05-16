@@ -10,26 +10,17 @@ import com.google.gson.annotations.Expose;
  */
 public class DeliverableProgram extends MarloBaseEntity implements java.io.Serializable, IAuditLog {
 
-
-  /**
-   * 
-   */
   private static final long serialVersionUID = 283477401039556496L;
 
-
   private Deliverable deliverable;
-
 
   @Expose
   private Phase phase;
   @Expose
   private CrpProgram crpProgram;
 
-
   public DeliverableProgram() {
   }
-
-
 
   @Override
   public boolean equals(Object obj) {
@@ -61,8 +52,6 @@ public class DeliverableProgram extends MarloBaseEntity implements java.io.Seria
   public Deliverable getDeliverable() {
     return deliverable;
   }
-
-
 
 
   @Override
@@ -120,8 +109,8 @@ public class DeliverableProgram extends MarloBaseEntity implements java.io.Seria
 
   @Override
   public String toString() {
-    return "DeliverableProgram [id=" + id + ", deliverable=" + deliverable + ", crpProgram=" + crpProgram + ", phase="
-      + phase + "]";
+    return "DeliverableProgram [id=" + this.getId() + ", deliverable=" + deliverable + ", crpProgram=" + crpProgram
+      + ", phase=" + phase + "]";
   }
 
 }

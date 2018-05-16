@@ -76,12 +76,6 @@ public class DeliverableType extends MarloBaseEntity implements java.io.Serializ
     return this.deliverableCategory;
   }
 
-
-  public DeliverableType getDeliverableCategory() {
-    return this.deliverableCategory;
-  }
-
-
   public Set<DeliverableTypeRule> getDeliverableTypeRules() {
     return deliverableTypeRules;
   }
@@ -98,7 +92,6 @@ public class DeliverableType extends MarloBaseEntity implements java.io.Serializ
   public Boolean getFair() {
     return fair;
   }
-
 
 
   @Override
@@ -182,7 +175,7 @@ public class DeliverableType extends MarloBaseEntity implements java.io.Serializ
 
   @Override
   public String toString() {
-    return "DeliverableType [id=" + id + ", deliverableCategory=" + deliverableCategory + ", name=" + name
+    return "DeliverableType [id=" + this.getId() + ", deliverableCategory=" + deliverableCategory + ", name=" + name
       + ", description=" + description + ", timeline=" + timeline + ", fair=" + fair + ", crp=" + crp + "]";
   }
 

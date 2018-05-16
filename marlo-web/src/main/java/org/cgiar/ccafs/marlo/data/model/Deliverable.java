@@ -30,13 +30,7 @@ import com.google.gson.annotations.Expose;
  */
 public class Deliverable extends MarloAuditableEntity implements java.io.Serializable, IAuditLog {
 
-
   private static final long serialVersionUID = 1867818669925473872L;
-
-
-  @Expose
-  private Long id;
-
 
   @Expose
   private Project project;
@@ -158,11 +152,6 @@ public class Deliverable extends MarloAuditableEntity implements java.io.Seriali
   }
 
 
-  public Date getActiveSince() {
-    return this.activeSince;
-  }
-
-
   public String getComposedName() {
     if (this.getDeliverableInfo() != null) {
       try {
@@ -180,11 +169,6 @@ public class Deliverable extends MarloAuditableEntity implements java.io.Seriali
 
   public Date getCreateDate() {
     return createDate;
-  }
-
-
-  public User getCreatedBy() {
-    return createdBy;
   }
 
 
@@ -327,12 +311,6 @@ public class Deliverable extends MarloAuditableEntity implements java.io.Seriali
   public List<DeliverableGenderLevel> getGenderLevels() {
     return genderLevels;
   }
-
-  @Override
-  public Long getId() {
-    return id;
-  }
-
 
   public long getID(int metadataID) {
 
@@ -572,7 +550,6 @@ public class Deliverable extends MarloAuditableEntity implements java.io.Seriali
   }
 
 
-
   // End
 
 
@@ -580,9 +557,6 @@ public class Deliverable extends MarloAuditableEntity implements java.io.Seriali
     this.createDate = createDate;
   }
 
-  public void setCreatedBy(User createdBy) {
-    this.createdBy = createdBy;
-  }
 
   public void setCrp(GlobalUnit crp) {
     this.crp = crp;
@@ -717,10 +691,6 @@ public class Deliverable extends MarloAuditableEntity implements java.io.Seriali
   }
 
 
-  public void setId(Long id) {
-    this.id = id;
-  }
-
   public void setIntellectualAsset(DeliverableIntellectualAsset intellectualAsset) {
     this.intellectualAsset = intellectualAsset;
   }
@@ -800,8 +770,8 @@ public class Deliverable extends MarloAuditableEntity implements java.io.Seriali
 
   @Override
   public String toString() {
-    return "Deliverable [id=" + id + ", project=" + project + ", active=" + active + ", phase=" + phase
-      + ", isPublication=" + isPublication + ", deliverableInfo=" + deliverableInfo + "]";
+    return "Deliverable [id=" + this.getId() + ", project=" + project + ", phase=" + phase + ", isPublication="
+      + isPublication + ", deliverableInfo=" + deliverableInfo + "]";
   }
 
 

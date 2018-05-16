@@ -15,9 +15,6 @@ import com.google.gson.annotations.Expose;
  */
 public class CrpClusterKeyOutput extends MarloAuditableEntity implements java.io.Serializable, IAuditLog {
 
-  /**
-   * 
-   */
   private static final long serialVersionUID = -5642790359021262160L;
 
   @Expose
@@ -144,18 +141,10 @@ public class CrpClusterKeyOutput extends MarloAuditableEntity implements java.io
     this.keyOutputOutcomes = keyOutputOutcomes;
   }
 
-  public void setModificationJustification(String modificationJustification) {
-    this.modificationJustification = modificationJustification;
-  }
-
-  public void setModifiedBy(User usersByModifiedBy) {
-    this.modifiedBy = usersByModifiedBy;
-  }
-
   @Override
   public String toString() {
-    return "CrpClusterKeyOutput [id=" + id + ", keyOutput=" + keyOutput + ", crpClusterOfActivity="
-      + crpClusterOfActivity + ", composeID=" + composeID + ", active=" + active + "]";
+    return "CrpClusterKeyOutput [id=" + this.getId() + ", keyOutput=" + keyOutput + ", crpClusterOfActivity="
+      + crpClusterOfActivity + ", composeID=" + composeID + "]";
   }
 
 

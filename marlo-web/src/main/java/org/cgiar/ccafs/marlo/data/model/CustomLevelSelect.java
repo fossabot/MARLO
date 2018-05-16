@@ -1,3 +1,5 @@
+package org.cgiar.ccafs.marlo.data.model;
+
 /*****************************************************************
  * This file is part of Managing Agricultural Research for Learning &
  * Outcomes Platform (MARLO).
@@ -13,14 +15,11 @@
  * along with MARLO. If not, see <http://www.gnu.org/licenses/>.
  *****************************************************************/
 
-package org.cgiar.ccafs.marlo.data.model;
-
-import java.io.Serializable;
 
 /**
  * @author Christian Garcia- CIAT/CCAFS
  */
-public class CustomLevelSelect implements Serializable {
+public class CustomLevelSelect implements java.io.Serializable {
 
   private static final long serialVersionUID = -3426216373887145149L;
   private LocElementType locElementType;

@@ -41,11 +41,11 @@ public class ExpectedStudyProject extends MarloAuditableEntity implements java.i
       return false;
     }
     ExpectedStudyProject other = (ExpectedStudyProject) obj;
-    if (id == null) {
-      if (other.id != null) {
+    if (this.getId() == null) {
+      if (other.getId() != null) {
         return false;
       }
-    } else if (!this.getId().equals(other.id)) {
+    } else if (!this.getId().equals(other.getId())) {
       return false;
     }
     return true;

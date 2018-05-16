@@ -12,14 +12,9 @@ import com.google.gson.annotations.Expose;
  */
 public class DeliverableLeader extends MarloBaseEntity implements java.io.Serializable, IAuditLog {
 
-
-  /**
-   * 
-   */
   private static final long serialVersionUID = -5863315494457225665L;
 
   private Deliverable deliverable;
-
 
   @Expose
   private Institution institution;
@@ -120,8 +115,8 @@ public class DeliverableLeader extends MarloBaseEntity implements java.io.Serial
 
   @Override
   public String toString() {
-    return "DeliverableLeader [id=" + id + ", deliverable=" + deliverable + ", institution=" + institution + ", phase="
-      + phase + "]";
+    return "DeliverableLeader [id=" + this.getId() + ", deliverable=" + deliverable + ", institution=" + institution
+      + ", phase=" + phase + "]";
   }
 
 
