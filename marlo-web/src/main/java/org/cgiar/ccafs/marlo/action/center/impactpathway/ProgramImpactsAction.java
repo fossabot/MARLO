@@ -62,7 +62,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -574,14 +573,10 @@ public class ProgramImpactsAction extends BaseAction {
     for (CenterImpact researchImpact : impacts) {
       if (researchImpact.getId() == null || researchImpact.getId() == -1) {
         CenterImpact researchImpactNew = new CenterImpact();
-        researchImpactNew.setActive(true);
-        researchImpactNew.setActiveSince(new Date());
-        researchImpactNew.setCreatedBy(this.getCurrentUser());
 
         researchImpactNew.setResearchProgram(programDb);
         researchImpactNew.setColor(null);
         researchImpactNew.setShortName(researchImpact.getShortName().trim());
-        researchImpactNew.setModifiedBy(this.getCurrentUser());
 
 
         CenterImpactStatement impactStatement = null;
@@ -612,12 +607,8 @@ public class ProgramImpactsAction extends BaseAction {
             CenterObjective researchObjective =
               objectiveService.getResearchObjectiveById(Long.parseLong(objectiveId.trim()));
             CenterImpactObjective impactObjectiveNew = new CenterImpactObjective();
-            impactObjectiveNew.setActive(true);
-            impactObjectiveNew.setActiveSince(new Date());
-            impactObjectiveNew.setCreatedBy(this.getCurrentUser());
             impactObjectiveNew.setResearchObjective(researchObjective);
             impactObjectiveNew.setResearchImpact(researchImpactNew);
-            impactObjectiveNew.setModifiedBy(this.getCurrentUser());
 
             impactObjectiveService.saveResearchImpactObjective(impactObjectiveNew);
           }
@@ -682,7 +673,6 @@ public class ProgramImpactsAction extends BaseAction {
         }
 
         if (hasChanges) {
-          researchImpactRew.setModifiedBy(this.getCurrentUser());
           researchImpactRew = impactService.saveResearchImpact(researchImpactRew);
 
         }
@@ -707,10 +697,6 @@ public class ProgramImpactsAction extends BaseAction {
               .filter(rio -> rio.isActive()).collect(Collectors.toList());
 
             if (!impactObjectives.contains(impactObjectiveNew)) {
-              impactObjectiveNew.setActive(true);
-              impactObjectiveNew.setActiveSince(new Date());
-              impactObjectiveNew.setCreatedBy(this.getCurrentUser());
-              impactObjectiveNew.setModifiedBy(this.getCurrentUser());
               impactObjectiveService.saveResearchImpactObjective(impactObjectiveNew);
             }
 
@@ -729,13 +715,16 @@ public class ProgramImpactsAction extends BaseAction {
 
       }
 
+      List<String> relationsName = new ArrayList<>();
+      relationsName.add(APConstants.RESEARCH_PROGRAM_IMPACT_RELATION);
+      selectedProgram = programService.getCrpProgramById(crpProgramID);
+      programService.saveCrpProgram(selectedProgram, this.getActionName(), relationsName, this.getActualPhase());
 
     }
 
     List<String> relationsName = new ArrayList<>();
     relationsName.add(APConstants.RESEARCH_PROGRAM_IMPACT_RELATION);
     selectedProgram = programService.getCrpProgramById(crpProgramID);
-    selectedProgram.setActiveSince(new Date());
     selectedProgram.setModifiedBy(this.getCurrentUser());
     programService.saveCrpProgram(selectedProgram, this.getActionName(), relationsName, this.getActualPhase());
 
@@ -797,11 +786,6 @@ public class ProgramImpactsAction extends BaseAction {
       for (CenterImpactBeneficiary impactBeneficiary : researchImpact.getBeneficiaries()) {
         if (impactBeneficiary.getId() == null) {
           CenterImpactBeneficiary impactBeneficiaryNew = new CenterImpactBeneficiary();
-          impactBeneficiaryNew.setActive(true);
-          impactBeneficiaryNew.setActiveSince(new Date());
-          impactBeneficiaryNew.setCreatedBy(this.getCurrentUser());
-          impactBeneficiaryNew.setModifiedBy(this.getCurrentUser());
-          impactBeneficiaryNew.setModificationJustification("");
 
           impactBeneficiaryNew.setResearchImpact(researchImpactSave);
 
@@ -871,8 +855,6 @@ public class ProgramImpactsAction extends BaseAction {
           }
 
           if (hasChanges) {
-            impactBeneficiaryPrew.setModifiedBy(this.getCurrentUser());
-            impactBeneficiaryPrew.setActiveSince(new Date());
             impactBeneficiaryService.saveResearchImpactBeneficiary(impactBeneficiaryPrew);
           }
 

@@ -74,14 +74,10 @@ public class ProjectHighListAction extends BaseAction {
   public String add() {
     ProjectHighlight projectHighlight = new ProjectHighlight();
     // newDeliverable.setType(deliverableTypeManager.getDeliverableSubTypes().get(0));
-    projectHighlight.setModifiedBy(this.getCurrentUser());
-    projectHighlight.setActiveSince(new Date());
     // newDeliverable.setContributor("");
     // newDeliverable.setCoverage("");
-    projectHighlight.setCreatedBy(this.getCurrentUser());
 
 
-    projectHighlight.setActive(true);
     // newDeliverable.setIsGlobal(false);
     // newDeliverable.setLeader(0);
     // newDeliverable.setObjectives("");
@@ -99,7 +95,6 @@ public class ProjectHighListAction extends BaseAction {
     cal.set(Calendar.DAY_OF_MONTH, 31); // new years eve
 
 
-    projectHighlight.setModificationJustification("");
 
     projectHighlight = projectHighligthManager.saveProjectHighligth(projectHighlight);
     ProjectHighlightInfo projectHighlightInfo = new ProjectHighlightInfo();

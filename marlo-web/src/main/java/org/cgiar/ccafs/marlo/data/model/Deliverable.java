@@ -28,7 +28,7 @@ import com.google.gson.annotations.Expose;
 /**
  * @author Hermes Jiménez - CIAT/CCAFS
  */
-public class Deliverable implements java.io.Serializable, IAuditLog {
+public class Deliverable extends MarloAuditableEntity implements java.io.Serializable, IAuditLog {
 
 
   private static final long serialVersionUID = 1867818669925473872L;
@@ -41,13 +41,6 @@ public class Deliverable implements java.io.Serializable, IAuditLog {
   @Expose
   private Project project;
 
-
-  @Expose
-  private boolean active;
-  @Expose
-  private Date activeSince;
-  @Expose
-  private User createdBy;
   @Expose
   private Date createDate;
 
@@ -173,10 +166,10 @@ public class Deliverable implements java.io.Serializable, IAuditLog {
   public String getComposedName() {
     if (this.getDeliverableInfo() != null) {
       try {
-        return "<b> (D" + this.id + ") " + this.getDeliverableInfo().getDeliverableType().getName() + "</b> - "
+        return "<b> (D" + this.getId() + ") " + this.getDeliverableInfo().getDeliverableType().getName() + "</b> - "
           + this.getDeliverableInfo().getTitle();
       } catch (Exception e) {
-        return "<b> (D" + this.id + ") </b> - " + this.getDeliverableInfo().getTitle();
+        return "<b> (D" + this.getId() + ") </b> - " + this.getDeliverableInfo().getTitle();
 
       }
     }
@@ -406,7 +399,7 @@ public class Deliverable implements java.io.Serializable, IAuditLog {
   }
 
 
-  public DeliverableMetadataElement getMetadata(int metadataID) {
+  public DeliverableMetadataElement getMetadata(long metadataID) {
     String value = "";
     if (metadataElements != null) {
       for (DeliverableMetadataElement dmetadata : metadataElements) {
@@ -429,7 +422,7 @@ public class Deliverable implements java.io.Serializable, IAuditLog {
     return metadataElements;
   }
 
-  public int getMetadataID(String metadataName) {
+  public long getMetadataID(String metadataName) {
     for (MetadataElement mData : metadata) {
       if (mData != null) {
         if (mData.getEcondedName().equals(metadataName)) {
@@ -457,7 +450,7 @@ public class Deliverable implements java.io.Serializable, IAuditLog {
     return -1;
   }
 
-  public String getMetadataValue(int metadataID) {
+  public String getMetadataValue(long metadataID) {
     String value = "";
     if (metadataElements != null) {
       for (DeliverableMetadataElement dmetadata : metadataElements) {
@@ -513,11 +506,6 @@ public class Deliverable implements java.io.Serializable, IAuditLog {
   @Override
   public String getModificationJustification() {
     return "";
-  }
-
-  @Override
-  public User getModifiedBy() {
-    return createdBy;
   }
 
 
@@ -579,22 +567,10 @@ public class Deliverable implements java.io.Serializable, IAuditLog {
   public int hashCode() {
     final int prime = 31;
     int result = 1;
-    result = prime * result + ((id == null) ? 0 : id.hashCode());
+    result = prime * result + ((this.getId() == null) ? 0 : this.getId().hashCode());
     return result;
   }
 
-  @Override
-  public boolean isActive() {
-    return active;
-  }
-
-  public void setActive(boolean active) {
-    this.active = active;
-  }
-
-  public void setActiveSince(Date activeSince) {
-    this.activeSince = activeSince;
-  }
 
 
   // End

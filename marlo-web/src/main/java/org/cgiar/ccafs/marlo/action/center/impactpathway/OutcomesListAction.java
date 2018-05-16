@@ -37,7 +37,6 @@ import org.cgiar.ccafs.marlo.utils.APConfig;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -107,10 +106,6 @@ public class OutcomesListAction extends BaseAction {
   public String add() {
 
     CenterOutcome outcome = new CenterOutcome();
-    outcome.setActive(true);
-    outcome.setActiveSince(new Date());
-    outcome.setCreatedBy(this.getCurrentUser());
-    outcome.setModifiedBy(this.getCurrentUser());
     outcome.setResearchTopic(selectedResearchTopic);
     outcome.setTargetYear(-1);
     outcome.setImpactPathway(true);
@@ -161,7 +156,7 @@ public class OutcomesListAction extends BaseAction {
       topicID = outcome.getResearchTopic().getId();
       outcome
         .setModificationJustification(this.getJustification() == null ? "Outcome deleted" : this.getJustification());
-      outcome.setModifiedBy(this.getCurrentUser());
+
 
       CenterSectionStatus status = sectionStatusService.getSectionStatusByOutcome(crpProgramID, outcome.getId(),
         "outcomesList", this.getActualPhase().getYear());
@@ -259,11 +254,10 @@ public class OutcomesListAction extends BaseAction {
         } catch (Exception ex) {
           User user = userService.getUser(this.getCurrentUser().getId());
           // Check if the User is an Area Leader
-          List<CenterLeader> userAreaLeads =
-            new ArrayList<>(user.getResearchLeaders().stream()
-              .filter(rl -> rl.isActive()
-                && rl.getType().getId() == CenterLeaderTypeEnum.RESEARCH_AREA_LEADER_TYPE.getValue())
-              .collect(Collectors.toList()));
+          List<CenterLeader> userAreaLeads = new ArrayList<>(user.getResearchLeaders().stream()
+            .filter(
+              rl -> rl.isActive() && rl.getType().getId() == CenterLeaderTypeEnum.RESEARCH_AREA_LEADER_TYPE.getValue())
+            .collect(Collectors.toList()));
           if (!userAreaLeads.isEmpty()) {
             areaID = userAreaLeads.get(0).getResearchArea().getId();
           } else {

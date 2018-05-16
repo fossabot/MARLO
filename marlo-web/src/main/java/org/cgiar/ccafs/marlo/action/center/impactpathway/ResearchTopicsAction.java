@@ -436,7 +436,6 @@ public class ResearchTopicsAction extends BaseAction {
     List<String> relationsName = new ArrayList<>();
     relationsName.add(APConstants.RESEARCH_PROGRAM_TOPIC_RELATION);
     selectedProgram = programService.getCrpProgramById(crpProgramID);
-    selectedProgram.setActiveSince(new Date());
     selectedProgram.setModifiedBy(this.getCurrentUser());
     programService.saveCrpProgram(selectedProgram, this.getActionName(), relationsName, this.getActualPhase());
 

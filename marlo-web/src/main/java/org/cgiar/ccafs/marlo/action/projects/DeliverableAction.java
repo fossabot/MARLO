@@ -2988,7 +2988,6 @@ public class DeliverableAction extends BaseAction {
       }
     }
 
-    deliverableInfoDb.setModifiedBy(this.getCurrentUser());
     deliverableInfoDb.setModificationJustification(this.getJustification());
 
     deliverableBase.setDeliverableInfo(deliverableInfoDb);

@@ -85,8 +85,19 @@
          <property name="crossCuttingScoreCapacity" type="java.lang.Long">
             <column name="cross_cutting_score_capacity" />
         </property>
+<<<<<<< HEAD
         <property name="isLocationGlobal" type="java.lang.Boolean">
             <column name="is_location_global" />
+=======
+        <many-to-one name="createdBy" class="org.cgiar.ccafs.marlo.data.model.User" fetch="select">
+            <column name="created_by" />
+        </many-to-one>
+        <property name="active" type="boolean">
+            <column name="is_active" not-null="true" />
+        </property>
+        <property name="activeSince" type="timestamp">
+            <column name="active_since" length="19" not-null="true" />
+>>>>>>> refs/remotes/origin/issue_1308_tidy_up_audit_logging
         </property>
     </class>
 </hibernate-mapping>

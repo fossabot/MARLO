@@ -115,12 +115,7 @@ public class OutputsListAction extends BaseAction {
   @Override
   public String add() {
     CenterOutput output = new CenterOutput();
-
-    output.setActive(true);
-    output.setActiveSince(new Date());
     output.setDateAdded(new Date());
-    output.setCreatedBy(this.getCurrentUser());
-    output.setModifiedBy(this.getCurrentUser());
     output = outputService.saveResearchOutput(output);
     output.setCenterProgram(selectedProgram);
     outputID = output.getId();
@@ -145,7 +140,6 @@ public class OutputsListAction extends BaseAction {
 
     if (output != null) {
       output.setModificationJustification(this.getJustification() == null ? "Output deleted" : this.getJustification());
-      output.setModifiedBy(this.getCurrentUser());
 
       List<CenterOutputsOutcome> centerOutputsOutcomes = new ArrayList<>(
         output.getCenterOutputsOutcomes().stream().filter(co -> co.isActive()).collect(Collectors.toList()));
@@ -275,11 +269,10 @@ public class OutputsListAction extends BaseAction {
         } catch (Exception ex) {
           User user = userService.getUser(this.getCurrentUser().getId());
           // Check if the User is an Area Leader
-          List<CenterLeader> userAreaLeads =
-            new ArrayList<>(user.getResearchLeaders().stream()
-              .filter(rl -> rl.isActive()
-                && rl.getType().getId() == CenterLeaderTypeEnum.RESEARCH_AREA_LEADER_TYPE.getValue())
-              .collect(Collectors.toList()));
+          List<CenterLeader> userAreaLeads = new ArrayList<>(user.getResearchLeaders().stream()
+            .filter(
+              rl -> rl.isActive() && rl.getType().getId() == CenterLeaderTypeEnum.RESEARCH_AREA_LEADER_TYPE.getValue())
+            .collect(Collectors.toList()));
           if (!userAreaLeads.isEmpty()) {
             areaID = userAreaLeads.get(0).getResearchArea().getId();
           } else {

@@ -103,9 +103,6 @@ public class PublicationListAction extends BaseAction {
     if (this.hasPermission(this.generatePermission(Permission.PUBLICATION_ADD, params))) {
       Deliverable deliverable = new Deliverable();
 
-      deliverable.setCreatedBy(this.getCurrentUser());
-      deliverable.setActive(true);
-      deliverable.setActiveSince(new Date());
       deliverable.setCrp(loggedCrp);
       deliverable.setCreateDate(new Date());
       deliverable.setIsPublication(true);
