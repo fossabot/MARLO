@@ -16,7 +16,6 @@
 package org.cgiar.ccafs.marlo.action.projects;
 
 import org.cgiar.ccafs.marlo.action.BaseAction;
-import org.cgiar.ccafs.marlo.action.summaries.ReportingSummaryAction;
 import org.cgiar.ccafs.marlo.config.APConstants;
 import org.cgiar.ccafs.marlo.data.manager.GlobalUnitManager;
 import org.cgiar.ccafs.marlo.data.manager.LiaisonUserManager;
@@ -32,21 +31,23 @@ import org.cgiar.ccafs.marlo.data.model.CrpProgramLeader;
 import org.cgiar.ccafs.marlo.data.model.GlobalUnit;
 import org.cgiar.ccafs.marlo.data.model.GlobalUnitProject;
 import org.cgiar.ccafs.marlo.data.model.LiaisonUser;
+import org.cgiar.ccafs.marlo.data.model.Phase;
 import org.cgiar.ccafs.marlo.data.model.Project;
+import org.cgiar.ccafs.marlo.data.model.ProjectInfo;
 import org.cgiar.ccafs.marlo.data.model.ProjectPartnerPerson;
 import org.cgiar.ccafs.marlo.data.model.Role;
 import org.cgiar.ccafs.marlo.data.model.Submission;
 import org.cgiar.ccafs.marlo.data.model.UserRole;
 import org.cgiar.ccafs.marlo.security.Permission;
 import org.cgiar.ccafs.marlo.utils.APConfig;
+import org.cgiar.ccafs.marlo.utils.ReportingSummaryContext;
+import org.cgiar.ccafs.marlo.utils.ReportingSummaryService;
 import org.cgiar.ccafs.marlo.utils.SendMailS;
 
 import java.nio.ByteBuffer;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -78,7 +79,7 @@ public class ProjectSubmissionAction extends BaseAction {
   private String cycleName;
   private final RoleManager roleManager;
   private PhaseManager phaseManager;
-
+  private final ReportingSummaryService reportingSummaryService;
 
   private boolean complete;
 
@@ -87,12 +88,12 @@ public class ProjectSubmissionAction extends BaseAction {
 
   private Project project;
 
-  private ReportingSummaryAction reportingSummaryAction;
+  // private ReportingSummaryAction reportingSummaryAction;
 
   @Inject
   public ProjectSubmissionAction(APConfig config, SubmissionManager submissionManager, ProjectManager projectManager,
     GlobalUnitManager crpManager, SendMailS sendMail, LiaisonUserManager liasonUserManager, RoleManager roleManager,
-    PhaseManager phaseManager, UserManager userManager, ReportingSummaryAction reportingSummaryAction) {
+    PhaseManager phaseManager, UserManager userManager, ReportingSummaryService reportingSummaryService) {
     super(config);
     this.submissionManager = submissionManager;
     this.projectManager = projectManager;
@@ -101,7 +102,7 @@ public class ProjectSubmissionAction extends BaseAction {
     this.roleManager = roleManager;
     this.userManager = userManager;
     this.phaseManager = phaseManager;
-    this.reportingSummaryAction = reportingSummaryAction;
+    this.reportingSummaryService = reportingSummaryService;
   }
 
   @Override
@@ -321,25 +322,43 @@ public class ProjectSubmissionAction extends BaseAction {
     String contentType = null;
     try {
       // Set the parameters that are assigned in the prepare by reportingSummaryAction
-      reportingSummaryAction.setSession(this.getSession());
-      reportingSummaryAction.setSelectedYear(this.getActualPhase().getYear());
-      reportingSummaryAction.setLoggedCrp(loggedCrp);
-      reportingSummaryAction.setSelectedCycle(this.getActualPhase().getDescription());
-      reportingSummaryAction.setProjectID(projectID);
       Project project = projectManager.getProjectById(projectID);
-      Set<Submission> submissions = new HashSet<>();
-      submissions.add(this.getSubmission());
-      project.setSubmissions(submissions);
-      reportingSummaryAction.setProject(project);
-      reportingSummaryAction.setCrpSession(loggedCrp.getAcronym());
-      reportingSummaryAction.setSelectedPhase(phaseManager.findCycle(reportingSummaryAction.getSelectedCycle(),
-        reportingSummaryAction.getSelectedYear(), loggedCrp.getId().longValue()));
-      reportingSummaryAction.setProjectInfo(project.getProjecInfoPhase(reportingSummaryAction.getSelectedPhase()));
-      reportingSummaryAction.loadProvider(this.getSession());
-      reportingSummaryAction.execute();
+      Phase actualPhase = this.getActualPhase();
+      ProjectInfo projectInfo = project.getProjecInfoPhase(actualPhase);
+
+      ReportingSummaryContext reportingSummaryContext = ReportingSummaryContext.builder()
+        .withActivitiesSpecifityEnabled(this.hasSpecificities(APConstants.CRP_ACTIVITES_MODULE))
+        .withActualPhase(actualPhase)
+        .withBudgetGenderSpecifityEnabled(this.hasSpecificities(APConstants.CRP_BUDGET_GENDER))
+        .withCrpAcronym(this.getCrpSession()).withHasProgramRegions(this.hasProgramnsRegions())
+        .withIpOutcomeIndicatorSpecificityEnabled(this.hasSpecificities(APConstants.CRP_IP_OUTCOME_INDICATOR))
+        .withIsPhaseOne(this.isPhaseOne()).withIsProjectNew(this.isProjectNew(projectID)).withLoggedCrp(this.loggedCrp)
+        .withProject(project).withProjectInfo(projectInfo).withSelectedYear(actualPhase.getYear())
+        .withSelectedCycle(null).withSelectedPhase(actualPhase).withTargetUnitList(null).build();
+
+
+      // reportingSummaryAction.setSession(this.getSession());
+      // reportingSummaryAction.setSelectedYear(this.getActualPhase().getYear());
+      // reportingSummaryAction.setLoggedCrp(loggedCrp);
+      // reportingSummaryAction.setSelectedCycle(this.getActualPhase().getDescription());
+      // reportingSummaryAction.setProjectID(projectID);
+      //
+      // Set<Submission> submissions = new HashSet<>();
+      // submissions.add(this.getSubmission());
+      // project.setSubmissions(submissions);
+      // reportingSummaryAction.setProject(project);
+      // reportingSummaryAction.setCrpSession(loggedCrp.getAcronym());
+      // reportingSummaryAction.setSelectedPhase(phaseManager.findCycle(reportingSummaryAction.getSelectedCycle(),
+      // reportingSummaryAction.getSelectedYear(), loggedCrp.getId().longValue()));
+      // reportingSummaryAction.setProjectInfo(project.getProjecInfoPhase(reportingSummaryAction.getSelectedPhase()));
+      // reportingSummaryAction.loadProvider(this.getSession());
+      // reportingSummaryAction.execute();
       // Getting the file data.
       //
-      buffer = ByteBuffer.wrap(reportingSummaryAction.getBytesPDF());
+
+      byte[] report = reportingSummaryService.getReport(reportingSummaryContext);
+
+      buffer = ByteBuffer.wrap(report);
       fileName = this.getFileName();
       contentType = "application/pdf";
       //

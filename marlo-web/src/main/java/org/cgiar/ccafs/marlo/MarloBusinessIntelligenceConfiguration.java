@@ -19,11 +19,12 @@ import org.pentaho.reporting.engine.classic.core.ClassicEngineBoot;
 import org.pentaho.reporting.libraries.resourceloader.ResourceManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 
 @Configuration
 public class MarloBusinessIntelligenceConfiguration {
 
-
+  @Lazy(value = true)
   @Bean
   public ResourceManager resourceManager() {
     ClassicEngineBoot.getInstance().start();

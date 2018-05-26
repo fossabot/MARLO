@@ -27,6 +27,7 @@ import org.cgiar.ccafs.marlo.data.model.ProjectOutcome;
 import org.cgiar.ccafs.marlo.data.model.ProjectStatusEnum;
 import org.cgiar.ccafs.marlo.data.model.SrfTargetUnit;
 import org.cgiar.ccafs.marlo.utils.APConfig;
+import org.cgiar.ccafs.marlo.utils.ReportingSummaryService;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -79,6 +80,8 @@ public class OutcomesContributionsSummaryAction extends BaseSummariesAction impl
   // Managers
   private final SrfTargetUnitManager srfTargetUnitManager;
   private final ResourceManager resourceManager;
+
+  private final ReportingSummaryService reportingSummaryService;
   // XLSX bytes
   private byte[] bytesXLSX;
   // Streams
@@ -87,10 +90,12 @@ public class OutcomesContributionsSummaryAction extends BaseSummariesAction impl
 
   @Inject
   public OutcomesContributionsSummaryAction(APConfig config, GlobalUnitManager crpManager,
-    SrfTargetUnitManager srfTargetUnitManager, PhaseManager phaseManager, ResourceManager resourceManager) {
+    SrfTargetUnitManager srfTargetUnitManager, PhaseManager phaseManager, ResourceManager resourceManager,
+    ReportingSummaryService reportingSummaryService) {
     super(config, crpManager, phaseManager);
     this.srfTargetUnitManager = srfTargetUnitManager;
     this.resourceManager = resourceManager;
+    this.reportingSummaryService = reportingSummaryService;
   }
 
   /**
@@ -154,7 +159,7 @@ public class OutcomesContributionsSummaryAction extends BaseSummariesAction impl
       // Create new empty subreport hash map
       HashMap<String, Element> hm = new HashMap<String, Element>();
       // method to get all the subreports in the prpt and store in the HashMap
-      this.getAllSubreports(hm, masteritemBand);
+      reportingSummaryService.getAllSubreports(hm, masteritemBand);
       // Uncomment to see which Subreports are detecting the method getAllSubreports
       // System.out.println("Pentaho SubReports: " + hm);
       this.fillSubreport((SubReport) hm.get("projects_outcomes"), "projects_outcomes");

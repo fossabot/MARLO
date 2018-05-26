@@ -92,7 +92,6 @@ import org.cgiar.ccafs.marlo.data.model.CrpProgramOutcome;
 import org.cgiar.ccafs.marlo.data.model.CrpUser;
 import org.cgiar.ccafs.marlo.data.model.CustomLevelSelect;
 import org.cgiar.ccafs.marlo.data.model.Deliverable;
-import org.cgiar.ccafs.marlo.data.model.DeliverableDissemination;
 import org.cgiar.ccafs.marlo.data.model.DeliverableFundingSource;
 import org.cgiar.ccafs.marlo.data.model.DeliverableInfo;
 import org.cgiar.ccafs.marlo.data.model.DeliverablePartnership;
@@ -108,7 +107,6 @@ import org.cgiar.ccafs.marlo.data.model.IpLiaisonInstitution;
 import org.cgiar.ccafs.marlo.data.model.IpProgram;
 import org.cgiar.ccafs.marlo.data.model.LiaisonInstitution;
 import org.cgiar.ccafs.marlo.data.model.LiaisonUser;
-import org.cgiar.ccafs.marlo.data.model.LicensesTypeEnum;
 import org.cgiar.ccafs.marlo.data.model.LocElement;
 import org.cgiar.ccafs.marlo.data.model.LocElementType;
 import org.cgiar.ccafs.marlo.data.model.Phase;
@@ -148,8 +146,6 @@ import org.cgiar.ccafs.marlo.validation.fundingSource.FundingSourceValidator;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -812,13 +808,11 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
         ProjectBudget projectBudget = projectBudgetManager.getProjectBudgetById(id);
         FundingSource fundingSource =
           fundingSourceManager.getFundingSourceById(projectBudget.getFundingSource().getId());
-        List<DeliverableFundingSource> deliverableFundingSources =
-          fundingSource.getDeliverableFundingSources().stream()
-            .filter(
-              c -> c.isActive() && c.getDeliverable().isActive() && c.getPhase() != null
-                && c.getPhase().getYear() == projectBudget.getYear() && c.getDeliverable().getProject() != null && c
-                  .getDeliverable().getProject().getId().longValue() == projectBudget.getProject().getId().longValue())
-            .collect(Collectors.toList());
+        List<DeliverableFundingSource> deliverableFundingSources = fundingSource.getDeliverableFundingSources().stream()
+          .filter(c -> c.isActive() && c.getDeliverable().isActive() && c.getPhase() != null
+            && c.getPhase().getYear() == projectBudget.getYear() && c.getDeliverable().getProject() != null
+            && c.getDeliverable().getProject().getId().longValue() == projectBudget.getProject().getId().longValue())
+          .collect(Collectors.toList());
         List<Deliverable> onDeliverables =
           this.getDeliverableRelationsProject(id, ProjectBudget.class.getName(), projectBudget.getProject().getId());
         if (!onDeliverables.isEmpty()) {
@@ -2980,12 +2974,11 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
 
         List<ProjectPartner> partners =
           crpPpaPartner.getInstitution().getProjectPartners().stream()
-            .filter(
-              c -> c.isActive() && c.getPhase() != null && c.getPhase().getId().equals(this.getActualPhase().getId())
-                && c.getProject().getGlobalUnitProjects().stream()
-                  .filter(
-                    gup -> gup.isActive() && gup.isOrigin() && gup.getGlobalUnit().getId().equals(this.getCrpID()))
-                  .collect(Collectors.toList()).size() > 0)
+            .filter(c -> c.isActive() && c.getPhase() != null
+              && c.getPhase().getId().equals(this.getActualPhase().getId())
+              && c.getProject().getGlobalUnitProjects().stream()
+                .filter(gup -> gup.isActive() && gup.isOrigin() && gup.getGlobalUnit().getId().equals(this.getCrpID()))
+                .collect(Collectors.toList()).size() > 0)
             .collect(Collectors.toList());
         Set<Project> projectsSet = new HashSet<>();
         for (ProjectPartner projectPartner : partners) {
@@ -3165,15 +3158,14 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
                 .parseInt(ProjectStatusEnum.Complete.getStatusId()))
             .collect(Collectors.toList()));
 
-          openA.addAll(deliverables.stream()
-            .filter(d -> d.isActive() && d.getDeliverableInfo(this.getActualPhase()) != null
-              && d.getDeliverableInfo(this.getActualPhase()) != null
-              && d.getDeliverableInfo(this.getActualPhase()).getNewExpectedYear() != null
-              && d.getDeliverableInfo(this.getActualPhase()).getNewExpectedYear().intValue() == this
-                .getCurrentCycleYear()
-              && d.getDeliverableInfo(this.getActualPhase()).getStatus() != null
-              && d.getDeliverableInfo(this.getActualPhase()).getStatus().intValue() == Integer
-                .parseInt(ProjectStatusEnum.Complete.getStatusId()))
+          openA.addAll(deliverables.stream().filter(d -> d.isActive()
+            && d.getDeliverableInfo(this.getActualPhase()) != null
+            && d.getDeliverableInfo(this.getActualPhase()) != null
+            && d.getDeliverableInfo(this.getActualPhase()).getNewExpectedYear() != null
+            && d.getDeliverableInfo(this.getActualPhase()).getNewExpectedYear().intValue() == this.getCurrentCycleYear()
+            && d.getDeliverableInfo(this.getActualPhase()).getStatus() != null
+            && d.getDeliverableInfo(this.getActualPhase()).getStatus().intValue() == Integer
+              .parseInt(ProjectStatusEnum.Complete.getStatusId()))
             .collect(Collectors.toList()));
 
         }
@@ -3677,25 +3669,6 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
     return list;
   }
 
-  public Boolean isA(long deliverableID) {
-    try {
-      Deliverable deliverableBD = deliverableManager.getDeliverableById(deliverableID);
-      this.loadDissemination(deliverableBD);
-
-      if (deliverableBD.getDissemination().getIsOpenAccess() != null
-        && deliverableBD.getDissemination().getIsOpenAccess().booleanValue()) {
-        return true;
-      }
-
-      if (deliverableBD.getDissemination().getIsOpenAccess() == null) {
-        return null;
-      }
-      return false;
-    } catch (Exception e) {
-      return null;
-    }
-  }
-
 
   /**
    * @param role
@@ -4130,15 +4103,13 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
               && d.getDeliverableInfo(this.getActualPhase()).getStatus().intValue() == Integer
                 .parseInt(ProjectStatusEnum.Complete.getStatusId()))
           .collect(Collectors.toList()));
-        openA
-          .addAll(deliverables.stream()
-            .filter(d -> d.isActive() && d.getDeliverableInfo(this.getActualPhase()).getNewExpectedYear() != null
-              && d.getDeliverableInfo(this.getActualPhase()).getNewExpectedYear().intValue() == this
-                .getCurrentCycleYear()
-              && d.getDeliverableInfo(this.getActualPhase()).getStatus() != null
-              && d.getDeliverableInfo(this.getActualPhase()).getStatus().intValue() == Integer
-                .parseInt(ProjectStatusEnum.Complete.getStatusId()))
-            .collect(Collectors.toList()));
+        openA.addAll(deliverables.stream()
+          .filter(d -> d.isActive() && d.getDeliverableInfo(this.getActualPhase()).getNewExpectedYear() != null
+            && d.getDeliverableInfo(this.getActualPhase()).getNewExpectedYear().intValue() == this.getCurrentCycleYear()
+            && d.getDeliverableInfo(this.getActualPhase()).getStatus() != null
+            && d.getDeliverableInfo(this.getActualPhase()).getStatus().intValue() == Integer
+              .parseInt(ProjectStatusEnum.Complete.getStatusId()))
+          .collect(Collectors.toList()));
       }
 
       for (Deliverable deliverable : openA) {
@@ -4524,27 +4495,6 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
   }
 
 
-  public Boolean isF(long deliverableID) {
-
-
-    try {
-      Deliverable deliverableBD = deliverableManager.getDeliverableById(deliverableID);
-      this.loadDissemination(deliverableBD);
-      if (deliverableBD.getDissemination().getAlreadyDisseminated() != null
-        && deliverableBD.getDissemination().getAlreadyDisseminated().booleanValue()) {
-        return true;
-      }
-      if (deliverableBD.getDissemination().getAlreadyDisseminated() == null) {
-        return null;
-      }
-
-      return false;
-    } catch (Exception e) {
-      return null;
-    }
-
-  }
-
   public boolean isFullEditable() {
     return fullEditable;
   }
@@ -4593,68 +4543,6 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
     return false;
   }
 
-
-  public Boolean isI(long deliverableID) {
-    try {
-      Deliverable deliverableBD = deliverableManager.getDeliverableById(deliverableID);
-      this.loadDissemination(deliverableBD);
-      if (deliverableBD.getDissemination().getAlreadyDisseminated() != null
-        && deliverableBD.getDissemination().getAlreadyDisseminated().booleanValue()) {
-
-
-        String channel = deliverableBD.getDissemination().getDisseminationChannel();
-        String link = deliverableBD.getDissemination().getDisseminationUrl().replaceAll(" ", "%20");;
-        if (channel == null || channel.equals("-1")) {
-          return null;
-        }
-        if (link == null || link.equals("-1") || link.isEmpty()) {
-          return null;
-        }
-
-        // If the deliverable is synced
-        if ((deliverableBD.getDissemination().getSynced() != null)
-          && (deliverableBD.getDissemination().getSynced().booleanValue())) {
-          return true;
-        }
-
-        switch (channel) {
-          case "cgspace":
-            if (!this.validURL(link)) {
-              return null;
-            }
-            if ((link.contains("cgspace")) || (link.contains("hdl")) || (link.contains("handle"))) {
-              return true;
-            }
-            break;
-          case "dataverse":
-            if (!link.contains("dataverse.harvard.edu")) {
-              if (!this.validURL(link)) {
-                return null;
-              }
-              return null;
-            }
-            break;
-          case "other":
-            return null;
-
-          default:
-            return null;
-
-        }
-
-
-        return true;
-      }
-      if (deliverableBD.getDissemination().getAlreadyDisseminated() == null) {
-        return null;
-      }
-    } catch (Exception e) {
-      return null;
-    }
-    return null;
-
-
-  }
 
   public boolean isLessonsActive() {
     return Boolean.parseBoolean(this.getSession().get(APConstants.CRP_LESSONS_ACTIVE).toString());
@@ -4816,42 +4704,6 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
     return true;
   }
 
-  public Boolean isR(long deliverableID) {
-    try {
-      Deliverable deliverableBD = deliverableManager.getDeliverableById(deliverableID);
-      if (deliverableBD.getDeliverableInfo(this.getActualPhase()).getAdoptedLicense() == null) {
-        return null;
-      }
-      if (deliverableBD.getDeliverableInfo(this.getActualPhase()).getAdoptedLicense()) {
-        if (deliverableBD.getDeliverableInfo(this.getActualPhase()).getLicense() == null) {
-          return false;
-        } else {
-          if (!(deliverableBD.getDeliverableInfo(this.getActualPhase()).getLicense()
-            .equals(LicensesTypeEnum.OTHER.getValue())
-            || deliverableBD.getDeliverableInfo(this.getActualPhase()).getLicense()
-              .equals(LicensesTypeEnum.CC_BY_ND.getValue())
-            || deliverableBD.getDeliverableInfo(this.getActualPhase()).getLicense()
-              .equals(LicensesTypeEnum.CC_BY_NC_ND.getValue()))) {
-            return true;
-          } else {
-            if (deliverableBD.getDeliverableInfo(this.getActualPhase()).getAllowModifications() == null
-              || !deliverableBD.getDeliverableInfo(this.getActualPhase()).getAllowModifications().booleanValue()) {
-              return false;
-            }
-            if (deliverableBD.getDeliverableInfo(this.getActualPhase()).getOtherLicense() == null
-              || deliverableBD.getDeliverableInfo(this.getActualPhase()).getOtherLicense().isEmpty()) {
-              return false;
-            }
-            return true;
-          }
-
-        }
-      }
-      return false;
-    } catch (Exception e) {
-      return false;
-    }
-  }
 
   public boolean isReportingActive() {
 
@@ -5016,19 +4868,6 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
       return false;
     }
 
-  }
-
-  public void loadDissemination(Deliverable deliverableBD) {
-
-    if (deliverableBD.getDeliverableDisseminations() != null) {
-      deliverableBD.setDisseminations(new ArrayList<>(deliverableBD.getDeliverableDisseminations()));
-      if (deliverableBD.getDeliverableDisseminations().size() > 0) {
-        deliverableBD.setDissemination(deliverableBD.getDisseminations().get(0));
-      } else {
-        deliverableBD.setDissemination(new DeliverableDissemination());
-      }
-
-    }
   }
 
   public List<Project> loadFlagShipBudgetInfoProgram(long crpProgramID) {
@@ -5820,19 +5659,5 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
     return true;
   }
 
-  public boolean validURL(String URL) {
-    try {
-      java.net.URL url = new java.net.URL(URL);
-      url.toURI();
-      return true;
-    } catch (MalformedURLException e) {
-
-      return false;
-    } catch (URISyntaxException e) {
-
-      return false;
-    }
-
-  }
 
 }

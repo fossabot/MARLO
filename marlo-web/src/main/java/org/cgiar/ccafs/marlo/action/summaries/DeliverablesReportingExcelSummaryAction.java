@@ -41,6 +41,8 @@ import org.cgiar.ccafs.marlo.data.model.ProjectPartnerPerson;
 import org.cgiar.ccafs.marlo.data.model.ProjectStatusEnum;
 import org.cgiar.ccafs.marlo.data.model.RepositoryChannel;
 import org.cgiar.ccafs.marlo.utils.APConfig;
+import org.cgiar.ccafs.marlo.utils.FAIRService;
+import org.cgiar.ccafs.marlo.utils.ReportingSummaryService;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -88,8 +90,8 @@ public class DeliverablesReportingExcelSummaryAction extends BaseSummariesAction
   private final GenderTypeManager genderTypeManager;
   private final RepositoryChannelManager repositoryChannelManager;
   private final ResourceManager resourceManager;
-
-
+  private final FAIRService fairService;
+  private final ReportingSummaryService reportingSummaryService;
   // XLSX bytes
   private byte[] bytesXLSX;
   // Streams
@@ -100,13 +102,16 @@ public class DeliverablesReportingExcelSummaryAction extends BaseSummariesAction
   @Inject
   public DeliverablesReportingExcelSummaryAction(APConfig config, GlobalUnitManager crpManager,
     CrpProgramManager programManager, GenderTypeManager genderTypeManager, DeliverableManager deliverableManager,
-    PhaseManager phaseManager, RepositoryChannelManager repositoryChannelManager, ResourceManager resourceManager) {
+    PhaseManager phaseManager, RepositoryChannelManager repositoryChannelManager, ResourceManager resourceManager,
+    FAIRService fairService, ReportingSummaryService reportingSummaryService) {
     super(config, crpManager, phaseManager);
     this.genderTypeManager = genderTypeManager;
     this.programManager = programManager;
     this.deliverableManager = deliverableManager;
     this.repositoryChannelManager = repositoryChannelManager;
     this.resourceManager = resourceManager;
+    this.fairService = fairService;
+    this.reportingSummaryService = reportingSummaryService;
   }
 
   /**
@@ -250,7 +255,7 @@ public class DeliverablesReportingExcelSummaryAction extends BaseSummariesAction
       // Create new empty subreport hash map
       HashMap<String, Element> hm = new HashMap<String, Element>();
       // method to get all the subreports in the prpt and store in the HashMap
-      this.getAllSubreports(hm, masteritemBand);
+      reportingSummaryService.getAllSubreports(hm, masteritemBand);
       // Uncomment to see which Subreports are detecting the method getAllSubreports
       // System.out.println("Pentaho SubReports: " + hm);
 
@@ -897,10 +902,10 @@ public class DeliverablesReportingExcelSummaryAction extends BaseSummariesAction
         if (showFAIR) {
           // FAIR
 
-          if (this.isF(deliverable.getId()) == null) {
+          if (fairService.isF(deliverable.getId()) == null) {
             F = "X";
           } else {
-            if (this.isF(deliverable.getId()) == true) {
+            if (fairService.isF(deliverable.getId()) == true) {
               F = "F";
             } else {
               F = "X";
@@ -908,10 +913,10 @@ public class DeliverablesReportingExcelSummaryAction extends BaseSummariesAction
           }
 
 
-          if (this.isA(deliverable.getId()) == null) {
+          if (fairService.isA(deliverable.getId()) == null) {
             A += "X";
           } else {
-            if (this.isA(deliverable.getId()) == true) {
+            if (fairService.isA(deliverable.getId()) == true) {
               A += "A";
             } else {
               A += "X";
@@ -920,10 +925,10 @@ public class DeliverablesReportingExcelSummaryAction extends BaseSummariesAction
 
 
           try {
-            if (this.isI(deliverable.getId()) == null) {
+            if (fairService.isI(deliverable.getId()) == null) {
               I += "X";
             } else {
-              if (this.isI(deliverable.getId()) == true) {
+              if (fairService.isI(deliverable.getId()) == true) {
                 I += "I";
               } else {
                 I += "X";
@@ -935,10 +940,10 @@ public class DeliverablesReportingExcelSummaryAction extends BaseSummariesAction
           }
 
 
-          if (this.isR(deliverable.getId()) == null) {
+          if (fairService.isR(deliverable.getId(), this.getActualPhase()) == null) {
             R += "X";
           } else {
-            if (this.isR(deliverable.getId()) == true) {
+            if (fairService.isR(deliverable.getId(), this.getActualPhase()) == true) {
               R += "R";
             } else {
               R += "X";
@@ -1447,10 +1452,10 @@ public class DeliverablesReportingExcelSummaryAction extends BaseSummariesAction
         if (showFAIR) {
           // FAIR
 
-          if (this.isF(deliverable.getId()) == null) {
+          if (fairService.isF(deliverable.getId()) == null) {
             F = "X";
           } else {
-            if (this.isF(deliverable.getId()) == true) {
+            if (fairService.isF(deliverable.getId()) == true) {
               F = "F";
             } else {
               F = "X";
@@ -1458,10 +1463,10 @@ public class DeliverablesReportingExcelSummaryAction extends BaseSummariesAction
           }
 
 
-          if (this.isA(deliverable.getId()) == null) {
+          if (fairService.isA(deliverable.getId()) == null) {
             A = "X";
           } else {
-            if (this.isA(deliverable.getId()) == true) {
+            if (fairService.isA(deliverable.getId()) == true) {
               A = "A";
             } else {
               A = "X";
@@ -1470,10 +1475,10 @@ public class DeliverablesReportingExcelSummaryAction extends BaseSummariesAction
 
 
           try {
-            if (this.isI(deliverable.getId()) == null) {
+            if (fairService.isI(deliverable.getId()) == null) {
               I = "X";
             } else {
-              if (this.isI(deliverable.getId()) == true) {
+              if (fairService.isI(deliverable.getId()) == true) {
                 I = "I";
               } else {
                 I = "X";
@@ -1485,10 +1490,10 @@ public class DeliverablesReportingExcelSummaryAction extends BaseSummariesAction
           }
 
 
-          if (this.isR(deliverable.getId()) == null) {
+          if (fairService.isR(deliverable.getId(), this.getActualPhase()) == null) {
             R = "X";
           } else {
-            if (this.isR(deliverable.getId()) == true) {
+            if (fairService.isR(deliverable.getId(), this.getActualPhase()) == true) {
               R = "R";
             } else {
               R = "X";

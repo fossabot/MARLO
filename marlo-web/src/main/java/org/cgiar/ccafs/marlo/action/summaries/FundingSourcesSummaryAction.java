@@ -35,6 +35,7 @@ import org.cgiar.ccafs.marlo.data.model.ProjectFocus;
 import org.cgiar.ccafs.marlo.data.model.ProjectInfo;
 import org.cgiar.ccafs.marlo.data.model.ProjectStatusEnum;
 import org.cgiar.ccafs.marlo.utils.APConfig;
+import org.cgiar.ccafs.marlo.utils.ReportingSummaryService;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -93,6 +94,7 @@ public class FundingSourcesSummaryAction extends BaseSummariesAction implements 
   private final CrpProgramManager programManager;
   private final ProjectManager projectManager;
   private final ResourceManager resourceManager;
+  private final ReportingSummaryService reportingSummaryService;
   // XLSX bytes
   private byte[] bytesXLSX;
 
@@ -101,11 +103,13 @@ public class FundingSourcesSummaryAction extends BaseSummariesAction implements 
 
   @Inject
   public FundingSourcesSummaryAction(APConfig config, GlobalUnitManager crpManager, CrpProgramManager programManager,
-    ProjectManager projectManager, PhaseManager phaseManager, ResourceManager resourceManager) {
+    ProjectManager projectManager, PhaseManager phaseManager, ResourceManager resourceManager,
+    ReportingSummaryService reportingSummaryService) {
     super(config, crpManager, phaseManager);
     this.programManager = programManager;
     this.projectManager = projectManager;
     this.resourceManager = resourceManager;
+    this.reportingSummaryService = reportingSummaryService;
   }
 
 
@@ -265,8 +269,7 @@ public class FundingSourcesSummaryAction extends BaseSummariesAction implements 
    * @param hm List to populate with subreports found
    * @param itemBand details section in pentaho
    */
-  @Override
-  public void getAllSubreports(HashMap<String, Element> hm, ItemBand itemBand) {
+  private void getAllSubreports(HashMap<String, Element> hm, ItemBand itemBand) {
     int elementCount = itemBand.getElementCount();
     for (int i = 0; i < elementCount; i++) {
       Element e = itemBand.getElement(i);
@@ -277,7 +280,7 @@ public class FundingSourcesSummaryAction extends BaseSummariesAction implements 
           this.getAllSubreports(hm, ((SubReport) e).getItemBand());
           // If report footer is not null check for subreports
           if (((SubReport) e).getReportFooter().getElementCount() != 0) {
-            this.getFooterSubreports(hm, ((SubReport) e).getReportFooter());
+            reportingSummaryService.getFooterSubreports(hm, ((SubReport) e).getReportFooter());
           }
         }
       }
@@ -304,7 +307,7 @@ public class FundingSourcesSummaryAction extends BaseSummariesAction implements 
         hm.put(e.getName(), e);
         // If report footer is not null check for subreports
         if (((SubReport) e).getReportFooter().getElementCount() != 0) {
-          this.getFooterSubreports(hm, ((SubReport) e).getReportFooter());
+          reportingSummaryService.getFooterSubreports(hm, ((SubReport) e).getReportFooter());
         }
       }
       if (e instanceof Band) {

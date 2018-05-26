@@ -20,6 +20,7 @@ import org.cgiar.ccafs.marlo.data.manager.PhaseManager;
 import org.cgiar.ccafs.marlo.data.manager.ProjectLeverageManager;
 import org.cgiar.ccafs.marlo.data.model.ProjectLeverage;
 import org.cgiar.ccafs.marlo.utils.APConfig;
+import org.cgiar.ccafs.marlo.utils.ReportingSummaryService;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -58,6 +59,7 @@ public class LeveragesReportingSummaryAction extends BaseSummariesAction impleme
   // Managers
   private final ProjectLeverageManager projectLeverageManager;
   private final ResourceManager resourceManager;
+  private final ReportingSummaryService reportingSummaryService;
 
   // Parameters
   private long startTime;
@@ -68,10 +70,12 @@ public class LeveragesReportingSummaryAction extends BaseSummariesAction impleme
 
   @Inject
   public LeveragesReportingSummaryAction(APConfig config, GlobalUnitManager crpManager,
-    ProjectLeverageManager projectLeverageManager, PhaseManager phaseManager, ResourceManager resourceManager) {
+    ProjectLeverageManager projectLeverageManager, PhaseManager phaseManager, ResourceManager resourceManager,
+    ReportingSummaryService reportingSummaryService) {
     super(config, crpManager, phaseManager);
     this.projectLeverageManager = projectLeverageManager;
     this.resourceManager = resourceManager;
+    this.reportingSummaryService = reportingSummaryService;
   }
 
   /**
@@ -128,7 +132,7 @@ public class LeveragesReportingSummaryAction extends BaseSummariesAction impleme
       // Create new empty subreport hash map
       HashMap<String, Element> hm = new HashMap<String, Element>();
       // method to get all the subreports in the prpt and store in the HashMap
-      this.getAllSubreports(hm, masteritemBand);
+      reportingSummaryService.getAllSubreports(hm, masteritemBand);
       // Uncomment to see which Subreports are detecting the method getAllSubreports
       // System.out.println("Pentaho SubReports: " + hm);
 

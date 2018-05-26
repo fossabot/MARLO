@@ -34,6 +34,7 @@ import org.cgiar.ccafs.marlo.data.model.ProjectPartner;
 import org.cgiar.ccafs.marlo.data.model.ProjectPhase;
 import org.cgiar.ccafs.marlo.data.model.ProjectStatusEnum;
 import org.cgiar.ccafs.marlo.utils.APConfig;
+import org.cgiar.ccafs.marlo.utils.ReportingSummaryService;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -67,13 +68,13 @@ import org.slf4j.LoggerFactory;
  * @author Andrés Felipe Valencia Rivera. CCAFS
  */
 
-public class budgetByCoAsSummaryAction extends BaseSummariesAction implements Summary {
+public class BudgetByCoAsSummaryAction extends BaseSummariesAction implements Summary {
 
   /**
    * 
    */
   private static final long serialVersionUID = 1L;
-  private static Logger LOG = LoggerFactory.getLogger(budgetByCoAsSummaryAction.class);
+  private static Logger LOG = LoggerFactory.getLogger(BudgetByCoAsSummaryAction.class);
 
   // Parameters
   private long startTime;
@@ -82,6 +83,7 @@ public class budgetByCoAsSummaryAction extends BaseSummariesAction implements Su
   private final CrpProgramManager programManager;
   private final ProjectBudgetManager projectBudgetManager;
   private final InstitutionManager institutionManager;
+  private final ReportingSummaryService reportingSummaryService;
 
   private final ResourceManager resourceManager;
 
@@ -93,14 +95,15 @@ public class budgetByCoAsSummaryAction extends BaseSummariesAction implements Su
 
 
   @Inject
-  public budgetByCoAsSummaryAction(APConfig config, GlobalUnitManager crpManager, CrpProgramManager programManager,
+  public BudgetByCoAsSummaryAction(APConfig config, GlobalUnitManager crpManager, CrpProgramManager programManager,
     ProjectBudgetManager projectBudgetManager, InstitutionManager institutionManager, PhaseManager phaseManager,
-    ResourceManager resourceManager) {
+    ResourceManager resourceManager, ReportingSummaryService reportingSummaryService) {
     super(config, crpManager, phaseManager);
     this.programManager = programManager;
     this.projectBudgetManager = projectBudgetManager;
     this.institutionManager = institutionManager;
     this.resourceManager = resourceManager;
+    this.reportingSummaryService = reportingSummaryService;
 
   }
 
@@ -195,7 +198,7 @@ public class budgetByCoAsSummaryAction extends BaseSummariesAction implements Su
       // Create new empty subreport hash map
       HashMap<String, Element> hm = new HashMap<String, Element>();
       // method to get all the subreports in the prpt and store in the HashMap
-      this.getAllSubreports(hm, masteritemBand);
+      reportingSummaryService.getAllSubreports(hm, masteritemBand);
       // Uncomment to see which Subreports are detecting the method getAllSubreports
       // System.out.println("Pentaho SubReports: " + hm);
 

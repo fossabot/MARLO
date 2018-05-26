@@ -16,7 +16,6 @@
 package org.cgiar.ccafs.marlo.action.center.impactpathway;
 
 import org.cgiar.ccafs.marlo.action.BaseAction;
-import org.cgiar.ccafs.marlo.action.center.summaries.ImpactSubmissionSummaryAction;
 import org.cgiar.ccafs.marlo.config.APConstants;
 import org.cgiar.ccafs.marlo.data.manager.CrpProgramManager;
 import org.cgiar.ccafs.marlo.data.manager.GlobalUnitManager;
@@ -31,6 +30,7 @@ import org.cgiar.ccafs.marlo.data.model.GlobalUnit;
 import org.cgiar.ccafs.marlo.data.model.ImpactPathwayCyclesEnum;
 import org.cgiar.ccafs.marlo.security.Permission;
 import org.cgiar.ccafs.marlo.utils.APConfig;
+import org.cgiar.ccafs.marlo.utils.ImpactSubmissionSummaryService;
 import org.cgiar.ccafs.marlo.utils.SendMail;
 
 import java.nio.ByteBuffer;
@@ -74,21 +74,21 @@ public class IPSubmissionAction extends BaseAction {
   private GlobalUnit loggedCenter;
   private boolean isSubmited = false;
 
-  private ImpactSubmissionSummaryAction impactSubmissionSummaryAction;
+  private final ImpactSubmissionSummaryService impactSubmissionSummaryService;
 
   private long crpProgramID;
 
   @Inject
   public IPSubmissionAction(APConfig config, ICenterSubmissionManager submissionService,
     CrpProgramManager programService, ICenterCycleManager cycleService, GlobalUnitManager centerService,
-    SendMail sendMail, ImpactSubmissionSummaryAction impactSubmissionSummaryAction) {
+    SendMail sendMail, ImpactSubmissionSummaryService impactSubmissionSummaryService) {
     super(config);
     this.programService = programService;
     this.submissionService = submissionService;
     this.cycleService = cycleService;
     this.centerService = centerService;
     this.sendMail = sendMail;
-    this.impactSubmissionSummaryAction = impactSubmissionSummaryAction;
+    this.impactSubmissionSummaryService = impactSubmissionSummaryService;
   }
 
   @Override
@@ -98,11 +98,9 @@ public class IPSubmissionAction extends BaseAction {
       if (submissionService.findAll() != null) {
         CrpProgram program = programService.getCrpProgramById(crpProgramID);
 
-        List<CenterSubmission> submissions =
-          new ArrayList<>(program.getCenterSubmissions().stream()
-            .filter(
-              s -> s.getResearchCycle().equals(cycle) && s.getYear().intValue() == this.getActualPhase().getYear())
-            .collect(Collectors.toList()));
+        List<CenterSubmission> submissions = new ArrayList<>(program.getCenterSubmissions().stream()
+          .filter(s -> s.getResearchCycle().equals(cycle) && s.getYear().intValue() == this.getActualPhase().getYear())
+          .collect(Collectors.toList()));
 
         if (submissions != null && submissions.size() > 0) {
           this.setCenterSubmission(submissions.get(0));
@@ -260,11 +258,11 @@ public class IPSubmissionAction extends BaseAction {
     String contentType = null;
     try {
       CrpProgram program = programService.getCrpProgramById(crpProgramID);
-      impactSubmissionSummaryAction.setResearchProgram(program);
-      impactSubmissionSummaryAction.execute();
+      // impactSubmissionSummaryAction.setResearchProgram(program);
+      byte[] pdfAsBytes = impactSubmissionSummaryService.execute(program, this.getActualPhase(), this.getBaseUrl());
 
       // Getting the file data.
-      buffer = ByteBuffer.wrap(impactSubmissionSummaryAction.getBytesPDF());
+      buffer = ByteBuffer.wrap(pdfAsBytes);
       fileName = this.getFileName();
       contentType = "application/pdf";
     } catch (Exception e) {

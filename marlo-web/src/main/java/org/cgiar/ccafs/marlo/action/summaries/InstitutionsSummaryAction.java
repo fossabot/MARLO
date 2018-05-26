@@ -28,6 +28,7 @@ import org.cgiar.ccafs.marlo.data.model.ProjectPartner;
 import org.cgiar.ccafs.marlo.data.model.ProjectPartnerLocation;
 import org.cgiar.ccafs.marlo.data.model.ProjectStatusEnum;
 import org.cgiar.ccafs.marlo.utils.APConfig;
+import org.cgiar.ccafs.marlo.utils.ReportingSummaryService;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -88,6 +89,8 @@ public class InstitutionsSummaryAction extends BaseSummariesAction implements Su
 
   private final ResourceManager resourceManager;
 
+  private final ReportingSummaryService reportingSummaryService;
+
   // Parameters
   private long startTime;
   HashMap<InstitutionType, Set<Institution>> institutionsPerType = new HashMap<InstitutionType, Set<Institution>>();
@@ -105,9 +108,10 @@ public class InstitutionsSummaryAction extends BaseSummariesAction implements Su
 
   @Inject
   public InstitutionsSummaryAction(APConfig config, GlobalUnitManager crpManager, PhaseManager phaseManager,
-    ResourceManager resourceManager) {
+    ResourceManager resourceManager, ReportingSummaryService reportingSummaryService) {
     super(config, crpManager, phaseManager);
     this.resourceManager = resourceManager;
+    this.reportingSummaryService = reportingSummaryService;
   }
 
   /**
@@ -256,7 +260,7 @@ public class InstitutionsSummaryAction extends BaseSummariesAction implements Su
       // Create new empty subreport hash map
       HashMap<String, Element> hm = new HashMap<String, Element>();
       // method to get all the subreports in the prpt and store in the HashMap
-      this.getAllSubreports(hm, masteritemBand);
+      reportingSummaryService.getAllSubreports(hm, masteritemBand);
       this.createIntitutionsProjectsList();
       masterReport.getParameterValues().put("total_inst", projectsPerInstitution.size());
       masterReport.getParameterValues().put("total_countries", countries.size());

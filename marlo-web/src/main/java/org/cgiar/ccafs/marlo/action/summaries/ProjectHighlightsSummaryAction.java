@@ -25,6 +25,7 @@ import org.cgiar.ccafs.marlo.data.model.ProjectHighlightType;
 import org.cgiar.ccafs.marlo.data.model.ProjectHighligthsTypeEnum;
 import org.cgiar.ccafs.marlo.utils.APConfig;
 import org.cgiar.ccafs.marlo.utils.FileManager;
+import org.cgiar.ccafs.marlo.utils.ReportingSummaryService;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -70,6 +71,7 @@ public class ProjectHighlightsSummaryAction extends BaseSummariesAction implemen
   // Managers
   private final ProjectHighligthManager projectHighLightManager;
   private final ResourceManager resourceManager;
+  private final ReportingSummaryService reportingSummaryService;
   // Parameters
   private long startTime;
   private String selectedFormat;
@@ -86,10 +88,12 @@ public class ProjectHighlightsSummaryAction extends BaseSummariesAction implemen
 
   @Inject
   public ProjectHighlightsSummaryAction(APConfig config, GlobalUnitManager crpManager,
-    ProjectHighligthManager projectHighLightManager, PhaseManager phaseManager, ResourceManager resourceManager) {
+    ProjectHighligthManager projectHighLightManager, PhaseManager phaseManager, ResourceManager resourceManager,
+    ReportingSummaryService reportingSummaryService) {
     super(config, crpManager, phaseManager);
     this.projectHighLightManager = projectHighLightManager;
     this.resourceManager = resourceManager;
+    this.reportingSummaryService = reportingSummaryService;
   }
 
   /**
@@ -163,7 +167,7 @@ public class ProjectHighlightsSummaryAction extends BaseSummariesAction implemen
       // Create new empty subreport hash map
       HashMap<String, Element> hm = new HashMap<String, Element>();
       // method to get all the subreports in the prpt and store in the HashMap
-      this.getAllSubreports(hm, masteritemBand);
+      reportingSummaryService.getAllSubreports(hm, masteritemBand);
       // Uncomment to see which Subreports are detecting the method getAllSubreports
       // System.out.println("Pentaho SubReports: " + hm);
       this.fillSubreport((SubReport) hm.get("project_highlight"), "project_highlight");

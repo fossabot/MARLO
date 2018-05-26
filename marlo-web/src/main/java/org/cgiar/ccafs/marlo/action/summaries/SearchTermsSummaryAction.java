@@ -34,6 +34,7 @@ import org.cgiar.ccafs.marlo.data.model.ProjectPartner;
 import org.cgiar.ccafs.marlo.data.model.ProjectPartnerPerson;
 import org.cgiar.ccafs.marlo.data.model.ProjectPhase;
 import org.cgiar.ccafs.marlo.utils.APConfig;
+import org.cgiar.ccafs.marlo.utils.ReportingSummaryService;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -94,6 +95,7 @@ public class SearchTermsSummaryAction extends BaseSummariesAction implements Sum
   private final CrpProgramManager programManager;
   private final CrossCuttingScoringManager crossCuttingScoringManager;
   private final ResourceManager resourceManager;
+  private final ReportingSummaryService reportingSummaryService;
   // XLSX bytes
   private byte[] bytesXLSX;
   // Streams
@@ -101,11 +103,13 @@ public class SearchTermsSummaryAction extends BaseSummariesAction implements Sum
 
   @Inject
   public SearchTermsSummaryAction(APConfig config, GlobalUnitManager crpManager, CrpProgramManager programManager,
-    PhaseManager phaseManager, CrossCuttingScoringManager crossCuttingScoringManager, ResourceManager resourceManager) {
+    PhaseManager phaseManager, CrossCuttingScoringManager crossCuttingScoringManager, ResourceManager resourceManager,
+    ReportingSummaryService reportingSummaryService) {
     super(config, crpManager, phaseManager);
     this.programManager = programManager;
     this.crossCuttingScoringManager = crossCuttingScoringManager;
     this.resourceManager = resourceManager;
+    this.reportingSummaryService = reportingSummaryService;
   }
 
   /**
@@ -198,7 +202,7 @@ public class SearchTermsSummaryAction extends BaseSummariesAction implements Sum
       // Create new empty subreport hash map
       HashMap<String, Element> hm = new HashMap<String, Element>();
       // method to get all the subreports in the prpt and store in the HashMap
-      this.getAllSubreports(hm, masteritemBand);
+      reportingSummaryService.getAllSubreports(hm, masteritemBand);
       // Uncomment to see which Subreports are detecting the method getAllSubreports
       // System.out.println("Pentaho SubReports: " + hm);
       this.fillSubreport((SubReport) hm.get("projects_details"), "project");

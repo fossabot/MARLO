@@ -33,6 +33,7 @@ import org.cgiar.ccafs.marlo.data.model.ProjectPartner;
 import org.cgiar.ccafs.marlo.data.model.ProjectPhase;
 import org.cgiar.ccafs.marlo.data.model.ProjectStatusEnum;
 import org.cgiar.ccafs.marlo.utils.APConfig;
+import org.cgiar.ccafs.marlo.utils.ReportingSummaryService;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -97,6 +98,7 @@ public class BudgetPerPartnersSummaryAction extends BaseSummariesAction implemen
   private final CrpProgramManager programManager;
   private final InstitutionManager institutionManager;
   private final ResourceManager resourceManager;
+  private final ReportingSummaryService reportingSummaryService;
 
   // XLSX bytes
   private byte[] bytesXLSX;
@@ -106,12 +108,13 @@ public class BudgetPerPartnersSummaryAction extends BaseSummariesAction implemen
   @Inject
   public BudgetPerPartnersSummaryAction(APConfig config, GlobalUnitManager crpManager,
     ProjectBudgetManager projectBudgetManager, CrpProgramManager programManager, InstitutionManager institutionManager,
-    PhaseManager phaseManager, ResourceManager resourceManager) {
+    PhaseManager phaseManager, ResourceManager resourceManager, ReportingSummaryService reportingSummaryService) {
     super(config, crpManager, phaseManager);
     this.projectBudgetManager = projectBudgetManager;
     this.programManager = programManager;
     this.institutionManager = institutionManager;
     this.resourceManager = resourceManager;
+    this.reportingSummaryService = reportingSummaryService;
   }
 
   /**
@@ -358,7 +361,7 @@ public class BudgetPerPartnersSummaryAction extends BaseSummariesAction implemen
       // Create new empty sub-report hash map
       HashMap<String, Element> hm = new HashMap<String, Element>();
       // method to get all the sub-reports in the prpt and store in the HashMap
-      this.getAllSubreports(hm, masteritemBand);
+      reportingSummaryService.getAllSubreports(hm, masteritemBand);
       // Uncomment to see which Sub-reports are detecting the method getAllSubreports
       // System.out.println("Pentaho SubReports: " + hm);
 

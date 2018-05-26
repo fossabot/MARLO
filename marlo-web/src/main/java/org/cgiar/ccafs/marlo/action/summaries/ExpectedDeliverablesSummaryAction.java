@@ -42,6 +42,7 @@ import org.cgiar.ccafs.marlo.data.model.ProjectPartnerContribution;
 import org.cgiar.ccafs.marlo.data.model.ProjectPartnerPerson;
 import org.cgiar.ccafs.marlo.data.model.ProjectStatusEnum;
 import org.cgiar.ccafs.marlo.utils.APConfig;
+import org.cgiar.ccafs.marlo.utils.ReportingSummaryService;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -114,6 +115,7 @@ public class ExpectedDeliverablesSummaryAction extends BaseSummariesAction imple
   private final CrossCuttingScoringManager crossCuttingScoringManager;
   private final CrpPpaPartnerManager crpPpaPartnerManager;
   private final ResourceManager resourceManager;
+  private final ReportingSummaryService reportingSummaryService;
 
   // XLS bytes
   private byte[] bytesXLSX;
@@ -125,13 +127,14 @@ public class ExpectedDeliverablesSummaryAction extends BaseSummariesAction imple
   public ExpectedDeliverablesSummaryAction(APConfig config, GlobalUnitManager crpManager, PhaseManager phaseManager,
     GenderTypeManager genderTypeManager, CrpProgramManager crpProgramManager,
     CrossCuttingScoringManager crossCuttingScoringManager, CrpPpaPartnerManager crpPpaPartnerManager,
-    ResourceManager resourceManager) {
+    ResourceManager resourceManager, ReportingSummaryService reportingSummaryService) {
     super(config, crpManager, phaseManager);
     this.genderTypeManager = genderTypeManager;
     this.crpProgramManager = crpProgramManager;
     this.crossCuttingScoringManager = crossCuttingScoringManager;
     this.crpPpaPartnerManager = crpPpaPartnerManager;
     this.resourceManager = resourceManager;
+    this.reportingSummaryService = reportingSummaryService;
   }
 
 
@@ -204,7 +207,7 @@ public class ExpectedDeliverablesSummaryAction extends BaseSummariesAction imple
       // Create new empty subreport hash map
       HashMap<String, Element> hm = new HashMap<String, Element>();
       // method to get all the subreports in the prpt and store in the HashMap
-      this.getAllSubreports(hm, masteritemBand);
+      reportingSummaryService.getAllSubreports(hm, masteritemBand);
       // Uncomment to see which Subreports are detecting the method getAllSubreports
       // System.out.println("Pentaho SubReports: " + hm);
       this.fillSubreport((SubReport) hm.get("details"), "details");

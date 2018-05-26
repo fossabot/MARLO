@@ -53,6 +53,7 @@ import org.cgiar.ccafs.marlo.data.model.ProjectFocus;
 import org.cgiar.ccafs.marlo.data.model.ProjectStatusEnum;
 import org.cgiar.ccafs.marlo.data.model.TypeExpectedStudiesEnum;
 import org.cgiar.ccafs.marlo.utils.APConfig;
+import org.cgiar.ccafs.marlo.utils.ReportingSummaryService;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -126,6 +127,7 @@ public class POWBSummaryAction extends BaseSummariesAction implements Summary {
   private final ProjectExpectedStudyManager projectExpectedStudyManager;
   private final PowbSynthesisManager powbSynthesisManager;
   private final ResourceManager resourceManager;
+  private final ReportingSummaryService reportingSummaryService;
   // RTF bytes
   private byte[] bytesRTF;
 
@@ -137,13 +139,15 @@ public class POWBSummaryAction extends BaseSummariesAction implements Summary {
   public POWBSummaryAction(APConfig config, GlobalUnitManager crpManager, PhaseManager phaseManager,
     PowbExpectedCrpProgressManager powbExpectedCrpProgressManager,
     PowbExpenditureAreasManager powbExpenditureAreasManager, PowbSynthesisManager powbSynthesisManager,
-    ProjectExpectedStudyManager projectExpectedStudyManager, ResourceManager resourceManager) {
+    ProjectExpectedStudyManager projectExpectedStudyManager, ResourceManager resourceManager,
+    ReportingSummaryService reportingSummaryService) {
     super(config, crpManager, phaseManager);
     this.powbExpectedCrpProgressManager = powbExpectedCrpProgressManager;
     this.powbExpenditureAreasManager = powbExpenditureAreasManager;
     this.powbSynthesisManager = powbSynthesisManager;
     this.projectExpectedStudyManager = projectExpectedStudyManager;
     this.resourceManager = resourceManager;
+    this.reportingSummaryService = reportingSummaryService;
   }
 
   /**
@@ -233,7 +237,7 @@ public class POWBSummaryAction extends BaseSummariesAction implements Summary {
       // Create new empty subreport hash map
       HashMap<String, Element> hm = new HashMap<String, Element>();
       // method to get all the subreports in the prpt and store in the HashMap
-      this.getAllSubreports(hm, masteritemBand);
+      reportingSummaryService.getAllSubreports(hm, masteritemBand);
       this.fillSubreport((SubReport) hm.get("ExpectedKeyResults"), "ExpectedKeyResults");
       // Table A
       this.fillSubreport((SubReport) hm.get("PlannedMilestones"), "PlannedMilestones");

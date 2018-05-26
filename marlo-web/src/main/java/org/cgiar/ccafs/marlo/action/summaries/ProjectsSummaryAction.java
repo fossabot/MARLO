@@ -30,6 +30,7 @@ import org.cgiar.ccafs.marlo.data.model.ProjectOutcome;
 import org.cgiar.ccafs.marlo.data.model.ProjectPartnerPerson;
 import org.cgiar.ccafs.marlo.data.model.ProjectStatusEnum;
 import org.cgiar.ccafs.marlo.utils.APConfig;
+import org.cgiar.ccafs.marlo.utils.ReportingSummaryService;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -79,6 +80,7 @@ public class ProjectsSummaryAction extends BaseSummariesAction implements Summar
   // Managers
   private final CrpProgramManager crpProgramManager;
   private final ResourceManager resourceManager;
+  private final ReportingSummaryService reportingSummaryService;
   // XLS bytes
   private byte[] bytesXLSX;
   // Streams
@@ -88,10 +90,12 @@ public class ProjectsSummaryAction extends BaseSummariesAction implements Summar
 
   @Inject
   public ProjectsSummaryAction(APConfig config, GlobalUnitManager crpManager, PhaseManager phaseManager,
-    CrpProgramManager crpProgramManager, ResourceManager resourceManager) {
+    CrpProgramManager crpProgramManager, ResourceManager resourceManager,
+    ReportingSummaryService reportingSummaryService) {
     super(config, crpManager, phaseManager);
     this.crpProgramManager = crpProgramManager;
     this.resourceManager = resourceManager;
+    this.reportingSummaryService = reportingSummaryService;
   }
 
 
@@ -140,7 +144,7 @@ public class ProjectsSummaryAction extends BaseSummariesAction implements Summar
       // Create new empty subreport hash map
       HashMap<String, Element> hm = new HashMap<String, Element>();
       // method to get all the subreports in the prpt and store in the HashMap
-      this.getAllSubreports(hm, masteritemBand);
+      reportingSummaryService.getAllSubreports(hm, masteritemBand);
       // Uncomment to see which Subreports are detecting the method getAllSubreports
       // System.out.println("Pentaho SubReports: " + hm);
       this.fillSubreport((SubReport) hm.get("details"), "details");

@@ -1,4 +1,5 @@
 package org.cgiar.ccafs.marlo.utils;
+
 import org.cgiar.ccafs.marlo.ApplicationContextConfig;
 import org.cgiar.ccafs.marlo.action.json.project.ProjectLeaderEditAction;
 import org.cgiar.ccafs.marlo.action.json.project.ValidateProjectSectionAction;
@@ -36,7 +37,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang.RandomStringUtils;
 import org.hibernate.SessionFactory;
-import org.springframework.context.ApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 /*****************************************************************
@@ -60,210 +61,55 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 
 public class SendEmails {
 
-  private static ReportingSummaryAction action;
-  private static ValidateProjectSectionAction validateProjectSectionAction;
-
-  private static SendMailS sendMail;
-  private static UserDAO userDAO;
-  private static ProjectDAO dao;
-  private static ProjectLeaderEditAction projectLeaderEditAction;
-  private static RoleDAO roleDAO;
-  private static GlobalUnitProjectManager globalUnitProjectManager;
-  private static GlobalUnitManager globalUnitManager;
-  private static List<User> users;
-  private static List<String> usersEmail;
-
   public static void main(String[] args) {
 
-    users = new ArrayList<>();
-    usersEmail = new ArrayList<>();
-    ApplicationContext ctx = new AnnotationConfigApplicationContext(ApplicationContextConfig.class);
-    SessionFactory sessionFactory = ctx.getBean(SessionFactory.class);
-    sessionFactory.getCurrentSession().beginTransaction();
-    userDAO = ctx.getBean(UserDAO.class);
-    roleDAO = ctx.getBean(RoleDAO.class);
-    dao = ctx.getBean(ProjectDAO.class);
-    sendMail = ctx.getBean(SendMailS.class);
-    action = ctx.getBean(ReportingSummaryAction.class);
-    validateProjectSectionAction = ctx.getBean(ValidateProjectSectionAction.class);
-    projectLeaderEditAction = ctx.getBean(ProjectLeaderEditAction.class);
-    globalUnitManager = ctx.getBean(GlobalUnitManager.class);
-    globalUnitProjectManager = ctx.getBean(GlobalUnitProjectManager.class);
-    action.setUsersToActive(new ArrayList<Map<String, Object>>());
-    AuditLogContextProvider.push(new AuditLogContext());
-    List<Map<String, Object>> list = userDAO.findCustomQuery(
-      " select p.id from  projects p  inner join global_unit_projects gp on gp.project_id=p.id where p.id_consolidado is not null  and gp.global_unit_id=21  and p.id>880; ");
-    action.setSession(new HashMap<>());
-    action.loadProvider(action.getSession());
-    action.getSession().put(APConstants.CRP_ADMIN_ROLE, "83");
-    action.getSession().put(APConstants.CRP_EMAIL_CC_FL_FM_CL, true);
-    action.getSession().put(APConstants.CRP_PMU_ROLE, "84");
-    action.getSession().put(APConstants.CRP_PL_ROLE, "91");
-    action.getSession().put(APConstants.CRP_PL_ROLE, "91");
-    action.getSession().put(APConstants.CRP_LESSONS_ACTIVE, true);
-    action.setPhaseID(new Long(7));
-    List<Phase> phases = globalUnitManager.getGlobalUnitById(21).getPhases().stream().filter(c -> c.isActive())
-      .collect(Collectors.toList());
-    phases.sort((p1, p2) -> p1.getStartDate().compareTo(p2.getStartDate()));
-    Map<Long, Phase> allPhasesMap = new HashMap<>();
-    for (Phase phase : phases) {
-      allPhasesMap.put(phase.getId(), phase);
-    }
-    action.getSession().put(APConstants.ALL_PHASES, allPhasesMap);
-    Long plRoleID = Long.parseLong((String) action.getSession().get(APConstants.CRP_PL_ROLE));
-    Role plRole = roleDAO.find(plRoleID);
-    for (Map<String, Object> map : list) {
-      Long id = Long.parseLong(map.get("id").toString());
-      Project project = dao.find(id);
-      for (ProjectPartner projectPartner : project.getProjectPartners().stream()
-        .filter(c -> c.isActive() && c.getPhase().getId().longValue() == action.getPhaseID().longValue())
-        .collect(Collectors.toList())) {
-        for (ProjectPartnerPerson projectPartnerPerson : projectPartner.getProjectPartnerPersons().stream()
-          .filter(c -> c.isActive()).collect(Collectors.toList())) {
-          if (projectPartnerPerson.getContactType().equals("PL")) {
-            if (!usersEmail.contains(projectPartnerPerson.getUser().getEmail())) {
-              notifyNewUserCreated(projectPartnerPerson.getUser());
-            }
-            notifyRoleAssigned(projectPartnerPerson.getUser(), plRole, project,
-              globalUnitProjectManager.findByProjectId(project.getId()).getGlobalUnit());
-          }
-        }
-      }
-      for (Phase phase : phases) {
-        if (phase.getYear() == 2017 || phase.getYear() == 2018) {
-          System.out.println("VALIDATE PROJECT " + project.getId());
-          validateProjectSectionAction.setProjectID(project.getId());
-          validateProjectSectionAction.setSession(action.getSession());
-          validateProjectSectionAction.setValidSection(true);
-          validateProjectSectionAction.setExistProject(true);
-          validateProjectSectionAction.setInvalidFields(new HashMap<>());
-          validateProjectSectionAction.setValidationMessage(new StringBuilder());
-          validateProjectSectionAction.loadProvider(action.getSession());
-          validateProjectSectionAction.setPhaseID(phase.getId());
-          validateProjectSectionAction
-            .setCrpID(globalUnitProjectManager.findByProjectId(project.getId()).getGlobalUnit().getId());
-          validateProjectSectionAction.setMissingFields(new StringBuilder());
-          validateProjectSectionAction.setSectionName(ProjectSectionStatusEnum.DESCRIPTION.getStatus());
-          try {
-            validateProjectSectionAction.execute();
-          } catch (Exception e) {
-            e.printStackTrace();
-          }
-          validateProjectSectionAction.setMissingFields(new StringBuilder());
-          validateProjectSectionAction.setSectionName(ProjectSectionStatusEnum.PARTNERS.getStatus());
-          try {
-            validateProjectSectionAction.execute();
-          } catch (Exception e) {
-            e.printStackTrace();
-          }
-          validateProjectSectionAction.setMissingFields(new StringBuilder());
-          validateProjectSectionAction.setSectionName(ProjectSectionStatusEnum.BUDGET.getStatus());
-          try {
-            validateProjectSectionAction.execute();
-          } catch (Exception e) {
-            e.printStackTrace();
-          }
-          projectLeaderEditAction.setProjectId(project.getId());
-          projectLeaderEditAction.setProjectStatus(true);
-          projectLeaderEditAction.setSession(action.getSession());
-          projectLeaderEditAction.setInvalidFields(new HashMap<>());
-          projectLeaderEditAction.setValidationMessage(new StringBuilder());
-          projectLeaderEditAction.loadProvider(action.getSession());
-          projectLeaderEditAction.setPhaseID(phase.getId());
-          projectLeaderEditAction
-            .setCrpID(globalUnitProjectManager.findByProjectId(project.getId()).getGlobalUnit().getId());
-          projectLeaderEditAction.setMissingFields(new StringBuilder());
-          try {
-            if (projectLeaderEditAction.isCompletePreProject(project.getId())) {
-              projectLeaderEditAction.execute();
-            }
-          } catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-          }
-        }
-      }
-    }
-    list = userDAO.findCustomQuery(
-      " select p.id from  projects p  inner join global_unit_projects gp on gp.project_id=p.id where p.id_consolidado is not null  and gp.global_unit_id=22  ; ");
-    action.setSession(new HashMap<>());
-    action.loadProvider(action.getSession());
-    action.getSession().put(APConstants.CRP_ADMIN_ROLE, "98");
-    action.getSession().put(APConstants.CRP_EMAIL_CC_FL_FM_CL, true);
-    action.getSession().put(APConstants.CRP_PMU_ROLE, "99");
-    action.getSession().put(APConstants.CRP_PL_ROLE, "106");
-    action.setPhaseID(new Long(8));
-    action.getSession().put(APConstants.CRP_LESSONS_ACTIVE, true);
-    phases = globalUnitManager.getGlobalUnitById(22).getPhases().stream().filter(c -> c.isActive())
-      .collect(Collectors.toList());
-    phases.sort((p1, p2) -> p1.getStartDate().compareTo(p2.getStartDate()));
-    allPhasesMap = new HashMap<>();
-    for (Phase phase : phases) {
-      allPhasesMap.put(phase.getId(), phase);
-    }
-    action.getSession().put(APConstants.ALL_PHASES, allPhasesMap);
-    plRoleID = Long.parseLong((String) action.getSession().get(APConstants.CRP_PL_ROLE));
-    plRole = roleDAO.find(plRoleID);
-    for (Map<String, Object> map : list) {
-      Long id = Long.parseLong(map.get("id").toString());
-      Project project = dao.find(id);
-      for (ProjectPartner projectPartner : project.getProjectPartners().stream()
-        .filter(c -> c.isActive() && c.getPhase().getId().longValue() == action.getPhaseID().longValue())
-        .collect(Collectors.toList())) {
-        for (ProjectPartnerPerson projectPartnerPerson : projectPartner.getProjectPartnerPersons().stream()
-          .filter(c -> c.isActive()).collect(Collectors.toList())) {
-          if (projectPartnerPerson.getContactType().equals("PL")) {
-            if (!usersEmail.contains(projectPartnerPerson.getUser().getEmail())) {
-              notifyNewUserCreated(projectPartnerPerson.getUser());
-            }
-            notifyRoleAssigned(projectPartnerPerson.getUser(), plRole, project,
-              globalUnitProjectManager.findByProjectId(project.getId()).getGlobalUnit());
-          }
-        }
-      }
-      for (Phase phase : phases) {
-        if (phase.getYear() == 2017 || phase.getYear() == 2018 && phase.getDescription().equals("Planning")) {
-          System.out.println("VALIDATE PROJECT " + project.getId());
-          validateProjectSectionAction.setProjectID(project.getId());
-          validateProjectSectionAction.setSession(action.getSession());
-          validateProjectSectionAction.setValidSection(true);
-          validateProjectSectionAction.setExistProject(true);
-          validateProjectSectionAction.setInvalidFields(new HashMap<>());
-          validateProjectSectionAction.setValidationMessage(new StringBuilder());
-          validateProjectSectionAction.loadProvider(action.getSession());
-          validateProjectSectionAction.setPhaseID(phase.getId());
-          validateProjectSectionAction
-            .setCrpID(globalUnitProjectManager.findByProjectId(project.getId()).getGlobalUnit().getId());
-          validateProjectSectionAction.setMissingFields(new StringBuilder());
-          validateProjectSectionAction.setSectionName(ProjectSectionStatusEnum.DESCRIPTION.getStatus());
-          try {
-            validateProjectSectionAction.execute();
-          } catch (Exception e) {
-            e.printStackTrace();
-          }
-          validateProjectSectionAction.setMissingFields(new StringBuilder());
-          validateProjectSectionAction.setSectionName(ProjectSectionStatusEnum.PARTNERS.getStatus());
-          try {
-            validateProjectSectionAction.execute();
-          } catch (Exception e) {
-            e.printStackTrace();
-          }
-          validateProjectSectionAction.setMissingFields(new StringBuilder());
-          validateProjectSectionAction.setSectionName(ProjectSectionStatusEnum.BUDGET.getStatus());
-          try {
-            validateProjectSectionAction.execute();
-          } catch (Exception e) {
-            e.printStackTrace();
-          }
-        }
-      }
-    }
-    action.addUsers();
-    sessionFactory.getCurrentSession().getTransaction().commit();
+    SendEmails sendEmails = new SendEmails();
+
+    sendEmails.sendEmails();
 
   }
 
-  private static void notifyNewUserCreated(User user) {
+  private ReportingSummaryAction action;
+
+  /** This is bad. The logic in the execute method should be placed in a manager class instead **/
+  private ValidateProjectSectionAction validateProjectSectionAction;
+
+  private SendMailS sendMail;
+
+  private UserDAO userDAO;
+  private ProjectDAO dao;
+  /** This is bad. The logic in the execute method should be placed in a manager class instead **/
+  private ProjectLeaderEditAction projectLeaderEditAction;
+  private RoleDAO roleDAO;
+  private GlobalUnitProjectManager globalUnitProjectManager;
+  private GlobalUnitManager globalUnitManager;
+  private List<User> users;
+  private SessionFactory sessionFactory;
+
+  private List<String> usersEmail;
+
+
+  public SendEmails() {
+    users = new ArrayList<>();
+    usersEmail = new ArrayList<>();
+
+    try (ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext(ApplicationContextConfig.class)) {
+      sessionFactory = ctx.getBean(SessionFactory.class);
+      sessionFactory.getCurrentSession().beginTransaction();
+      userDAO = ctx.getBean(UserDAO.class);
+      roleDAO = ctx.getBean(RoleDAO.class);
+      dao = ctx.getBean(ProjectDAO.class);
+      sendMail = ctx.getBean(SendMailS.class);
+      action = ctx.getBean(ReportingSummaryAction.class);
+      validateProjectSectionAction = ctx.getBean(ValidateProjectSectionAction.class);
+      projectLeaderEditAction = ctx.getBean(ProjectLeaderEditAction.class);
+      globalUnitManager = ctx.getBean(GlobalUnitManager.class);
+      globalUnitProjectManager = ctx.getBean(GlobalUnitProjectManager.class);
+    }
+  }
+
+
+  private void notifyNewUserCreated(User user) {
 
     if (user != null && user.getId() != null) {
       user = userDAO.getUser(user.getId());
@@ -298,7 +144,8 @@ public class SendEmails {
           if (crpAdmins.isEmpty()) {
             crpAdmins += userRole.getUser().getComposedCompleteName() + " (" + userRole.getUser().getEmail() + ")";
           } else {
-            crpAdmins += ", " + userRole.getUser().getComposedCompleteName() + " (" + userRole.getUser().getEmail() + ")";
+            crpAdmins +=
+              ", " + userRole.getUser().getComposedCompleteName() + " (" + userRole.getUser().getEmail() + ")";
           }
         }
 
@@ -324,7 +171,7 @@ public class SendEmails {
 
         try {
           inputStream = action.getClass().getResourceAsStream("/manual/Introduction_To_MARLO_v2.2.pdf");
-          buffer = readFully(inputStream);
+          buffer = this.readFully(inputStream);
         } catch (FileNotFoundException e) {
           // TODO Auto-generated catch block
           e.printStackTrace();
@@ -352,7 +199,7 @@ public class SendEmails {
 
   }
 
-  private static void notifyRoleAssigned(User userAssigned, Role role, Project project, GlobalUnit loggedCrp) {
+  private void notifyRoleAssigned(User userAssigned, Role role, Project project, GlobalUnit loggedCrp) {
 
 
     // Get The Crp/Center/Platform where the project was created
@@ -485,7 +332,7 @@ public class SendEmails {
     sendMail.send(toEmail, ccEmail, bbcEmails, subject, message.toString(), null, null, null, true);
   }
 
-  public static byte[] readFully(InputStream stream) throws IOException {
+  private byte[] readFully(InputStream stream) throws IOException {
     byte[] buffer = new byte[8192];
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
@@ -494,6 +341,181 @@ public class SendEmails {
       baos.write(buffer, 0, bytesRead);
     }
     return baos.toByteArray();
+  }
+
+  public void sendEmails() {
+
+    action.setUsersToActive(new ArrayList<Map<String, Object>>());
+    AuditLogContextProvider.push(new AuditLogContext());
+    List<Map<String, Object>> list = userDAO.findCustomQuery(
+      " select p.id from  projects p  inner join global_unit_projects gp on gp.project_id=p.id where p.id_consolidado is not null  and gp.global_unit_id=21  and p.id>880; ");
+    action.setSession(new HashMap<>());
+    action.loadProvider(action.getSession());
+    action.getSession().put(APConstants.CRP_ADMIN_ROLE, "83");
+    action.getSession().put(APConstants.CRP_EMAIL_CC_FL_FM_CL, true);
+    action.getSession().put(APConstants.CRP_PMU_ROLE, "84");
+    action.getSession().put(APConstants.CRP_PL_ROLE, "91");
+    action.getSession().put(APConstants.CRP_PL_ROLE, "91");
+    action.getSession().put(APConstants.CRP_LESSONS_ACTIVE, true);
+    action.setPhaseID(new Long(7));
+    List<Phase> phases = globalUnitManager.getGlobalUnitById(21).getPhases().stream().filter(c -> c.isActive())
+      .collect(Collectors.toList());
+    phases.sort((p1, p2) -> p1.getStartDate().compareTo(p2.getStartDate()));
+    Map<Long, Phase> allPhasesMap = new HashMap<>();
+    for (Phase phase : phases) {
+      allPhasesMap.put(phase.getId(), phase);
+    }
+    action.getSession().put(APConstants.ALL_PHASES, allPhasesMap);
+    Long plRoleID = Long.parseLong((String) action.getSession().get(APConstants.CRP_PL_ROLE));
+    Role plRole = roleDAO.find(plRoleID);
+    for (Map<String, Object> map : list) {
+      Long id = Long.parseLong(map.get("id").toString());
+      Project project = dao.find(id);
+      for (ProjectPartner projectPartner : project.getProjectPartners().stream()
+        .filter(c -> c.isActive() && c.getPhase().getId().longValue() == action.getPhaseID().longValue())
+        .collect(Collectors.toList())) {
+        for (ProjectPartnerPerson projectPartnerPerson : projectPartner.getProjectPartnerPersons().stream()
+          .filter(c -> c.isActive()).collect(Collectors.toList())) {
+          if (projectPartnerPerson.getContactType().equals("PL")) {
+            if (!usersEmail.contains(projectPartnerPerson.getUser().getEmail())) {
+              this.notifyNewUserCreated(projectPartnerPerson.getUser());
+            }
+            this.notifyRoleAssigned(projectPartnerPerson.getUser(), plRole, project,
+              globalUnitProjectManager.findByProjectId(project.getId()).getGlobalUnit());
+          }
+        }
+      }
+      for (Phase phase : phases) {
+        if (phase.getYear() == 2017 || phase.getYear() == 2018) {
+          System.out.println("VALIDATE PROJECT " + project.getId());
+          validateProjectSectionAction.setProjectID(project.getId());
+          validateProjectSectionAction.setSession(action.getSession());
+          validateProjectSectionAction.setValidSection(true);
+          validateProjectSectionAction.setExistProject(true);
+          validateProjectSectionAction.setInvalidFields(new HashMap<>());
+          validateProjectSectionAction.setValidationMessage(new StringBuilder());
+          validateProjectSectionAction.loadProvider(action.getSession());
+          validateProjectSectionAction.setPhaseID(phase.getId());
+          validateProjectSectionAction
+            .setCrpID(globalUnitProjectManager.findByProjectId(project.getId()).getGlobalUnit().getId());
+          validateProjectSectionAction.setMissingFields(new StringBuilder());
+          validateProjectSectionAction.setSectionName(ProjectSectionStatusEnum.DESCRIPTION.getStatus());
+          try {
+            validateProjectSectionAction.execute();
+          } catch (Exception e) {
+            e.printStackTrace();
+          }
+          validateProjectSectionAction.setMissingFields(new StringBuilder());
+          validateProjectSectionAction.setSectionName(ProjectSectionStatusEnum.PARTNERS.getStatus());
+          try {
+            validateProjectSectionAction.execute();
+          } catch (Exception e) {
+            e.printStackTrace();
+          }
+          validateProjectSectionAction.setMissingFields(new StringBuilder());
+          validateProjectSectionAction.setSectionName(ProjectSectionStatusEnum.BUDGET.getStatus());
+          try {
+            validateProjectSectionAction.execute();
+          } catch (Exception e) {
+            e.printStackTrace();
+          }
+          projectLeaderEditAction.setProjectId(project.getId());
+          projectLeaderEditAction.setProjectStatus(true);
+          projectLeaderEditAction.setSession(action.getSession());
+          projectLeaderEditAction.setInvalidFields(new HashMap<>());
+          projectLeaderEditAction.setValidationMessage(new StringBuilder());
+          projectLeaderEditAction.loadProvider(action.getSession());
+          projectLeaderEditAction.setPhaseID(phase.getId());
+          projectLeaderEditAction
+            .setCrpID(globalUnitProjectManager.findByProjectId(project.getId()).getGlobalUnit().getId());
+          projectLeaderEditAction.setMissingFields(new StringBuilder());
+          try {
+            if (projectLeaderEditAction.isCompletePreProject(project.getId())) {
+              projectLeaderEditAction.execute();
+            }
+          } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+          }
+        }
+      }
+    }
+    list = userDAO.findCustomQuery(
+      " select p.id from  projects p  inner join global_unit_projects gp on gp.project_id=p.id where p.id_consolidado is not null  and gp.global_unit_id=22  ; ");
+    action.setSession(new HashMap<>());
+    action.loadProvider(action.getSession());
+    action.getSession().put(APConstants.CRP_ADMIN_ROLE, "98");
+    action.getSession().put(APConstants.CRP_EMAIL_CC_FL_FM_CL, true);
+    action.getSession().put(APConstants.CRP_PMU_ROLE, "99");
+    action.getSession().put(APConstants.CRP_PL_ROLE, "106");
+    action.setPhaseID(new Long(8));
+    action.getSession().put(APConstants.CRP_LESSONS_ACTIVE, true);
+    phases = globalUnitManager.getGlobalUnitById(22).getPhases().stream().filter(c -> c.isActive())
+      .collect(Collectors.toList());
+    phases.sort((p1, p2) -> p1.getStartDate().compareTo(p2.getStartDate()));
+    allPhasesMap = new HashMap<>();
+    for (Phase phase : phases) {
+      allPhasesMap.put(phase.getId(), phase);
+    }
+    action.getSession().put(APConstants.ALL_PHASES, allPhasesMap);
+    plRoleID = Long.parseLong((String) action.getSession().get(APConstants.CRP_PL_ROLE));
+    plRole = roleDAO.find(plRoleID);
+    for (Map<String, Object> map : list) {
+      Long id = Long.parseLong(map.get("id").toString());
+      Project project = dao.find(id);
+      for (ProjectPartner projectPartner : project.getProjectPartners().stream()
+        .filter(c -> c.isActive() && c.getPhase().getId().longValue() == action.getPhaseID().longValue())
+        .collect(Collectors.toList())) {
+        for (ProjectPartnerPerson projectPartnerPerson : projectPartner.getProjectPartnerPersons().stream()
+          .filter(c -> c.isActive()).collect(Collectors.toList())) {
+          if (projectPartnerPerson.getContactType().equals("PL")) {
+            if (!usersEmail.contains(projectPartnerPerson.getUser().getEmail())) {
+              this.notifyNewUserCreated(projectPartnerPerson.getUser());
+            }
+            this.notifyRoleAssigned(projectPartnerPerson.getUser(), plRole, project,
+              globalUnitProjectManager.findByProjectId(project.getId()).getGlobalUnit());
+          }
+        }
+      }
+      for (Phase phase : phases) {
+        if (phase.getYear() == 2017 || phase.getYear() == 2018 && phase.getDescription().equals("Planning")) {
+          System.out.println("VALIDATE PROJECT " + project.getId());
+          validateProjectSectionAction.setProjectID(project.getId());
+          validateProjectSectionAction.setSession(action.getSession());
+          validateProjectSectionAction.setValidSection(true);
+          validateProjectSectionAction.setExistProject(true);
+          validateProjectSectionAction.setInvalidFields(new HashMap<>());
+          validateProjectSectionAction.setValidationMessage(new StringBuilder());
+          validateProjectSectionAction.loadProvider(action.getSession());
+          validateProjectSectionAction.setPhaseID(phase.getId());
+          validateProjectSectionAction
+            .setCrpID(globalUnitProjectManager.findByProjectId(project.getId()).getGlobalUnit().getId());
+          validateProjectSectionAction.setMissingFields(new StringBuilder());
+          validateProjectSectionAction.setSectionName(ProjectSectionStatusEnum.DESCRIPTION.getStatus());
+          try {
+            validateProjectSectionAction.execute();
+          } catch (Exception e) {
+            e.printStackTrace();
+          }
+          validateProjectSectionAction.setMissingFields(new StringBuilder());
+          validateProjectSectionAction.setSectionName(ProjectSectionStatusEnum.PARTNERS.getStatus());
+          try {
+            validateProjectSectionAction.execute();
+          } catch (Exception e) {
+            e.printStackTrace();
+          }
+          validateProjectSectionAction.setMissingFields(new StringBuilder());
+          validateProjectSectionAction.setSectionName(ProjectSectionStatusEnum.BUDGET.getStatus());
+          try {
+            validateProjectSectionAction.execute();
+          } catch (Exception e) {
+            e.printStackTrace();
+          }
+        }
+      }
+    }
+    action.addUsers();
+    sessionFactory.getCurrentSession().getTransaction().commit();
   }
 }
 
