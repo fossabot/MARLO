@@ -90,6 +90,17 @@
             </div>
           </div>
         </div>
+        [#-- Submit google button --]
+        <div class="row">
+          <div class="col-sm-12">
+            <div class="login-button-container">
+              [#-- This one to jump to second form and validate user data --]
+              [@s.submit key="Next" name="Google" class="fa fa-google-plus" role="button" disabled=false /]
+              [#-- and This one to send login form --]
+              [@s.submit name="formSubmit" cssClass="hidden" role="button "/]
+            </div>
+          </div>
+        </div>
         [#-- Login with different user --]
         <div class="login-back-container hidden">
           <p class="loginBack">[@s.text name="login.differentUser"/]</p>
