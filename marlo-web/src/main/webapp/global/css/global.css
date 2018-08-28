@@ -512,6 +512,10 @@ input[type="submit"]:hover {
   background-color: rgb(39, 147, 173);
 }
 
+input[type="submit"].google-button:hover{
+  background-color: #a83e32;
+}
+
 /* Accesible change on tab */
 input[type="submit"]:focus {
   background-color: rgb(39, 147, 173);

@@ -43,7 +43,7 @@
   letter-spacing: 0.012em;
 }
 
-.loginForm input:not(.login-form-button){
+.loginForm input:not(.login-form-button):not(.google-button){
   background: none;
   border-bottom: 1px solid rgb(224, 224, 224);
 }
@@ -338,6 +338,20 @@ span.login-input-container.username{
   margin: 8px;
   text-decoration: #d3d3d3 dotted underline;
   cursor: pointer;
+}
+
+.login-google-button-container {
+  display: flex;
+  justify-content: flex-end;
+  font-size:12px;
+}
+
+.login-google-button-container .google-button{
+  width: 20% !important;
+  margin-top: 15px;
+  background-color: #DD4B39;
+  border-bottom: 3px solid #a83e32;
+  border-radius: 2px;
 }
 
 /* Icon style */

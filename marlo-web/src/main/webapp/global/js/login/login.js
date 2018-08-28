@@ -72,6 +72,7 @@ function init() {
       wrongData("invalidEmail");
     }else if(!isSecondForm){
       loadAvailableItems(email);
+      $("input#login_google").hide();
     }else if(inputPassword.val()==""){
       wrongData("voidPassword");
     }else{
@@ -105,6 +106,7 @@ function init() {
   // Return to the first form (email input) when click on the user name
   $(".loginForm .login-input-container.username").on('click',function(){
     firstForm();
+    $("input#login_google").show();
   });
 
   // Return to the first form (email input) when click on the bottom message in form

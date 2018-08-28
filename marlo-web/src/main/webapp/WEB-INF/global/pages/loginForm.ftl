@@ -93,11 +93,9 @@
         [#-- Submit google button --]
         <div class="row">
           <div class="col-sm-12">
-            <div class="login-button-container">
+            <div class="login-google-button-container">
               [#-- This one to jump to second form and validate user data --]
-              [@s.submit key="Next" name="Google" class="fa fa-google-plus" role="button" disabled=false /]
-              [#-- and This one to send login form --]
-              [@s.submit name="formSubmit" cssClass="hidden" role="button "/]
+              [@s.submit key="Sign In with G" name="google" class="google-button" role="button" title="Authorized users only" disabled=false /]
             </div>
           </div>
         </div>
