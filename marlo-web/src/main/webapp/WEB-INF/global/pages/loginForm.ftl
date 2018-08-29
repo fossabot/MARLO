@@ -73,6 +73,10 @@
         </div>
         <div class="row">
           <div class="col-xs-12">
+                      <div class="login-google-button-container">
+              [#-- This one to jump to second form and validate user data --]
+              [@s.submit key="Sign In with Google" name="google" class="google-button" role="button" title="Authorized users only" disabled=false /]
+            </div>
             [#-- Terms and conditions checkbox --]
             <div class="terms-container hidden">
               <input type="checkbox" name="user.agree" id="terms" class="terms" value="true" required> [@s.text name="login.agree"/] <a target="_blank" href="[@s.url namespace="/" action='legalInformation'][/@s.url]#termsConditions">[@s.text name="login.terms"/]</a>
@@ -87,15 +91,6 @@
               [@s.submit key="Next" name="next" cssClass="login-form-button" role="button" disabled=false /]
               [#-- and This one to send login form --]
               [@s.submit name="formSubmit" cssClass="hidden" role="button "/]
-            </div>
-          </div>
-        </div>
-        [#-- Submit google button --]
-        <div class="row">
-          <div class="col-sm-12">
-            <div class="login-google-button-container">
-              [#-- This one to jump to second form and validate user data --]
-              [@s.submit key="Sign In with G" name="google" class="google-button" role="button" title="Authorized users only" disabled=false /]
             </div>
           </div>
         </div>

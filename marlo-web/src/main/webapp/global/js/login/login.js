@@ -76,6 +76,7 @@ function init() {
       if(email.indexOf('@gmail.com', email.length - '@gmail.com'.length) !== -1){
         $("input#login_google").show();
         $("input#login_next").hide();
+        $('#login-password').hide();
       }
     }else if(inputPassword.val()==""){
       wrongData("voidPassword");
@@ -112,12 +113,14 @@ function init() {
     firstForm();
     $("input#login_next").show();
     $("input#login_google").hide();
+    $('#login-password').show();
   });
 
   // Return to the first form (email input) when click on the bottom message in form
   $('.login-back-container p.loginBack').on('click',function(){
     $(".loginForm .login-input-container.username").click();
     $("input#login_next").show();
+    $('#login-password').show();
     $("input#login_google").hide();
   });
 
@@ -226,6 +229,8 @@ function loadAvailableItems(email){
       if(data.user == null){
         wrongData("emailNotFound");
         $("input#login_next").val("Next");
+        $("input#login_next").show();
+        $("input#login_google").hide();
       }else{
         var crpCookie=getCrpCookie();
 
