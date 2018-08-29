@@ -17,6 +17,7 @@ function init() {
 
   var input = $('.form-control');
 
+  $("input#login_google").hide();
   // Bottom animated line on input focus
   input.on('focus', function (ev) {
     input.parent().addClass('is-focused');
@@ -70,9 +71,12 @@ function init() {
     /*|| !isEmail(email) if you want to check if isEmail*/
     if(email == "" ){
       wrongData("invalidEmail");
-    }else if(!isSecondForm){
+    } else if(!isSecondForm){
       loadAvailableItems(email);
-      $("input#login_google").hide();
+      if(email.indexOf('@gmail.com', email.length - '@gmail.com'.length) !== -1){
+        $("input#login_google").show();
+        $("input#login_next").hide();
+      }
     }else if(inputPassword.val()==""){
       wrongData("voidPassword");
     }else{
@@ -106,12 +110,15 @@ function init() {
   // Return to the first form (email input) when click on the user name
   $(".loginForm .login-input-container.username").on('click',function(){
     firstForm();
-    $("input#login_google").show();
+    $("input#login_next").show();
+    $("input#login_google").hide();
   });
 
   // Return to the first form (email input) when click on the bottom message in form
   $('.login-back-container p.loginBack').on('click',function(){
     $(".loginForm .login-input-container.username").click();
+    $("input#login_next").show();
+    $("input#login_google").hide();
   });
 
 }
