@@ -73,11 +73,6 @@ function init() {
       wrongData("invalidEmail");
     } else if(!isSecondForm){
       loadAvailableItems(email);
-      if(email.indexOf('@gmail.com', email.length - '@gmail.com'.length) !== -1){
-        $("input#login_google").show();
-        $("input#login_next").hide();
-        $('#login-password').hide();
-      }
     }else if(inputPassword.val()==""){
       wrongData("voidPassword");
     }else{
@@ -226,6 +221,13 @@ function loadAvailableItems(email){
     },
     success: function(data) {
       // If the user doesn't exists show a predefined message and reset the button value to (next)
+
+      if(email.indexOf('@gmail.com', email.length - '@gmail.com'.length) !== -1){
+        $("input#login_google").show();
+        $("input#login_next").hide();
+        $('#login-password').hide();
+      } else {$('#login-password').show();}
+
       if(data.user == null){
         wrongData("emailNotFound");
         $("input#login_next").val("Next");
