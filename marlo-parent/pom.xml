@@ -19,7 +19,7 @@
 		<javax.inject.version>1</javax.inject.version>
 		<javax-mail.version>1.5.5</javax-mail.version>
 		<com.sun.mail.version>1.5.5</com.sun.mail.version>
-		<struts2.version>2.5.13</struts2.version>
+		<struts2.version>2.5.17</struts2.version>
 		<mysql.version>5.1.39</mysql.version>
 		<servlet-api.version>3.0.1</servlet-api.version>
 		<jsp-api.version>2.2.1</jsp-api.version>
@@ -664,12 +664,7 @@
 				<plugin>
 					<artifactId>maven-resources-plugin</artifactId>
 					<version>2.7</version>
-				</plugin>
-				<plugin>
-					<groupId>com.samaxes.maven</groupId>
-					<artifactId>minify-maven-plugin</artifactId>
-					<version>1.7.4</version>
-				</plugin>
+				</plugin>				
 				<plugin>
 					<!-- Ensure we can analyze java 8 code -->
 					<groupId>org.apache.maven.plugins</groupId>

@@ -348,6 +348,7 @@ public class ReportingSummaryAction extends BaseSummariesAction implements Summa
     masterReport.getParameterValues().put("i8nLocationsReportingMenu", "3. " + this.getText("projects.menu.locations"));
     masterReport.getParameterValues().put("i8nOutcomesReportingMenu", "4. " + this.getText("breadCrumb.menu.outcomes"));
 
+
     if (this.getProject().getProjectInfo().getAdministrative() != null
       && this.getProject().getProjectInfo().getAdministrative() == true) {
       masterReport.getParameterValues().put("i8nStudiesReportingMenu", "4. " + this.getText("menu.studies"));
@@ -964,6 +965,11 @@ public class ReportingSummaryAction extends BaseSummariesAction implements Summa
 
   @Override
   public String execute() throws Exception {
+
+    if (this.getSelectedPhase() == null) {
+      return NOT_FOUND;
+    }
+
     try {
       hasGender = this.hasSpecificities(APConstants.CRP_BUDGET_GENDER);
     } catch (Exception e) {
@@ -1026,6 +1032,7 @@ public class ReportingSummaryAction extends BaseSummariesAction implements Summa
         // Uncomment to see which Subreports are detecting the method getAllSubreports
         // System.out.println("Pentaho SubReports: " + hm);
         // get project leader
+
         ProjectPartner projectLeader = project.getLeader(this.getSelectedPhase());
         // get Flagships related to the project sorted by acronym
         List<CrpProgram> flagships = new ArrayList<>();
@@ -3336,6 +3343,15 @@ public class ReportingSummaryAction extends BaseSummariesAction implements Summa
         title += projectLeader.getInstitution().getAcronym() + "-";
       }
     }
+    try {
+
+      if (projectInfo.getAdministrative() == null) {
+        projectInfo.setAdministrative(false);
+      }
+    } catch (Exception e) {
+      projectInfo.setAdministrative(false);
+    }
+
     if (projectInfo.getAdministrative() == false) {
       if (flagships != null) {
         if (!flagships.isEmpty()) {

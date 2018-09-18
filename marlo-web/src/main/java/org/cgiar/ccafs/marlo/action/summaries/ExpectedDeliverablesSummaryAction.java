@@ -182,6 +182,11 @@ public class ExpectedDeliverablesSummaryAction extends BaseSummariesAction imple
 
   @Override
   public String execute() throws Exception {
+
+    if (this.getSelectedPhase() == null) {
+      return NOT_FOUND;
+    }
+
     ByteArrayOutputStream os = new ByteArrayOutputStream();
 
     try {
@@ -207,7 +212,6 @@ public class ExpectedDeliverablesSummaryAction extends BaseSummariesAction imple
       // method to get all the subreports in the prpt and store in the HashMap
       this.getAllSubreports(hm, masteritemBand);
       // Uncomment to see which Subreports are detecting the method getAllSubreports
-      // System.out.println("Pentaho SubReports: " + hm);
       this.fillSubreport((SubReport) hm.get("details"), "details");
       masterReport.getParameterValues().put("total_deliv", currentPhaseDeliverables.size());
       masterReport.getParameterValues().put("total_projects", projectsList.size());
@@ -227,7 +231,6 @@ public class ExpectedDeliverablesSummaryAction extends BaseSummariesAction imple
       "Downloaded successfully: " + this.getFileName() + ". User: " + this.getCurrentUser().getComposedCompleteName()
         + ". CRP: " + this.getLoggedCrp().getAcronym() + ". Time to generate: " + stopTime + "ms.");
     return SUCCESS;
-
   }
 
   private void fillSubreport(SubReport subReport, String query) {
@@ -735,6 +738,7 @@ public class ExpectedDeliverablesSummaryAction extends BaseSummariesAction imple
             projectTitle = deliverable.getProject().getProjectInfo().getTitle();
           }
           // Get project leader
+
           if (deliverable.getProject().getLeader(this.getSelectedPhase()) != null) {
             ProjectPartner leader = deliverable.getProject().getLeader(this.getSelectedPhase());
             if (leader.getInstitution() != null) {

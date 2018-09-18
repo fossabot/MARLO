@@ -710,7 +710,6 @@ public class POWBPOISummaryAction extends BaseSummariesAction implements Summary
   }
 
   private void createTableE() {
-
     List<List<POIField>> headers = new ArrayList<>();
     POIField[] sHeader = {new POIField("", ParagraphAlignment.CENTER),
       new POIField(
@@ -976,6 +975,11 @@ public class POWBPOISummaryAction extends BaseSummariesAction implements Summary
 
   @Override
   public String execute() throws Exception {
+
+    if (this.getSelectedPhase() == null) {
+      return NOT_FOUND;
+    }
+
     try {
       /* Create a portrait text Section */
       CTDocument1 doc = document.getDocument();
@@ -1526,6 +1530,9 @@ public class POWBPOISummaryAction extends BaseSummariesAction implements Summary
   @Override
   public void prepare() {
     this.setGeneralParameters();
+    if (this.getSelectedPhase() == null) {
+      this.setSelectedPhase(this.getActualPhase());
+    }
     powbSynthesisList =
       this.getSelectedPhase().getPowbSynthesis().stream().filter(ps -> ps.isActive()).collect(Collectors.toList());
     pmuInstitution = this.getPMUInstitution();

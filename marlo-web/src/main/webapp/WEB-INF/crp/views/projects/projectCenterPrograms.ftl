@@ -55,26 +55,34 @@
             <div class="form-group row">
               [#-- CENTER Research program --]
               <div class="col-md-6 researchProgram ">
-                [@customForm.select name="project.projectInfo.liaisonInstitutionCenter.id" listName="liaisonInstitutions" paramText="${currentCrp.acronym}" keyFieldName="id" displayFieldName="composedName" i18nkey="project.researchProgram" className="liaisonInstitutionSelect" help="project.researchProgram.help" required=true editable=editable /]
+                [@customForm.select name="project.projectInfo.liaisonInstitutionCenter.id" listName="liaisonInstitutions" paramText="${currentCrp.acronym}" keyFieldName="id" displayFieldName="composedName" i18nkey="CIAT Program" className="liaisonInstitutionSelect" help="project.researchProgram.help" required=true editable=editable /]
               </div>
             </div>
 
             <div class="form-group row simpleBox additionalPrograms">
-              <div class="col-md-6 ">
+              <div class="col-md-6" listname="additionalPrograms">
                 <h4> Additional Program(s)</h4>
-                [#list (programFlagships)![] as element] 
-                  [@customForm.checkmark id="program-${element.id}" name="project.flagshipValue" label="${element.composedName}" value="${element.id}" editable=editable checked=(flagshipIds?seq_contains(element.id))!false cssClass="fpInput" cssClassLabel="font-normal" /]
+                <div id="projectFlagshipsBlock" class="${customForm.changedField('project.flagshipValue')}">
+                [#list (programFlagships)![] as element]                                  
+                  [@customForm.checkmark id="program-${element.id}" name="project.flagshipValue" label="${element.centerComposedName}" value="${element.id}" editable=editable checked=(flagshipIds?seq_contains(element.id))!false cssClass="fpInput getCenterOutcomes" cssClassLabel="font-normal" /]
                   <br />
                 [/#list]
+                </div>
               </div>
-              <div class="col-md-6 ">
-                <h4> Additional Region(s)</h4>
+              <div class="col-md-6" listname="additionalOffices">
+                <h4> Regional Office(s)</h4>
                 [#list (regionFlagships)![] as element]
-                  [@customForm.checkmark id="region-${element.id}" name="project.regionsValue" label="${element.composedName}" value="${element.id}" editable=editable  checked=((regionsIds?seq_contains(element.id))!false) cssClass="rpInput" cssClassLabel="font-normal" /]
+                  [@customForm.checkmark id="region-${element.id}" name="project.regionsValue" label="${element.name}" value="${element.id}" editable=editable  checked=((regionsIds?seq_contains(element.id))!false) cssClass="rpInput" cssClassLabel="font-normal" /]
                   <br />
                 [/#list]
               </div>
             </div>
+            
+            [#-- CENTER Reserach Outcomes (SA Version) --] 
+            <div class="form-group">
+              [@customForm.elementsListComponent name="project.centerOutcomes" elementType="centerOutcome" elementList=project.centerOutcomes label="projectDescription.researchOutcomes" listName="centerOutcomes" keyFieldName="id" displayFieldName="listComposedName" required=editable /]
+            </div>
+            
             
           </div>
           
@@ -83,11 +91,13 @@
           <input type="hidden"  name="sharedPhaseID" value="${sharedPhaseID}"/>
           [/@s.form] 
       </div> 
+      
     </div> 
 </section>
 [/#if]
  
 <span id="liaisonInstitutionsPrograms" style="display:none">{[#list liaisonInstitutions as li]"${li.id}" : ${(li.crpProgram.id)!-1}[#if li_has_next], [/#if][/#list]}</span>
+
 
 [#include "/WEB-INF/global/pages/footer.ftl"]
 

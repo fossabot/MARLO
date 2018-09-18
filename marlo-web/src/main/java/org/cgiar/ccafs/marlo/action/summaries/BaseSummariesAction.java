@@ -105,6 +105,7 @@ public class BaseSummariesAction extends BaseAction {
       if (extentionDate != null) {
         extentionYear = this.getIntYearFromDate(extentionDate);
       }
+
       if (startYear <= this.getSelectedYear()
         && (endYear >= this.getSelectedYear() && (fundingSource.getFundingSourceInfo().getStatus().intValue() == Integer
           .parseInt(FundingStatusEnum.Ongoing.getStatusId())
@@ -269,6 +270,9 @@ public class BaseSummariesAction extends BaseAction {
   }
 
   public void setGeneralParameters() {
+    Map<String, Parameter> parameters = this.getParameters();
+
+    // Get logged crp
     try {
       this.setLoggedCrp((GlobalUnit) this.getSession().get(APConstants.SESSION_CRP));
       this.setLoggedCrp(crpManager.getGlobalUnitById(loggedCrp.getId()));
@@ -281,29 +285,32 @@ public class BaseSummariesAction extends BaseAction {
         this.setLoggedCrp(crpManager.findGlobalUnitByAcronym(crpAcronym));
       }
     }
-    // Get parameters from URL
-    // Get year
-    try {
-      Map<String, Parameter> parameters = this.getParameters();
-      this.setSelectedYear(
-        Integer.parseInt((StringUtils.trim(parameters.get(APConstants.YEAR_REQUEST).getMultipleValues()[0]))));
-    } catch (Exception e) {
-      LOG.warn("Failed to get " + APConstants.YEAR_REQUEST
-        + " parameter. Parameter will be set as CurrentCycleYear. Exception: " + e.getMessage());
-      this.setSelectedYear(this.getCurrentCycleYear());
+
+    // Get Phase
+    if (parameters.get(APConstants.PHASE_ID).isDefined()) {
+      try {
+        this.setSelectedPhase(phaseManager.getPhaseById(
+          Long.parseLong((StringUtils.trim(parameters.get(APConstants.PHASE_ID).getMultipleValues()[0])))));
+        this.setSelectedYear(selectedPhase.getYear());
+        this.setSelectedCycle(this.selectedPhase.getDescription());
+      } catch (Exception e) {
+        LOG.error("Failed to get " + APConstants.PHASE_ID + " parameter. Exception: " + e.getMessage());
+      }
+
+    } else {
+      // Get Phase from year and cycle parameters
+      if (parameters.get(APConstants.YEAR_REQUEST).isDefined() && parameters.get(APConstants.CYCLE).isDefined()) {
+        try {
+          this.setSelectedYear(
+            Integer.parseInt((StringUtils.trim(parameters.get(APConstants.YEAR_REQUEST).getMultipleValues()[0]))));
+          this.setSelectedCycle((StringUtils.trim(parameters.get(APConstants.CYCLE).getMultipleValues()[0])));
+          this.setSelectedPhase(phaseManager.findCycle(this.getSelectedCycle(), this.getSelectedYear(), false,
+            loggedCrp.getId().longValue()));
+        } catch (Exception e) {
+          LOG.error("Failed to get " + APConstants.PHASE_ID + " parameter. Exception: " + e.getMessage());
+        }
+      }
     }
-    // Get cycle
-    try {
-      Map<String, Parameter> parameters = this.getParameters();
-      this.setSelectedCycle((StringUtils.trim(parameters.get(APConstants.CYCLE).getMultipleValues()[0])));
-    } catch (Exception e) {
-      LOG.warn("Failed to get " + APConstants.CYCLE + " parameter. Parameter will be set as CurrentCycle. Exception: "
-        + e.getMessage());
-      this.setSelectedCycle(this.getCurrentCycle());
-    }
-    // Get phase
-    this.setSelectedPhase(
-      phaseManager.findCycle(this.getSelectedCycle(), this.getSelectedYear(), false, loggedCrp.getId().longValue()));
 
     // Get current user
     if (this.getCurrentUser() != null) {

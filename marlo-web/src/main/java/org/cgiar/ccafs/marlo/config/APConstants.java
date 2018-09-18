@@ -241,6 +241,8 @@ public final class APConstants {
 
   public static final String PROJECT_EXPECTED_STUDIES_PROJECTS_RELATION =
     "java.util.Set(org.cgiar.ccafs.marlo.data.model.ProjectExpectedStudy.expectedStudyProjects)";
+  public static final String PROJECT_EXPECTED_STUDIES_INFOS_RELATION =
+    "java.util.Set(org.cgiar.ccafs.marlo.data.model.ProjectExpectedStudy.projectExpectedStudyInfos)";
 
   public static final String PROJECT_EXPECTED_STUDIES_SUBIDOS_RELATION =
     "java.util.Set(org.cgiar.ccafs.marlo.data.model.ProjectExpectedStudy.projectExpectedStudySubIdos)";
@@ -384,6 +386,8 @@ public final class APConstants {
     "java.util.Set(org.cgiar.ccafs.marlo.data.model.ProjectPartnerPartnership.projectPartnerPartnershipLocations)";
 
   // Project innovations Relations
+  public static final String PROJECT_INNOVATION_INFOS_RELATION =
+    "java.util.Set(org.cgiar.ccafs.marlo.data.model.ProjectInnovation.projectInnovationInfos)";
   public static final String PROJECT_INNOVATION_COUNTRY_RELATION =
     "java.util.Set(org.cgiar.ccafs.marlo.data.model.ProjectInnovation.projectInnovationCountries)";
   public static final String PROJECT_INNOVATION_ORGANIZATION_RELATION =

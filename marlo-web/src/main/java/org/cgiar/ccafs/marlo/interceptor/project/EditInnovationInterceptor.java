@@ -106,7 +106,7 @@ public class EditInnovationInterceptor extends AbstractInterceptor implements Se
           .hasPermission(baseAction.generatePermission(Permission.PROJECT_INNOVATIONS_EDIT_PERMISSION, params))) {
           canEdit = true;
         }
-        if (baseAction.isSubmit(projectInnovation.getProject().getId())) {
+        if (baseAction.isSubmit(projectInnovation.getProject().getId()) && !baseAction.getActualPhase().getUpkeep()) {
           canEdit = false;
         }
         if (baseAction.isCrpClosed()) {
@@ -129,6 +129,10 @@ public class EditInnovationInterceptor extends AbstractInterceptor implements Se
       if (editParameter || parameters.get("save").isDefined()) {
         hasPermissionToEdit = ((baseAction.canAccessSuperAdmin() || baseAction.canEditCrpAdmin())) ? true : baseAction
           .hasPermission(baseAction.generatePermission(Permission.PROJECT_INNOVATIONS_EDIT_PERMISSION, params));
+      }
+
+      if (parameters.get(APConstants.TRANSACTION_ID).isDefined()) {
+        hasPermissionToEdit = false;
       }
 
       if (baseAction.hasPermission(baseAction.generatePermission(Permission.PROJECT__SWITCH, params))) {

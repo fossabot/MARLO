@@ -13,55 +13,29 @@
  * along with MARLO. If not, see <http://www.gnu.org/licenses/>.
  *****************************************************************/
 
-package org.cgiar.ccafs.marlo.rest.crpPrograms;
+package org.cgiar.ccafs.marlo.rest.crpprograms;
 
-import javax.validation.constraints.NotNull;
+import org.cgiar.ccafs.marlo.data.model.CrpProgram;
+import org.cgiar.ccafs.marlo.rest.dto.CrpProgramDTO;
+import org.cgiar.ccafs.marlo.rest.dto.NewFlagshipDTO;
 
-import io.swagger.annotations.ApiModelProperty;
+import org.mapstruct.Mapper;
+import org.mapstruct.MappingTarget;
 
 /**
  * @author Hermes Jiménez - CIAT/CCAFS
  */
-public class CrpProgramDTO {
+@Mapper(componentModel = "jsr330")
+public interface CrpProgramMapper {
 
-  @ApiModelProperty(notes = "The Generated Program ID")
-  private Long id;
+  public abstract CrpProgram crpProgramDTOToCrpProgram(CrpProgramDTO crpProgramDTO);
 
-  @ApiModelProperty(notes = "The Flagship program Name")
-  @NotNull
-  private String name;
+  public abstract CrpProgramDTO crpProgramToCrpProgramDTO(CrpProgram crpProgram);
 
-  @ApiModelProperty(notes = "The Flagship program Acronym")
-  @NotNull
-  private String acronym;
+  public abstract CrpProgram newFlagshipDTOToCrpProgram(NewFlagshipDTO newFlagshipDTO);
 
-  public String getAcronym() {
-    return acronym;
-  }
-
-
-  public Long getId() {
-    return id;
-  }
-
-
-  public String getName() {
-    return name;
-  }
-
-
-  public void setAcronym(String acronym) {
-    this.acronym = acronym;
-  }
-
-  public void setId(Long id) {
-    this.id = id;
-  }
-
-
-  public void setName(String name) {
-    this.name = name;
-  }
+  public abstract CrpProgram updateCrpProgramFromCrpProgramDto(CrpProgramDTO crpProgramDTO,
+    @MappingTarget CrpProgram crpProgram);
 
 
 }

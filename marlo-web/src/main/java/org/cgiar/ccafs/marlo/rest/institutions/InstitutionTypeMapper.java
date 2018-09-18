@@ -16,7 +16,7 @@
 package org.cgiar.ccafs.marlo.rest.institutions;
 
 import org.cgiar.ccafs.marlo.data.model.InstitutionType;
-import org.cgiar.ccafs.marlo.rest.institutions.dto.InstitutionTypeDTO;
+import org.cgiar.ccafs.marlo.rest.dto.InstitutionTypeDTO;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;

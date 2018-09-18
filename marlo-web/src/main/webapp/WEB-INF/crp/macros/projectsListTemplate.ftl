@@ -32,7 +32,9 @@
           <th id="projectBudget">[@s.text name="projectsList.BILATERALprojectBudget" /]</th>
         [/#if]
         <th id="projectActionStatus">[@s.text name="projectsList.projectActionStatus" /]</th>
+        
         <th id="projectDownload">[@s.text name="projectsList.download" /]</th>
+
         <th id="projectDelete">[@s.text name="projectsList.delete" /]</th>
         [#if isPlanning]
           <th id="projectBudget">[@s.text name="planning.projects.completion" /]</th>
@@ -164,15 +166,18 @@
             [/#if]
             
           </td>
+          
           [#-- Summary PDF download --]
-          <td>
-            <a href="[@s.url namespace="/projects" action='${(crpSession)!}/reportingSummary'][@s.param name='projectID']${project.id?c}[/@s.param][@s.param name='cycle']${action.getCurrentCycle()}[/@s.param][@s.param name='year']${action.getCurrentCycleYear()}[/@s.param][/@s.url]" target="__BLANK">
-              <img src="${baseUrl}/global/images/pdf.png" height="25" title="[@s.text name="projectsList.downloadPDF" /]" />
-            </a>            
+          <td>        
+            [#if action.getActualPhase().crp.id != 29]
+              <a href="[@s.url namespace="/projects" action='${(crpSession)!}/reportingSummary'][@s.param name='projectID']${project.id?c}[/@s.param][@s.param name='cycle']${action.getCurrentCycle()}[/@s.param][@s.param name='year']${action.getCurrentCycleYear()}[/@s.param][/@s.url]" target="__BLANK">
+                <img src="${baseUrl}/global/images/pdf.png" height="25" title="[@s.text name="projectsList.downloadPDF" /]" />
+              </a>          
+            [/#if]
           </td>
           [#-- Delete Project--]
           <td>
-            [#if canEdit && isProjectNew && action.deletePermission(project.id) && action.getActualPhase().editable ]
+            [#if canEdit && isProjectNew && action.deletePermission(project.id) && action.getActualPhase().editable && project.projectInfo.phase.id=action.getActualPhase().id]
               <a id="removeProject-${project.id}" class="removeProject" href="#" title="">
                 <img src="${baseUrl}/global/images/trash.png" title="[@s.text name="projectsList.deleteProject" /]" /> 
               </a>
@@ -266,9 +271,11 @@
           </td>
           [#-- Summary PDF download --]
           <td>
-            <a href="[@s.url namespace="/projects" action='${(crpSession)!}/reportingSummary'][@s.param name='projectID']${project.id?c}[/@s.param][@s.param name='cycle']${action.getCurrentCycle()}[/@s.param][@s.param name='year']${action.getCurrentCycleYear()}[/@s.param][/@s.url]" target="__BLANK">
-              <img src="${baseUrl}/global/images/pdf.png" height="25" title="[@s.text name="projectsList.downloadPDF" /]" />
-            </a>
+            [#if action.getActualPhase().crp.id != 29]
+              <a href="[@s.url namespace="/projects" action='${(crpSession)!}/reportingSummary'][@s.param name='projectID']${project.id?c}[/@s.param][@s.param name='cycle']${action.getCurrentCycle()}[/@s.param][@s.param name='year']${action.getCurrentCycleYear()}[/@s.param][/@s.url]" target="__BLANK">
+                <img src="${baseUrl}/global/images/pdf.png" height="25" title="[@s.text name="projectsList.downloadPDF" /]" />
+              </a>
+            [/#if]
           </td>
           [#-- Delete Project--] 
           <td>

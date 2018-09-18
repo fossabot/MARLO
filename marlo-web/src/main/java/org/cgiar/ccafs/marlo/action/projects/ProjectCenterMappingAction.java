@@ -22,18 +22,23 @@ import org.cgiar.ccafs.marlo.data.manager.CrpProgramManager;
 import org.cgiar.ccafs.marlo.data.manager.GlobalUnitManager;
 import org.cgiar.ccafs.marlo.data.manager.GlobalUnitProjectManager;
 import org.cgiar.ccafs.marlo.data.manager.LiaisonInstitutionManager;
+import org.cgiar.ccafs.marlo.data.manager.LiaisonUserManager;
 import org.cgiar.ccafs.marlo.data.manager.PhaseManager;
+import org.cgiar.ccafs.marlo.data.manager.ProjectCenterOutcomeManager;
 import org.cgiar.ccafs.marlo.data.manager.ProjectFocusManager;
 import org.cgiar.ccafs.marlo.data.manager.ProjectInfoManager;
 import org.cgiar.ccafs.marlo.data.manager.ProjectManager;
 import org.cgiar.ccafs.marlo.data.manager.SectionStatusManager;
+import org.cgiar.ccafs.marlo.data.manager.impl.CenterOutcomeManager;
+import org.cgiar.ccafs.marlo.data.model.CenterOutcome;
+import org.cgiar.ccafs.marlo.data.model.CenterTopic;
 import org.cgiar.ccafs.marlo.data.model.CrpProgram;
 import org.cgiar.ccafs.marlo.data.model.GlobalUnit;
-import org.cgiar.ccafs.marlo.data.model.GlobalUnitProject;
 import org.cgiar.ccafs.marlo.data.model.LiaisonInstitution;
 import org.cgiar.ccafs.marlo.data.model.Phase;
 import org.cgiar.ccafs.marlo.data.model.ProgramType;
 import org.cgiar.ccafs.marlo.data.model.Project;
+import org.cgiar.ccafs.marlo.data.model.ProjectCenterOutcome;
 import org.cgiar.ccafs.marlo.data.model.ProjectFocus;
 import org.cgiar.ccafs.marlo.data.model.ProjectInfo;
 import org.cgiar.ccafs.marlo.security.Permission;
@@ -69,8 +74,11 @@ public class ProjectCenterMappingAction extends BaseAction {
 
   private static final Logger LOG = LoggerFactory.getLogger(ProjectCenterMappingAction.class);
 
+
   private ProjectManager projectManager;
+
   private CrpProgramManager programManager;
+  private LiaisonUserManager liaisonUserManager;
   private GlobalUnitProjectManager globalUnitProjectManager;
   private GlobalUnitManager crpManager;
   private SectionStatusManager sectionStatusManager;
@@ -91,13 +99,17 @@ public class ProjectCenterMappingAction extends BaseAction {
   private PhaseManager phaseManager;
   private List<LiaisonInstitution> liaisonInstitutions;
   private LiaisonInstitutionManager liaisonInstitutionManager;
+  private ProjectCenterOutcomeManager projectCenterOutcomeManager;
+  private CenterOutcomeManager centerOutcomeManager;
+  private List<CenterOutcome> centerOutcomes;
 
   @Inject
   public ProjectCenterMappingAction(APConfig config, ProjectManager projectManager, CrpProgramManager programManager,
     GlobalUnitProjectManager globalUnitProjectManager, GlobalUnitManager crpManager,
     SectionStatusManager sectionStatusManager, ProjectFocusManager projectFocusManager, AuditLogManager auditLogManager,
     ProjectInfoManager projectInfoManager, ProjectCenterMappingValidator validator, PhaseManager phaseManager,
-    LiaisonInstitutionManager liaisonInstitutionManager) {
+    LiaisonInstitutionManager liaisonInstitutionManager, ProjectCenterOutcomeManager projectCenterOutcomeManager,
+    CenterOutcomeManager centerOutcomeManager, LiaisonUserManager liaisonUserManager) {
     super(config);
     this.projectManager = projectManager;
     this.programManager = programManager;
@@ -110,18 +122,25 @@ public class ProjectCenterMappingAction extends BaseAction {
     this.validator = validator;
     this.phaseManager = phaseManager;
     this.liaisonInstitutionManager = liaisonInstitutionManager;
+    this.projectCenterOutcomeManager = projectCenterOutcomeManager;
+    this.centerOutcomeManager = centerOutcomeManager;
+    this.liaisonUserManager = liaisonUserManager;
   }
 
-  private Path getAutoSaveFilePath() {
+  private Path getAutoSaveFilePath(Phase phase) {
     // get the class simple name
     String composedClassName = project.getClass().getSimpleName();
     // get the action name and replace / for _
     String actionFile = this.getActionName().replace("/", "_");
     // concatane name and add the .json extension
-    String autoSaveFile = project.getId() + "_" + composedClassName + "_" + this.getActualPhase().getDescription() + "_"
-      + this.getActualPhase().getYear() + "_" + actionFile + ".json";
+    String autoSaveFile = project.getId() + "_" + composedClassName + "_" + phase.getDescription() + "_"
+      + phase.getYear() + "_" + actionFile + ".json";
 
     return Paths.get(config.getAutoSaveFolder() + autoSaveFile);
+  }
+
+  public List<CenterOutcome> getCenterOutcomes() {
+    return centerOutcomes;
   }
 
   public List<CrpProgram> getCenterPrograms() {
@@ -162,10 +181,10 @@ public class ProjectCenterMappingAction extends BaseAction {
     return projectID;
   }
 
-
   public List<CrpProgram> getRegionFlagships() {
     return regionFlagships;
   }
+
 
   public List<CrpProgram> getRegionPrograms() {
     return regionPrograms;
@@ -241,7 +260,7 @@ public class ProjectCenterMappingAction extends BaseAction {
     if (project != null) {
       // We validate if there is a draft version
       // Get the path
-      Path path = this.getAutoSaveFilePath();
+      Path path = this.getAutoSaveFilePath(phase);
       // validate if file exist and user has enabled auto-save funcionallity
       if (path.toFile().exists() && this.getCurrentUser().isAutoSave()) {
 
@@ -269,6 +288,13 @@ public class ProjectCenterMappingAction extends BaseAction {
             .getLiaisonInstitutionById(project.getProjectInfo().getLiaisonInstitutionCenter().getId()));
         } else {
           project.getProjecInfoPhase(phase).setLiaisonInstitutionCenter(null);
+        }
+
+        if (project.getCenterOutcomes() != null) {
+          for (ProjectCenterOutcome projectCenterOutcome : project.getCenterOutcomes()) {
+            projectCenterOutcome.setCenterOutcome(
+              centerOutcomeManager.getResearchOutcomeById(projectCenterOutcome.getCenterOutcome().getId()));
+          }
         }
 
         // load fps value
@@ -315,12 +341,18 @@ public class ProjectCenterMappingAction extends BaseAction {
       } else {
         this.setDraft(false);
 
-        GlobalUnitProject gp = globalUnitProjectManager.findByProjectId(project.getId());
-
         // Load the DB information and adjust it to the structures with which the front end
         project.setProjectInfo(project.getProjecInfoPhase(phase));
         if (project.getProjectInfo() == null) {
           project.setProjectInfo(new ProjectInfo());
+        }
+
+        if (project.getProjectInfo().getLiaisonInstitutionCenter() != null
+          && project.getProjectInfo().getLiaisonInstitutionCenter().getId() != null) {
+          project.getProjectInfo().setLiaisonUser(
+            liaisonUserManager.getLiaisonUserById(project.getProjectInfo().getLiaisonInstitutionCenter().getId()));
+        } else {
+          project.getProjecInfoPhase(this.getActualPhase()).setLiaisonUser(null);
         }
 
         // Load the center Programs
@@ -330,7 +362,7 @@ public class ProjectCenterMappingAction extends BaseAction {
         for (ProjectFocus projectFocuses : project.getProjectFocuses().stream()
           .filter(c -> c.isActive() && c.getPhase() != null && c.getPhase().equals(phase)
             && c.getCrpProgram().getProgramType() == ProgramType.FLAGSHIP_PROGRAM_TYPE.getValue()
-            && c.getCrpProgram().getCrp().getId().equals(gp.getGlobalUnit().getId()))
+            && c.getCrpProgram().getCrp().getId().equals(this.getLoggedCrp().getId()))
           .collect(Collectors.toList())) {
           programs.add(projectFocuses.getCrpProgram());
           if (project.getFlagshipValue().isEmpty()) {
@@ -346,7 +378,7 @@ public class ProjectCenterMappingAction extends BaseAction {
         for (ProjectFocus projectFocuses : project.getProjectFocuses().stream()
           .filter(c -> c.isActive() && c.getPhase() != null && c.getPhase().equals(phase)
             && c.getCrpProgram().getProgramType() == ProgramType.REGIONAL_PROGRAM_TYPE.getValue()
-            && c.getCrpProgram().getCrp().getId().equals(gp.getGlobalUnit().getId()))
+            && c.getCrpProgram().getCrp().getId().equals(this.getLoggedCrp().getId()))
           .collect(Collectors.toList())) {
           regions.add(projectFocuses.getCrpProgram());
           if (project.getRegionsValue() != null && project.getRegionsValue().isEmpty()) {
@@ -357,6 +389,15 @@ public class ProjectCenterMappingAction extends BaseAction {
           }
         }
 
+        List<ProjectCenterOutcome> projectCenterOutcomes = new ArrayList<>();
+        for (ProjectCenterOutcome projectCenterOutcome : project.getProjectCenterOutcomes().stream()
+          .filter(c -> c.isActive() && c.getPhase() != null && c.getPhase().equals(phase))
+          .collect(Collectors.toList())) {
+          projectCenterOutcome.setCenterOutcome(
+            centerOutcomeManager.getResearchOutcomeById(projectCenterOutcome.getCenterOutcome().getId()));
+          projectCenterOutcomes.add(projectCenterOutcome);
+        }
+        project.setCenterOutcomes(projectCenterOutcomes);
         project.setFlagships(programs);
         project.setRegions(regions);
       }
@@ -374,6 +415,21 @@ public class ProjectCenterMappingAction extends BaseAction {
 
       programFlagships.sort((p1, p2) -> p1.getAcronym().compareTo(p2.getAcronym()));
 
+
+      centerOutcomes = new ArrayList<>();
+
+      for (CrpProgram crpProgram : project.getFlagships()) {
+        crpProgram = programManager.getCrpProgramById(crpProgram.getId());
+        List<CenterTopic> centerTopics = new ArrayList<>(
+          crpProgram.getResearchTopics().stream().filter(rt -> rt.isActive()).collect(Collectors.toList()));
+        for (CenterTopic centerTopic : centerTopics) {
+          List<CenterOutcome> centerOutcomesList = new ArrayList<>(
+            centerTopic.getResearchOutcomes().stream().filter(ro -> ro.isActive()).collect(Collectors.toList()));
+          for (CenterOutcome centerOutcome : centerOutcomesList) {
+            centerOutcomes.add(centerOutcome);
+          }
+        }
+      }
 
       regionFlagships.addAll(loggedCrp.getCrpPrograms().stream()
         .filter(c -> c.isActive() && c.getProgramType() == ProgramType.REGIONAL_PROGRAM_TYPE.getValue())
@@ -486,6 +542,32 @@ public class ProjectCenterMappingAction extends BaseAction {
 
         }
 
+        // Removing Project Center Outcomes
+        for (ProjectCenterOutcome projectCenterOutcome : projectDB.getProjectCenterOutcomes().stream()
+          .filter(c -> c.isActive() && c.getPhase() != null && c.getPhase().equals(sharedPhase))
+          .collect(Collectors.toList())) {
+          if (project.getCenterOutcomes() == null) {
+            project.setCenterOutcomes(new ArrayList<>());
+          }
+          if (!project.getCenterOutcomes().contains(projectCenterOutcome)) {
+            projectCenterOutcomeManager.deleteProjectCenterOutcome(projectCenterOutcome.getId());
+          }
+        }
+
+        // Add Project Center Outcomes
+        if (project.getCenterOutcomes() != null) {
+          for (ProjectCenterOutcome projectCenterOutcome : project.getCenterOutcomes()) {
+            if (projectCenterOutcome.getId() == null) {
+              projectCenterOutcome.setProject(project);
+              projectCenterOutcome.setPhase(sharedPhase);
+              projectCenterOutcome = projectCenterOutcomeManager.saveProjectCenterOutcome(projectCenterOutcome);
+              // This add centerOutcome to generate correct auditlog.
+              project.getProjectCenterOutcomes().add(projectCenterOutcome);
+            }
+
+          }
+        }
+
         project.getProjectInfo().setCofinancing(projectDB.getProjectInfo().isCofinancing());
 
         List<String> relationsName = new ArrayList<>();
@@ -501,6 +583,7 @@ public class ProjectCenterMappingAction extends BaseAction {
         project.getProjectInfo().setNewPartnershipsPlanned(projectDB.getProjectInfo().getNewPartnershipsPlanned());
         project.getProjectInfo().setLocationRegional(projectDB.getProjectInfo().getLocationRegional());
         project.getProjectInfo().setLocationGlobal(projectDB.getProjectInfo().getLocationGlobal());
+        project.getProjectInfo().setLiaisonInstitution(projectDB.getProjectInfo().getLiaisonInstitution());
 
         project.getProjectInfo().setModificationJustification(this.getJustification());
 
@@ -519,7 +602,7 @@ public class ProjectCenterMappingAction extends BaseAction {
         // this.setModificationJustification(project);
         // projectManager.saveProject(project, this.getActionName(), relationsName, sharedPhase);
 
-        Path path = this.getAutoSaveFilePath();
+        Path path = this.getAutoSaveFilePath(sharedPhase);
         // delete the draft file if exists
         if (path.toFile().exists()) {
           path.toFile().delete();
@@ -542,9 +625,16 @@ public class ProjectCenterMappingAction extends BaseAction {
         }
       }
       return SUCCESS;
-    } else {
+    } else
+
+    {
       return NOT_AUTHORIZED;
     }
+
+  }
+
+  public void setCenterOutcomes(List<CenterOutcome> centerOutcomes) {
+    this.centerOutcomes = centerOutcomes;
   }
 
   public void setCenterPrograms(List<CrpProgram> centerPrograms) {

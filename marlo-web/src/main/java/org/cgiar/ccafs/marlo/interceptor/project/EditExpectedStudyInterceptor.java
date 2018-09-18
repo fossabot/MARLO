@@ -117,11 +117,15 @@ public class EditExpectedStudyInterceptor extends AbstractInterceptor implements
             baseAction.generatePermission(Permission.PROJECT_EXPECTED_STUDIES_EDIT_PERMISSION, params))) {
             canEdit = true;
           }
-          if (baseAction.isSubmit(projectExpectedStudy.getProject().getId())) {
+          if (baseAction.isSubmit(projectExpectedStudy.getProject().getId())
+            && !baseAction.getActualPhase().getUpkeep()) {
             canEdit = false;
           }
         } else {
           if (user.getId() == projectExpectedStudy.getCreatedBy().getId()) {
+            canEdit = true;
+          } else if (baseAction
+            .hasPermission(baseAction.generatePermission(Permission.STUDIES_FULL_EDIT_PERMISSION, crp.getAcronym()))) {
             canEdit = true;
           } else {
             if (baseAction.hasPermission(baseAction.generatePermission(Permission.STUDIES_EDIT_PERMISSION, params))) {
@@ -179,7 +183,9 @@ public class EditExpectedStudyInterceptor extends AbstractInterceptor implements
           }
         }
       }
-
+      if (parameters.get(APConstants.TRANSACTION_ID).isDefined()) {
+        hasPermissionToEdit = false;
+      }
       if (baseAction.hasPermission(baseAction.generatePermission(Permission.PROJECT__SWITCH, params))) {
         canSwitchProject = true;
       }

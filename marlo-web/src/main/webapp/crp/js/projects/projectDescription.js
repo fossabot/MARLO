@@ -115,32 +115,60 @@ $(document).ready(function() {
   }
 
   $('#projectFlagshipsBlock input').on('change', function() {
-    console.log(flagshipsIds());
+        
+    var urlAction = "clusterByFPsAction";
+    
+    var $inputSelected = $(this);
+    if($inputSelected.hasClass('getCenterOutcomes')){
+      urlAction = "centerOutcomeByProgramAction";
+      $coreSelect = $('select.elementType-centerOutcome')
+    }
+    
+    var selectedPrograms = flagshipsIds();
+    if(!selectedPrograms){
+      return;
+    }
+    
     $.ajax({
-        url: baseURL + '/clusterByFPsAction.do',
+        url: baseURL + '/'+ urlAction+'.do',
         data: {
-          flagshipID: flagshipsIds(),
+          flagshipID: selectedPrograms,
+          programID: selectedPrograms,
           phaseID: phaseID
         },
         beforeSend: function() {
+          $coreSelect.parents('.panel').find('.listComponentLoading').fadeIn();
           $('.loading.clustersBlock').fadeIn();
           $coreSelect.empty();
           $coreSelect.addOption(-1, 'Select an option');
         },
         success: function(data) {
+          var optionsArray = data.clusters;
+          if($inputSelected.hasClass('getCenterOutcomes')){
+            optionsArray = data.outcomes;
+          }
           // console.log(data.clusters);
-          $.each(data.clusters, function(i,e) {
+          $.each(optionsArray, function(i,e) {
             $coreSelect.addOption(e.id, e.description);
           });
         },
         complete: function(){
+          $coreSelect.parents('.panel').find('.listComponentLoading').fadeOut();
           $('.loading.clustersBlock').fadeOut();
         }
     });
   });
   
-  $('.additionalPrograms input[type="checkbox"]').on('change', function() {
-    console.log($(this).attr('id'));
+  $('.additionalPrograms input[type="checkbox"], #projectWorking  input[type="checkbox"]').on('click', function(e) {
+    
+    var programID = ($(this).attr('id')).split("-")[1];
+    var liaisonID = getKeyByValue(liaisonInstitutionsPrograms, programID);
+    var selectedLiaisonID = $('select.liaisonInstitutionSelect').val();
+    if(liaisonID == selectedLiaisonID){
+      e.preventDefault();
+      $(this).prop('checked', true);
+      $(this).parent().animateCss('shake');
+    }
   });
 
   // No regional programmatic focus
