@@ -24,6 +24,11 @@
         [@customForm.input name="${customName}.projectExpectedStudyInfo.title" i18nkey="study.title" help="study.title.help" className="limitWords-20" helpIcon=!isOutcomeCaseStudy required=true editable=editable /]
       </div>
       
+      [#-- Who is commissioning this study --]
+      <div class="form-group">
+        [@customForm.input name="${customName}.projectExpectedStudyInfo.commissioningStudy" i18nkey="study.commissioningStudy" help="study.commissioningStudy.help" className="" helpIcon=false required=true editable=editable /]
+      </div>
+      
       [#-- 2. Short outcome/impact statement (up to 80 words) --]
       [#if isOutcomeCaseStudy]
       <div class="form-group">
@@ -112,7 +117,6 @@
       </div>
       
       [#-- 6.  Geographic scope - Countries  --]
-      [#if isOutcomeCaseStudy]
       <div class="form-group geographicScopeBlock">
         [#local geographicScope = ((element.projectExpectedStudyInfo.repIndGeographicScope.id)!-1) ]
         
@@ -143,7 +147,6 @@
           </div>
         </div>
       </div>
-      [/#if]
 
       [#-- 7. Key Contributors  --]
       <div class="form-group">
