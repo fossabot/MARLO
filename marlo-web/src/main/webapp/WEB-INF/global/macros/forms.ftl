@@ -10,32 +10,30 @@
       [@helpLabel name="${help}" paramText="${paramText}" showIcon=helpIcon editable=editable/]
     [/#if]
     [#if errorField==""][@s.fielderror cssClass="fieldError" fieldName="${name}"/][#else][@s.fielderror cssClass="fieldError" fieldName="${errorfield}"/][/#if]
+    [#-- Get Custom Value --]
+    [#assign customValue][#if value=="-NULL"][@s.property value="${name?string}"/][#else]${value}[/#if][/#assign]
     [#if editable]
       [#-- Condition to add input group to field --]
       [#if inputGroupText != ""]<div class="input-group"><span class="input-group-addon">${inputGroupText}</span>[/#if]
-      <input type="${type}" id="${name}" name="${name}" value="[#if value=="-NULL"][@s.property value="${name?string}"/][#else]${value}[/#if]"  class="form-control input-sm ${className} ${required?string('required','optional')}" [#if readOnly] readonly="readonly"[/#if] [#if disabled]disabled="disabled"[/#if] [#if placeholder?has_content]placeholder="[@s.text name=placeholder /]"[/#if]/>
+      <input type="${type}" id="${name}" name="${name}" value="${customValue}" class="form-control input-sm ${className} ${required?string('required','optional')}" [#if readOnly] readonly="readonly"[/#if] [#if disabled]disabled="disabled"[/#if] [#if placeholder?has_content]placeholder="[@s.text name=placeholder /]"[/#if]/>
       [#if inputGroupText != ""]</div>[/#if]
       [#-- End condition --]
     [#else]
-      <input type="hidden" id="${name}" name="${name}" value="[#if value=="-NULL"][@s.property value="${name?string}"/][#else]${value}[/#if]" class="form-control input-sm ${className} ${required?string('required','optional')}"/>
       [#assign requiredText][#if required && editable ]<span class="fieldError">[@s.text name="form.values.required" /]</span>[/#if][/#assign] 
-      <p>
-        [#if value=="-NULL"] 
-          [#assign customValue][@s.property value="${name?string}"/][/#assign] 
-          [#if !(customValue)?has_content]${requiredText}[@s.text name="form.values.fieldEmpty" /][#else]${customValue}[/#if]
-        [#else]
-          [#if !value?has_content]${requiredText}[@s.text name="form.values.fieldEmpty" /][#else]${value}[/#if] 
-        [/#if]
-      </p>
+      [#-- Hidden input --]
+      <input type="hidden" id="${name}" name="${name}" value="${customValue}" class="form-control input-sm ${className} ${required?string('required','optional')}"/>
+      [#-- Show custom value --]
+      <p class="">[#if (customValue?has_content)!false]${customValue}[#else]${requiredText}[@s.text name="form.values.fieldEmpty" /][/#if]</p>
     [/#if]
   </div>
 [/#macro]
 
-[#macro textArea name editable value="-NULL" i18nkey="" disabled=false required=false errorfield="" help="" helpIcon=true  fieldEmptyText="form.values.fieldEmpty" showTitle=true display=true className="-NULL" labelClass="" paramText="" readOnly=false editable=true placeholder="" powbInclude=false]
+[#macro textArea name editable value="-NULL" i18nkey="" disabled=false required=false errorfield="" help="" helpIcon=true  fieldEmptyText="form.values.fieldEmpty" showTitle=true display=true className="-NULL" labelClass="" paramText="" readOnly=false editable=true placeholder="" allowTextEditor=false powbInclude=false]
   <div class="textArea ${changedField(name)}" [#if !display]style="display: none;"[/#if]> 
     [#assign customName]${(i18nkey?has_content)?string(i18nkey,name)}[/#assign]  
     [#assign customLabel][#if !editable]${customName}.readText[#else]${customName}[/#if][/#assign]
-    [#assign customValue][#if value=="-NULL"][@s.property value="${name}"/][#else]${value}[/#if][/#assign]
+    [#-- Get Custom Value --]
+    [#assign customValue][#if value=="-NULL"][@s.property value="${name?string}"/][#else]${value}[/#if][/#assign]
   	[#if showTitle]
       <label for="${name}" class="${editable?string('editable', 'readOnly')} ${labelClass} [#if powbInclude]powb-label[/#if]"> [@s.text name="${customLabel}"][@s.param]${paramText}[/@s.param][/@s.text]:[@req required=required && editable /]
         [#--  Help Text --]
@@ -47,17 +45,14 @@
     [/#if]
     [#if errorfield==""][@s.fielderror cssClass="fieldError" fieldName="${name}"/][#else][@s.fielderror cssClass="fieldError" fieldName="${errorfield}"/][/#if]
     [#if editable]
-      <textarea rows="4" name="${name}" id="${name}" [#if readOnly] readonly="readonly"[/#if] [#if disabled]disabled="disabled"[/#if]  class="[#if className != "-NULL"]${className}[/#if] form-control input-sm ${required?string('required','optional')}" placeholder="[@s.text name=placeholder /]" />${customValue}</textarea>
+      <textarea rows="4" name="${name}" id="${name}" [#if readOnly] readonly="readonly"[/#if] [#if disabled]disabled="disabled"[/#if]  class="[#if className != "-NULL"]${className}[/#if] form-control input-sm ${required?string('required','optional')} [#if allowTextEditor]allowTextEditor[/#if]" placeholder="[@s.text name=placeholder /]" />${customValue}</textarea>
     [#else]
-      <input type="hidden" name="${name}" id="${name}" value="${customValue}" class="[#if className != "-NULL"] ${className}[/#if]  ${required?string('required','optional')}" />
       [#assign requiredText][#if required && editable]<span class="fieldError">[@s.text name="form.values.required" /]</span>[/#if][/#assign] 
-      <p>
-        [#if value=="-NULL"] 
-          [#assign customValue][@s.property value="${name?string}"/][/#assign] 
-          [#if !(customValue)?has_content]${requiredText}[@s.text name=fieldEmptyText /][#else]${customValue?replace('\n', '<br>')}[/#if]
-        [#else]
-          [#if !value?has_content]${requiredText}[@s.text name=fieldEmptyText /][#else]${value?replace('\n', '<br>')}[/#if] 
-        [/#if]
+      [#-- Hidden input --]
+      <input type="hidden" name="${name}" id="${name}" value="${customValue}" class="[#if className != "-NULL"] ${className}[/#if]  ${required?string('required','optional')}" />
+      [#-- Show custom value --]
+      <p class="${allowTextEditor?string('decodeHTML trumbowyg-editor', '')}">
+        [#if (customValue?has_content)!false]${customValue?replace('\n', '<br>')}[#else]${requiredText}[@s.text name=fieldEmptyText /][/#if]
       </p>
     [/#if] 
   </div>

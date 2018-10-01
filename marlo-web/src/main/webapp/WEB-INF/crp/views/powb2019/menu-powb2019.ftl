@@ -1,15 +1,15 @@
 [#ftl]
 
 [#assign menus= [
-  { 'title': '1.  Expected Key Results', 'show': true,
+  { 'title': '1.  Theories of Change', 'show': true,
     'items': [
     { 'slug': 'adjustmentsChanges',       'name': 'powb.menu.adjustmentsChanges',     'action': 'adjustmentsChanges',     'active': true }
     ]
   },
   { 'title': '2.  Expected Key Results', 'show': true,
     'items': [
-    { 'slug': 'expectedOutcomes',              'name': 'powb.menu.expectedOutcomes',                'action': 'crpStaffing',                'active': false},
-    { 'slug': 'financialPlan',            'name': 'powb.menu.plannedStudies',              'action': 'financialPlan',              'active': false},
+    { 'slug': 'expectedOutcomes',              'name': 'powb.menu.expectedOutcomes',                'action': 'plannedStudies',                'active': false},
+    { 'slug': 'plannedStudies',            'name': 'powb.menu.plannedStudies',              'action': 'plannedStudies',              'active': true},
     { 'slug': 'collaborationIntegration', 'name': 'powb.menu.plannedCollaborations',   'action': 'collaborationIntegration',   'active': false }
     ]
   },

@@ -1,16 +1,16 @@
 [#ftl]
 [#assign title = "POWB Report" /]
 [#assign currentSectionString = "powb-${actionName?replace('/','-')}-${powbSynthesisID}" /]
-[#assign pageLibs = [ "blueimp-file-upload" ] /]
-[#assign customJS = [ "${baseUrlMedia}/js/powb/2019/powb_adjustmentsChanges2019.js" ] /]
+[#assign pageLibs = [ "blueimp-file-upload", "trumbowyg"] /]
+[#assign customJS = [ "${baseUrlMedia}/js/powb2019/powb2019_adjustmentsChanges.js" ] /]
 [#assign customCSS = ["${baseUrlMedia}/css/powb/powbGlobal.css"] /]
 [#assign currentSection = "synthesis" /]
 [#assign currentStage = "adjustmentsChanges" /]
 
 [#assign breadCrumb = [
   {"label":"${currentSection}", "nameSpace":"", "action":""},
-  {"label":"powbReport", "nameSpace":"powb", "action":"${crpSession}/adjustmentsChanges"},
-  {"label":"adjustmentsChanges", "nameSpace":"powb", "action":"${crpSession}/adjustmentsChanges"}
+  {"label":"powbReport", "nameSpace":"powb2019", "action":"${crpSession}/adjustmentsChanges"},
+  {"label":"adjustmentsChanges", "nameSpace":"powb2019", "action":"${crpSession}/adjustmentsChanges"}
 ]/]
 
 [#import "/WEB-INF/global/macros/utils.ftl" as utilities /]
@@ -22,16 +22,16 @@
     
 <section class="container">
   [#-- Program (Flagships and PMU) --]
-  [#include "/WEB-INF/crp/views/powb/submenu-powb.ftl" /]
+  [#include "/WEB-INF/crp/views/powb2019/submenu-powb2019.ftl" /]
   
   <div class="row">
     [#-- POWB Menu --]
     <div class="col-md-3">
-      [#include "/WEB-INF/crp/views/powb/2019/menu-powb2019.ftl" /]
+      [#include "/WEB-INF/crp/views/powb2019/menu-powb2019.ftl" /]
     </div> 
     <div class="col-md-9">
       [#-- Section Messages --]
-      [#include "/WEB-INF/crp/views/powb/messages-powb.ftl" /]
+      [#include "/WEB-INF/crp/views/powb2019/messages-powb2019.ftl" /]
       
       [@s.form action=actionName method="POST" enctype="multipart/form-data" cssClass=""]
          
@@ -41,27 +41,9 @@
         
           [#-- Provide any major modifications to the overall balance of the program and/or Theory of change --]
           <div class="form-group margin-panel">
-            [@customForm.textArea name="powbSynthesis.powbToc.tocOverall" i18nkey="liaisonInstitution.powb.adjustmentsChanges" help="liaisonInstitution.powb.adjustmentsChanges.help" helpIcon=false required=true className="" editable=editable powbInclude=PMU /]
+            [@customForm.textArea name="powbSynthesis.powbToc.tocOverall" i18nkey="liaisonInstitution.powb.adjustmentsChanges" help="liaisonInstitution.powb.adjustmentsChanges.help" helpIcon=false required=true className="" editable=editable allowTextEditor=true  powbInclude=PMU /]
+            [#-- ${action.getOnlyReadHtmlText(powbSynthesis.powbToc.tocOverall)} --]
           </div>
-          
-          [#-- Annex a brief updated summary of the crp --] 
-          [#if PMU]
-          <div class="form-group margin-panel">
-            <div class="row">
-              <div class="col-sm-7">
-                <span class="powb-doc badge pull-right" title="[@s.text name="powb.includedField.title" /]">[@s.text name="powb.includedField" /] <span class="glyphicon glyphicon-save-file"></span></span>
-                [@customForm.fileUploadAjax
-                  fileDB=(powbSynthesis.powbToc.file)!{} 
-                  name="powbSynthesis.powbToc.file.id" 
-                  label="adjustmentsChanges.uploadFile" 
-                  dataUrl="${baseUrl}/uploadPowbSynthesis.do" 
-                  path="${action.path}"
-                  isEditable=editable
-                /]
-              </div>
-            </div>
-          </div>
-          [/#if]
           
           [#if PMU]
           <div class="form-group">
@@ -103,7 +85,11 @@
           
           [#-- Narrative--]
           <td class="left narrative">
-            [#if (element.overall?has_content)!false]${element.overall?replace('\n', '<br>')}[#else]<i style="opacity:0.5">[@s.text name="global.prefilledWhenAvailable"/]</i>[/#if]
+            [#if (element.overall?has_content)!false]
+             <div class="">${element.overall}</div> 
+            [#else]
+              <i style="opacity:0.5">[@s.text name="global.prefilledWhenAvailable"/]</i>
+            [/#if]
           </td>
         </tr>
       [/#list]

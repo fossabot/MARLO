@@ -310,6 +310,26 @@ $(document).ready(function() {
 
   // Set autogrow
   $("textarea[id!='justification']").autoGrow();
+  
+  if($.fn.trumbowyg) {
+    $('.allowTextEditor').trumbowyg({
+        btns: [
+          ['formatting'],
+          ['strong', 'em', 'del'],
+          ['superscript', 'subscript'],
+          ['link'],
+          ['unorderedList', 'orderedList'],
+          ['removeformat'],
+      ],
+      autogrow: true,
+      minimalLinks: true,
+      semantic: false
+    });
+  }
+
+  $('.decodeHTML').each(function(i,e){
+    $(this).html($(this).text());
+  });
 
   // Accessible enter click when button is focus
   $("input[type='submit']").keyup(function(event) {
