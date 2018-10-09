@@ -20,7 +20,9 @@ import java.math.BigInteger;
 import java.util.List;
 
 import org.apache.poi.xwpf.model.XWPFHeaderFooterPolicy;
+import org.apache.poi.xwpf.usermodel.Borders;
 import org.apache.poi.xwpf.usermodel.ParagraphAlignment;
+import org.apache.poi.xwpf.usermodel.TOC;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.apache.poi.xwpf.usermodel.XWPFRelation;
@@ -32,6 +34,7 @@ import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTHMerge;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTHyperlink;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTP;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTR;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTSdtBlock;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTSectPr;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTTblWidth;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTTc;
@@ -52,7 +55,7 @@ public class POISummary {
   private final static String FONT_TYPE = "Calibri Light";
   private final static String TITLE_FONT_COLOR = "3366CC";
   private final static String TEXT_FONT_COLOR = "000000";
-  private final static Integer TABLE_TEXT_FONT_SIZE = 10;
+  private static Integer TABLE_TEXT_FONT_SIZE = 10;
   private static String TABLE_HEADER_FONT_COLOR = "FFF2CC";
   private int count = 0;
 
@@ -67,6 +70,23 @@ public class POISummary {
       }
     } else {
       paragraphRun.setText(text, 0);
+    }
+  }
+
+  public void createTOC(XWPFDocument document) {
+    // Create table of contents
+    CTSdtBlock block = document.getDocument().getBody().addNewSdt();
+    TOC toc = new TOC(block);
+    for (XWPFParagraph par : document.getParagraphs()) {
+      String parStyle = par.getStyle();
+      if ((parStyle != null) && (parStyle.startsWith("Narrative "))) {
+        try {
+          int level = Integer.valueOf(parStyle.substring("Narrative".length())).intValue();
+          toc.addRow(level, par.getText(), 1, "112723803");
+        } catch (NumberFormatException e) {
+          e.printStackTrace();
+        }
+      }
     }
   }
 
@@ -112,6 +132,21 @@ public class POISummary {
     policy.createHeader(XWPFHeaderFooterPolicy.DEFAULT, parsHeader);
   }
 
+  public void pageLeftHeader(XWPFDocument document, String text) throws IOException {
+    CTSectPr sectPr = document.getDocument().getBody().addNewSectPr();
+    XWPFHeaderFooterPolicy policy = new XWPFHeaderFooterPolicy(document, sectPr);
+    CTP ctpHeader = CTP.Factory.newInstance();
+    CTR ctrHeader = ctpHeader.addNewR();
+    CTText ctHeader = ctrHeader.addNewT();
+    ctHeader.setStringValue(text);
+    XWPFParagraph headerParagraph = new XWPFParagraph(ctpHeader, document);
+    headerParagraph.setAlignment(ParagraphAlignment.LEFT);
+    XWPFParagraph[] parsHeader = new XWPFParagraph[1];
+    parsHeader[0] = headerParagraph;
+    policy.createHeader(XWPFHeaderFooterPolicy.DEFAULT, parsHeader);
+  }
+
+
   public void tableA1AnnualReportStyle(XWPFTable table) {
     /* horizontal merge, From format tables A1 */
 
@@ -124,6 +159,46 @@ public class POISummary {
         CTTcPr pr = cell.getCTTc().addNewTcPr();
         // pr.addNewNoWrap();
         cellWidth.setW(BigInteger.valueOf(100));
+      }
+    }
+  }
+
+  public void tableA2PowbStyle(XWPFTable table) {
+    /* Horizontal merge, From format tables A */
+    CTVMerge vmerge = CTVMerge.Factory.newInstance();
+    CTVMerge vmerge1 = CTVMerge.Factory.newInstance();
+
+    for (int x = 0; x < table.getNumberOfRows(); x++) {
+      if (x > 0) {
+        XWPFTableRow row = table.getRow(x);
+        for (int y = 0; y < 6; y++) {
+          XWPFTableCell cell = row.getCell(y);
+
+          if (cell.getCTTc() == null) {
+            ((CTTc) cell).addNewTcPr();
+          }
+
+          if (cell.getCTTc().getTcPr() == null) {
+            cell.getCTTc().addNewTcPr();
+          }
+          if (x == 1 && !(cell.getText().trim().length() > 0)) {
+            break;
+          }
+          if (cell.getText().trim().length() > 0) {
+            if (y == 0) {
+              cell.getCTTc().getTcPr().addNewTcW().setW(BigInteger.valueOf(1500));
+            }
+            vmerge.setVal(STMerge.RESTART);
+            cell.getCTTc().getTcPr().setVMerge(vmerge);
+          } else {
+            if (y == 0) {
+              cell.getCTTc().getTcPr().addNewTcW().setW(BigInteger.valueOf(1500));
+            }
+            vmerge1.setVal(STMerge.CONTINUE);
+            cell.getCTTc().getTcPr().setVMerge(vmerge1);
+          }
+        }
+
       }
     }
   }
@@ -209,6 +284,38 @@ public class POISummary {
   }
 
 
+  public void tableC2PowbStyle(XWPFTable table) {
+    /* Vertical merge, From format tables C */
+    CTVMerge vmerge = CTVMerge.Factory.newInstance();
+    CTVMerge vmerge1 = CTVMerge.Factory.newInstance();
+
+
+    for (int x = 0; x < table.getNumberOfRows(); x++) {
+      if (x > 0) {
+        XWPFTableRow row = table.getRow(x);
+        XWPFTableCell cell = row.getCell(row.getTableCells().size() - 1);
+
+        if (cell.getCTTc() == null) {
+          ((CTTc) cell).addNewTcPr();
+        }
+
+        if (cell.getCTTc().getTcPr() == null) {
+          cell.getCTTc().addNewTcPr();
+        }
+        if (x == 1 && !(cell.getText().trim().length() > 0)) {
+          break;
+        }
+        if (cell.getText().trim().length() > 0) {
+          vmerge.setVal(STMerge.RESTART);
+          cell.getCTTc().getTcPr().setVMerge(vmerge);
+        } else {
+          vmerge1.setVal(STMerge.CONTINUE);
+          cell.getCTTc().getTcPr().setVMerge(vmerge1);
+        }
+      }
+    }
+  }
+
   public void tableCStyle(XWPFTable table) {
     /* Vertical merge, From format tables C */
     CTVMerge vmerge = CTVMerge.Factory.newInstance();
@@ -281,6 +388,88 @@ public class POISummary {
     }
   }
 
+  public void tableEPowbStyle(XWPFTable table) {
+    /* Horizontal merge, From format tables E */
+    CTHMerge hMerge = CTHMerge.Factory.newInstance();
+    CTHMerge hMerge1 = CTHMerge.Factory.newInstance();
+
+    /* Vertical merge, From format tables E */
+    CTVMerge vmerge = CTVMerge.Factory.newInstance();
+    CTVMerge vmerge1 = CTVMerge.Factory.newInstance();
+
+
+    XWPFTableRow row = table.getRow(0);
+    int numberOfCell = row.getTableCells().size();
+    for (int y = 0; y < numberOfCell - 1; y++) {
+      XWPFTableCell cell = row.getCell(y);
+      if (cell.getCTTc() == null) {
+        ((CTTc) cell).addNewTcPr();
+      }
+      if (cell.getCTTc().getTcPr() == null) {
+        cell.getCTTc().addNewTcPr();
+      }
+      if (y > 0 && y < numberOfCell) {
+        if (cell.getText().trim().length() > 0) {
+          hMerge.setVal(STMerge.RESTART);
+          cell.getCTTc().getTcPr().setHMerge(hMerge);
+        } else {
+          hMerge1.setVal(STMerge.CONTINUE);
+          cell.getCTTc().getTcPr().setHMerge(hMerge1);
+        }
+      }
+    }
+
+    for (int x = 0; x < 2; x++) {
+      if (x >= 0) {
+        XWPFTableRow row1 = table.getRow(x);
+        for (int y = 0; y < 7; y++) {
+          XWPFTableCell cell = row1.getCell(y);
+
+          if (cell.getCTTc() == null) {
+            ((CTTc) cell).addNewTcPr();
+          }
+
+          if (cell.getCTTc().getTcPr() == null) {
+            cell.getCTTc().addNewTcPr();
+          }
+          if (x == 1 && !(cell.getText().trim().length() > 0)) {
+            break;
+          }
+          if (cell.getText().trim().length() > 0) {
+            if (y == 0) {
+              cell.getCTTc().getTcPr().addNewTcW().setW(BigInteger.valueOf(1500));
+            }
+            vmerge.setVal(STMerge.RESTART);
+            cell.getCTTc().getTcPr().setVMerge(vmerge);
+          } else {
+            if (y == 0) {
+              cell.getCTTc().getTcPr().addNewTcW().setW(BigInteger.valueOf(1500));
+            }
+            vmerge1.setVal(STMerge.CONTINUE);
+            cell.getCTTc().getTcPr().setVMerge(vmerge1);
+          }
+        }
+
+      }
+    }
+
+
+    for (int x = 0; x < table.getNumberOfRows(); x++) {
+      if (x > 1) {
+        XWPFTableRow rowCom = table.getRow(x);
+        XWPFTableCell cell = rowCom.getCell(6);
+        if (cell.getCTTc() == null) {
+          ((CTTc) cell).addNewTcPr();
+        }
+        if (cell.getCTTc().getTcPr() == null) {
+          cell.getCTTc().addNewTcPr();
+        }
+        cell.getCTTc().getTcPr().addNewTcW().setW(BigInteger.valueOf(5000));
+      }
+    }
+
+  }
+
   public void tableEStyle(XWPFTable table) {
     /* Horizontal merge, From format tables E */
     CTHMerge hMerge = CTHMerge.Factory.newInstance();
@@ -309,6 +498,7 @@ public class POISummary {
         }
       }
     }
+
 
     for (int x = 0; x < table.getNumberOfRows(); x++) {
       if (x > 1) {
@@ -447,6 +637,27 @@ public class POISummary {
     h1Run.setFontSize(16);
   }
 
+  public void textHead1TitleFontCalibri(XWPFParagraph h1, String text) {
+    h1.setAlignment(ParagraphAlignment.BOTH);
+    XWPFRun h1Run = h1.createRun();
+    this.addParagraphTextBreak(h1Run, text);
+    h1Run.setColor(TITLE_FONT_COLOR);
+    h1Run.setBold(true);
+    h1Run.setFontFamily("Calibri");
+    h1Run.setFontSize(14);
+  }
+
+
+  public void textHead1TitleLightBlue(XWPFParagraph h1, String text) {
+    h1.setAlignment(ParagraphAlignment.BOTH);
+    XWPFRun h1Run = h1.createRun();
+    this.addParagraphTextBreak(h1Run, text);
+    h1Run.setColor("5B9BD5");
+    h1Run.setBold(true);
+    h1Run.setFontFamily("Calibri");
+    h1Run.setFontSize(13);
+  }
+
   public void textHead2Title(XWPFParagraph h2, String text) {
     h2.setAlignment(ParagraphAlignment.BOTH);
     XWPFRun h2Run = h2.createRun();
@@ -475,6 +686,17 @@ public class POISummary {
     h1Run.setBold(false);
     h1Run.setFontFamily(FONT_TYPE);
     h1Run.setFontSize(26);
+  }
+
+  public void textHeadPrincipalTitle(XWPFParagraph h1, String text) {
+    h1.setAlignment(ParagraphAlignment.LEFT);
+    XWPFRun h1Run = h1.createRun();
+    this.addParagraphTextBreak(h1Run, text);
+    h1Run.setColor("323E4F");
+    h1Run.setBold(false);
+    h1Run.setFontFamily("Calibri");
+    h1Run.setFontSize(26);
+    h1.setBorderBottom(Borders.SINGLE);
   }
 
   public void textHyperlink(String url, String text, XWPFParagraph paragraph) {
@@ -527,8 +749,35 @@ public class POISummary {
     paragraphRun.setFontSize(11);
   }
 
+  public void textParagraphFontCalibri(XWPFParagraph paragraph, String text) {
+    paragraph.setAlignment(ParagraphAlignment.BOTH);
+    XWPFRun paragraphRun = paragraph.createRun();
+    this.addParagraphTextBreak(paragraphRun, text);
+    paragraphRun.setColor(TEXT_FONT_COLOR);
+    paragraphRun.setBold(false);
+    paragraphRun.setFontFamily("Calibri");
+    paragraphRun.setFontSize(11);
+  }
+
+  public void textParagraphItalicLightBlue(XWPFParagraph paragraph, String text) {
+    paragraph.setAlignment(ParagraphAlignment.BOTH);
+    XWPFRun paragraphRun = paragraph.createRun();
+    this.addParagraphTextBreak(paragraphRun, text);
+    paragraphRun.setColor("5B9BD5");
+    paragraphRun.setBold(false);
+    paragraphRun.setItalic(true);
+    paragraphRun.setFontFamily("Calibri");
+    paragraphRun.setFontSize(12);
+  }
+
   public void textTable(XWPFDocument document, List<List<POIField>> sHeaders, List<List<POIField>> sData,
     Boolean highlightFirstColumn, String tableType) {
+    if (tableType.contains("Powb")) {
+      TABLE_TEXT_FONT_SIZE = 11;
+    } else {
+      TABLE_TEXT_FONT_SIZE = 10;
+    }
+
     XWPFTable table = document.createTable();
     int record = 0;
     int headerIndex = 0;
@@ -543,9 +792,12 @@ public class POISummary {
       }
       for (POIField poiParameter : poiParameters) {
 
-        // Condition for table b cell color in fields 5 and 6
+        // Condition for table b cell color in fields 5 and 6 in annual report
         if (tableType.equals("tableBAnnualReport") && (record == 4 || record == 5)) {
           TABLE_HEADER_FONT_COLOR = "DEEAF6";
+          // Condition for table 2a
+        } else if (tableType.equals("tableA2Powb")) {
+          TABLE_HEADER_FONT_COLOR = "FFFFFF";
         } else {
           TABLE_HEADER_FONT_COLOR = "FFF2CC";
         }
@@ -596,7 +848,6 @@ public class POISummary {
           paragraphRun.setFontFamily(FONT_TYPE);
           paragraphRun.setFontSize(TABLE_TEXT_FONT_SIZE);
 
-
           tableRowHeader.getCell(record).setColor(TABLE_HEADER_FONT_COLOR);
         }
         record++;
@@ -611,6 +862,8 @@ public class POISummary {
       // Condition for table b cell color in fields 5 and 6
       if (tableType.equals("tableBAnnualReport") && (record == 4 || record == 5)) {
         TABLE_HEADER_FONT_COLOR = "DEEAF6";
+      } else if (tableType.equals("tableA2Powb")) {
+        TABLE_HEADER_FONT_COLOR = "FFFFFF";
       } else {
         TABLE_HEADER_FONT_COLOR = "FFF2CC";
       }
@@ -641,6 +894,19 @@ public class POISummary {
           } else {
             TABLE_HEADER_FONT_COLOR = "FFF2CC";
           }
+
+          if (tableType.equals("tableA2Powb")) {
+            if (count >= 1) {
+              dataRow.getCell(record).setColor("FFF2CC");
+            }
+            if (count >= 21) {
+              dataRow.getCell(record).setColor("D9EAD3");
+            }
+            if (count >= 27) {
+              dataRow.getCell(record).setColor("FFFFFF");
+            }
+          }
+
 
           // highlight and bold first and SecondColumn for table D1
           if (tableType.equals("tableD1AnnualReport") && (record == 0 || record == 1) && count < 9) {
@@ -691,6 +957,7 @@ public class POISummary {
         this.tableGStyle(table);
         break;
 
+      // Annual report tables
       case "tableAAnnualReport":
         this.tableBAnnualReportStyle(table);
         break;
@@ -732,9 +999,29 @@ public class POISummary {
       case "tableJAnnualReport":
         this.tableJAnnualReportStyle(table);
         break;
+
+      // powb 2019 template tables
+      case "tableA2Powb":
+        count = 0;
+        this.tableA2PowbStyle(table);
+        break;
+      case "tableB2Powb":
+        count = 0;
+        // this.tableB2PowbStyle(table);
+        break;
+      case "tableC2Powb":
+        count = 0;
+        // this.tableC2PowbStyle(table);
+        break;
+      case "tableEPowb":
+        count = 0;
+        this.tableEPowbStyle(table);
+        break;
     }
     if (tableType.contains("AnnualReport")) {
       table.getCTTbl().addNewTblPr().addNewTblW().setW(BigInteger.valueOf(13350));
+    } else if (tableType.contains("Powb")) {
+      table.getCTTbl().addNewTblPr().addNewTblW().setW(BigInteger.valueOf(13400));
     } else {
       table.getCTTbl().addNewTblPr().addNewTblW().setW(BigInteger.valueOf(12000));
     }

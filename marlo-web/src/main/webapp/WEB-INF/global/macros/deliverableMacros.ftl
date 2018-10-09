@@ -1,6 +1,35 @@
 [#ftl]
 [#import "/WEB-INF/global/macros/utils.ftl" as utils /]
 
+[#macro deliverableGeographicScope]
+  <div class="block-geographicScope">
+    <div class="form-group row">
+      <div class="col-md-6">
+        [@customForm.select name="deliverable.deliverableInfo.geographicScope.id" className="setSelect2 geographicScopeSelect" i18nkey="deliverable.geographicScope" listName="repIndGeographicScopes" keyFieldName="id"  displayFieldName="name" editable=editable required=editable/]
+      </div>
+    </div>
+    
+    [#assign scopeID = (deliverable.deliverableInfo.geographicScope.id)!-1 ]  
+    [#assign isRegional = ((scopeID == action.reportingIndGeographicScopeRegional)) ]
+    [#assign isMultiNational = ((scopeID == action.reportingIndGeographicScopeMultiNational)) ]
+    [#assign isNational = ((scopeID == action.reportingIndGeographicScopeNational)) ]
+    [#assign isSubNational = ((scopeID == action.reportingIndGeographicScopeSubNational)) ]
+    
+    [#-- Region --]
+    <div class="form-group row">
+      <div class="col-md-6 regionalBlock" style="display:${(isRegional)?string('block','none')}">
+        [@customForm.selectGroup name="deliverable.deliverableInfo.region.id" list=(repIndRegions)![] element=(deliverable.deliverableInfo.region)!{} subListName="subRegions"  keyFieldName="id" displayFieldName="name" i18nkey="deliverable.region" required=true className="" editable=editable /]
+      </div>
+    </div>
+    
+    [#-- Countries --]
+    <div class="form-group nationalBlock" style="display:${(isMultiNational || isNational || isSubNational)?string('block','none')}">
+      [#-- Multinational, National and Subnational scope --]
+      [@customForm.select name="deliverable.countriesIds" label="" i18nkey="deliverable.countries" listName="countries" keyFieldName="isoAlpha2"  displayFieldName="name" value="deliverable.countriesIds" multiple=true required=editable className="countriesSelect" disabled=!editable/]
+    </div>
+  </div>
+[/#macro]
+
 [#macro deliverableCrossCuttingMacro label="deliverable.crossCuttingDimensions" ]
   [#-- Does this deliverable have a cross-cutting dimension --]
   <div class="form-group">
@@ -334,32 +363,6 @@
       </div>
     </div>
     
-    [#-- Scope of the event  --]
-    <div class="form-group row">
-      <div class="col-md-6">
-        [@customForm.select name="${customName}.repIndGeographicScope.id" className="setSelect2 geographicScopeSelect" i18nkey="involveParticipants.eventScope" listName="repIndGeographicScopes" keyFieldName="id"  displayFieldName="name" editable=editable required=editable/]
-      </div>
-    </div>
-    
-    [#local scopeID = (deliverable.deliverableParticipant.repIndGeographicScope.id)!-1 ]  
-    [#local isRegional = ((scopeID == action.reportingIndGeographicScopeRegional)) ]
-    [#local isMultiNational = ((scopeID == action.reportingIndGeographicScopeMultiNational)) ]
-    [#local isNational = ((scopeID == action.reportingIndGeographicScopeNational)) ]
-    [#local isSubNational = ((scopeID == action.reportingIndGeographicScopeSubNational)) ]
-    
-    [#-- Region --]
-    <div class="form-group row">
-      <div class="col-md-6 regionalBlock" style="display:${(isRegional)?string('block','none')}">
-        [@customForm.selectGroup name="${customName}.repIndRegion.id" list=(repIndRegions)![] element=(deliverable.deliverableParticipant.repIndRegion)!{} subListName="subRegions"  keyFieldName="id" displayFieldName="name" i18nkey="involveParticipants.region" required=true className="" editable=editable /]
-      </div>
-    </div>
-    
-    [#-- Countries --]
-    <div class="form-group nationalBlock" style="display:${(isMultiNational || isNational || isSubNational)?string('block','none')}">
-      [#-- Multinational, National and Subnational scope --]
-      [@customForm.select name="${customName}.participantLocationsIsos" label="" i18nkey="involveParticipants.countries" listName="countries" keyFieldName="isoAlpha2"  displayFieldName="name" value="${customName}.participantLocationsIsos" multiple=true required=editable className="countriesSelect" disabled=!editable/]
-    </div>
-
   </div>
 </div>
 [/#macro]
@@ -483,7 +486,8 @@
     <div class="col-md-6">
       [@deliverableMacros.metadataField title="keywords" encodedName="marlo.keywords" type="input" require=false/]
     </div>
-  </div>  
+  </div>
+  <div class="form-group"> 
     [@deliverableMacros.metadataField title="citation" encodedName="dc.identifier.citation" type="textArea" require=false/]
   </div>
   <div class="form-group row">

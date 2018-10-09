@@ -30,7 +30,6 @@ import org.cgiar.ccafs.marlo.data.manager.DeliverableIntellectualAssetManager;
 import org.cgiar.ccafs.marlo.data.manager.DeliverableLocationManager;
 import org.cgiar.ccafs.marlo.data.manager.DeliverableManager;
 import org.cgiar.ccafs.marlo.data.manager.DeliverableMetadataElementManager;
-import org.cgiar.ccafs.marlo.data.manager.DeliverableParticipantLocationManager;
 import org.cgiar.ccafs.marlo.data.manager.DeliverableParticipantManager;
 import org.cgiar.ccafs.marlo.data.manager.DeliverablePartnershipManager;
 import org.cgiar.ccafs.marlo.data.manager.DeliverablePublicationMetadataManager;
@@ -73,7 +72,6 @@ import org.cgiar.ccafs.marlo.data.model.DeliverableIntellectualAssetTypeEnum;
 import org.cgiar.ccafs.marlo.data.model.DeliverableLocation;
 import org.cgiar.ccafs.marlo.data.model.DeliverableMetadataElement;
 import org.cgiar.ccafs.marlo.data.model.DeliverableParticipant;
-import org.cgiar.ccafs.marlo.data.model.DeliverableParticipantLocation;
 import org.cgiar.ccafs.marlo.data.model.DeliverablePartnership;
 import org.cgiar.ccafs.marlo.data.model.DeliverablePartnershipTypeEnum;
 import org.cgiar.ccafs.marlo.data.model.DeliverableQualityAnswer;
@@ -183,7 +181,6 @@ public class DeliverableAction extends BaseAction {
   private RepIndGeographicScopeManager repIndGeographicScopeManager;
   private RepIndRegionManager repIndRegionManager;
   private LocElementManager locElementManager;
-  private DeliverableParticipantLocationManager deliverableParticipantLocationManager;
   private RepIndFillingTypeManager repIndFillingTypeManager;
   private RepIndPatentStatusManager repIndPatentStatusManager;
   private DeliverableLocationManager deliverableLocationManager;
@@ -246,9 +243,9 @@ public class DeliverableAction extends BaseAction {
     CrpProgramManager crpProgramManager, DeliverableIntellectualAssetManager deliverableIntellectualAssetManager,
     RepIndTypeActivityManager repIndTypeActivityManager, RepIndTypeParticipantManager repIndTypeParticipantManager,
     RepIndGeographicScopeManager repIndGeographicScopeManager, RepIndRegionManager repIndRegionManager,
-    LocElementManager locElementManager, DeliverableParticipantLocationManager deliverableParticipantLocationManager,
-    DeliverableParticipantManager deliverableParticipantManager, RepIndFillingTypeManager repIndFillingTypeManager,
-    RepIndPatentStatusManager repIndPatentStatusManager, DeliverableLocationManager deliverableLocationManager) {
+    LocElementManager locElementManager, DeliverableParticipantManager deliverableParticipantManager,
+    RepIndFillingTypeManager repIndFillingTypeManager, RepIndPatentStatusManager repIndPatentStatusManager,
+    DeliverableLocationManager deliverableLocationManager) {
     super(config);
     this.deliverableManager = deliverableManager;
     this.deliverableTypeManager = deliverableTypeManager;
@@ -286,7 +283,6 @@ public class DeliverableAction extends BaseAction {
     this.repIndGeographicScopeManager = repIndGeographicScopeManager;
     this.repIndRegionManager = repIndRegionManager;
     this.locElementManager = locElementManager;
-    this.deliverableParticipantLocationManager = deliverableParticipantLocationManager;
     this.repIndFillingTypeManager = repIndFillingTypeManager;
     this.repIndPatentStatusManager = repIndPatentStatusManager;
     this.deliverableLocationManager = deliverableLocationManager;
@@ -500,15 +496,13 @@ public class DeliverableAction extends BaseAction {
   }
 
 
-  private void deleteParticipantLocations(List<DeliverableParticipantLocation> locationsDB) {
+  private void deleteDeliverableLocations(List<DeliverableLocation> locationsDB) {
     if (locationsDB != null) {
-      for (DeliverableParticipantLocation deliverableParticipantLocation : locationsDB) {
-        deliverableParticipantLocationManager
-          .deleteDeliverableParticipantLocation(deliverableParticipantLocation.getId());
+      for (DeliverableLocation deliverableLocation : locationsDB) {
+        deliverableLocationManager.deleteDeliverableLocation(deliverableLocation.getId());
       }
     }
   }
-
 
   public List<DeliverableQualityAnswer> getAnswers() {
     return answers;
@@ -1190,19 +1184,6 @@ public class DeliverableAction extends BaseAction {
           }
         }
 
-        if (deliverable.getDeliverableParticipant() != null) {
-          DeliverableParticipant deliverableParticipant = deliverable.getDeliverableParticipant();
-          if (deliverableParticipant.getParticipantLocationsIsosText() != null) {
-            String[] locationsIsos =
-              deliverableParticipant.getParticipantLocationsIsosText().replace("[", "").replace("]", "").split(",");
-            List<String> locations = new ArrayList<>();
-            for (String value : Arrays.asList(locationsIsos)) {
-              locations.add(value.trim());
-            }
-            deliverableParticipant.setParticipantLocationsIsos(locations);
-          }
-        }
-
         this.setDraft(true);
       } else {
         deliverable.getDeliverableInfo(this.getActualPhase());
@@ -1214,6 +1195,12 @@ public class DeliverableAction extends BaseAction {
           List<DeliverableLocation> countries = deliverableLocationManager
             .getDeliverableLocationbyPhase(deliverable.getId(), this.getActualPhase().getId());
           deliverable.setCountries(countries);
+        }
+
+        if (deliverable.getCountries() != null) {
+          for (DeliverableLocation country : deliverable.getCountries()) {
+            deliverable.getCountriesIds().add(country.getLocElement().getIsoAlpha2());
+          }
         }
 
         // Get partner responsible
@@ -1357,27 +1344,9 @@ public class DeliverableAction extends BaseAction {
               .filter(c -> c.isActive() && c.getPhase().equals(this.getActualPhase())).collect(Collectors.toList());
 
             if (deliverableParticipants.size() > 0) {
-              DeliverableParticipant pasdl =
-                deliverableParticipantManager.getDeliverableParticipantById(deliverableParticipants.get(0).getId());
               deliverable.setDeliverableParticipant(
                 deliverableParticipantManager.getDeliverableParticipantById(deliverableParticipants.get(0).getId()));
-              // Participants Locations
-              if (deliverable.getDeliverableParticipant().getDeliverableParticipantLocations() == null) {
-                deliverable.getDeliverableParticipant().setParticipantLocations(new ArrayList<>());
-              } else {
-                List<DeliverableParticipantLocation> locations =
-                  deliverable.getDeliverableParticipant().getDeliverableParticipantLocations().stream()
-                    .filter(pl -> pl.isActive()).collect(Collectors.toList());
-                deliverable.getDeliverableParticipant().setParticipantLocations(locations);
 
-              }
-              if (deliverable.getDeliverableParticipant().getParticipantLocations() != null) {
-                for (DeliverableParticipantLocation location : deliverable.getDeliverableParticipant()
-                  .getParticipantLocations()) {
-                  deliverable.getDeliverableParticipant().getParticipantLocationsIsos()
-                    .add(location.getLocElement().getIsoAlpha2());
-                }
-              }
               if (this.transaction != null && !this.transaction.equals("-1")) {
                 if (deliverable.getDeliverableParticipant().getRepIndTypeActivity() != null
                   && deliverable.getDeliverableParticipant().getRepIndTypeActivity().getId() != null) {
@@ -1391,12 +1360,6 @@ public class DeliverableAction extends BaseAction {
                     .setRepIndTypeParticipant(repIndTypeParticipantManager.getRepIndTypeParticipantById(
                       deliverable.getDeliverableParticipant().getRepIndTypeParticipant().getId()));
                 }
-                if (deliverable.getDeliverableParticipant().getRepIndGeographicScope() != null
-                  && deliverable.getDeliverableParticipant().getRepIndGeographicScope().getId() != null) {
-                  deliverable.getDeliverableParticipant()
-                    .setRepIndGeographicScope(repIndGeographicScopeManager.getRepIndGeographicScopeById(
-                      deliverable.getDeliverableParticipant().getRepIndGeographicScope().getId()));
-                }
               }
             } else {
               deliverable.setDeliverableParticipant(new DeliverableParticipant());
@@ -1406,14 +1369,6 @@ public class DeliverableAction extends BaseAction {
         }
 
         this.setDraft(false);
-      }
-
-      if (!this.isDraft()) {
-        if (deliverable.getCountries() != null) {
-          for (DeliverableLocation country : deliverable.getCountries()) {
-            deliverable.getCountriesIds().add(country.getLocElement().getIsoAlpha2());
-          }
-        }
       }
 
       this.setRepIndGeographicScopes(repIndGeographicScopeManager.findAll().stream()
@@ -1748,8 +1703,6 @@ public class DeliverableAction extends BaseAction {
           deliverable.getDisseminations().clear();
         }
         if (deliverable.getDeliverableParticipant() != null) {
-          deliverable.getDeliverableParticipant().setRepIndGeographicScope(null);
-          deliverable.getDeliverableParticipant().setRepIndRegion(null);
           deliverable.getDeliverableParticipant().setRepIndTypeActivity(null);
           deliverable.getDeliverableParticipant().setRepIndTypeParticipant(null);
         }
@@ -1920,7 +1873,6 @@ public class DeliverableAction extends BaseAction {
         relationsName.add(APConstants.PROJECT_DELIVERABLE_USERS);
         relationsName.add(APConstants.PROJECT_DELIVERABLES_INTELLECTUAL_RELATION);
         relationsName.add(APConstants.PROJECT_DELIVERABLES_PARTICIPANT_RELATION);
-        relationsName.add(APConstants.PROJECT_DELIVERABLES_PARTICIPANT_LOCATION_RELATION);
       }
       /**
        * The following is required because we need to update something on the @Deliverable if we want a row created in
@@ -2046,6 +1998,7 @@ public class DeliverableAction extends BaseAction {
   }
 
   private void saveDeliverableCountries() {
+
     if (deliverable.getCountriesIds() != null || !deliverable.getCountriesIds().isEmpty()) {
 
       List<DeliverableLocation> countries =
@@ -2063,12 +2016,15 @@ public class DeliverableAction extends BaseAction {
       }
 
       for (DeliverableLocation deliverableLocation : countries) {
-        if (!countriesSave.contains(deliverableLocation)) {
-          deliverableLocationManager.deleteDeliverableLocation(deliverableLocation.getId());
+        if (deliverableLocation != null) {
+          if (!countriesSave.contains(deliverableLocation)) {
+            deliverableLocationManager.deleteDeliverableLocation(deliverableLocation.getId());
+          }
         }
-      }
 
+      }
     }
+
   }
 
   private void saveDeliverableGenderLevels(Deliverable deliverablePrew) {
@@ -2381,13 +2337,6 @@ public class DeliverableAction extends BaseAction {
         participant = deliverableParticipantManager.saveDeliverableParticipant(participant);
       }
 
-      List<DeliverableParticipantLocation> locationsDB = new ArrayList<>();
-      if (participant.getId() != null && participant.getId() != -1) {
-        locationsDB = deliverableParticipantLocationManager.findParticipantLocationsByParticipant(participant.getId());
-      }
-      if (locationsDB == null) {
-        locationsDB = new ArrayList<>();
-      }
       participant.setHasParticipants(deliverable.getDeliverableParticipant().getHasParticipants());
 
       if (participant.getHasParticipants()) {
@@ -2431,63 +2380,6 @@ public class DeliverableAction extends BaseAction {
           participant.setRepIndTypeParticipant(null);
         }
 
-        // Save Locations
-        if (deliverable.getDeliverableParticipant().getRepIndGeographicScope() != null
-          && deliverable.getDeliverableParticipant().getRepIndGeographicScope().getId() != -1) {
-
-          participant.setRepIndGeographicScope(deliverable.getDeliverableParticipant().getRepIndGeographicScope());
-          RepIndGeographicScope repIndGeographicScope =
-            repIndGeographicScopeManager.getRepIndGeographicScopeById(participant.getRepIndGeographicScope().getId());
-
-          // Global
-          if (repIndGeographicScope.getId().equals(this.getReportingIndGeographicScopeGlobal())) {
-
-            participant.setRepIndRegion(null);
-            this.deleteParticipantLocations(locationsDB);
-
-          } else
-          // Regional
-          if (repIndGeographicScope.getId().equals(this.getReportingIndGeographicScopeRegional())) {
-
-            if (deliverable.getDeliverableParticipant().getRepIndRegion() != null
-              && deliverable.getDeliverableParticipant().getRepIndRegion().getId() != -1) {
-              participant.setRepIndRegion(deliverable.getDeliverableParticipant().getRepIndRegion());
-            } else {
-              participant.setRepIndRegion(null);
-            }
-            this.deleteParticipantLocations(locationsDB);
-
-          } else {
-            // Multi-national || National || Sub-national
-            // Save Locations
-            List<DeliverableParticipantLocation> locationsSave = new ArrayList<>();
-            if (deliverable.getDeliverableParticipant().getParticipantLocationsIsos() != null
-              && !deliverable.getDeliverableParticipant().getParticipantLocationsIsos().isEmpty()) {
-              participant
-                .setParticipantLocationsIsos(deliverable.getDeliverableParticipant().getParticipantLocationsIsos());
-              for (String locationIsoAlpha2 : participant.getParticipantLocationsIsos()) {
-                DeliverableParticipantLocation locationParticipant = new DeliverableParticipantLocation();
-                locationParticipant.setLocElement(locElementManager.getLocElementByISOCode(locationIsoAlpha2));
-                locationParticipant.setDeliverableParticipant(participant);
-                locationsSave.add(locationParticipant);
-                if (!locationsDB.contains(locationParticipant)) {
-                  deliverableParticipantLocationManager.saveDeliverableParticipantLocation(locationParticipant);
-                }
-              }
-            }
-            for (DeliverableParticipantLocation deliverableParticipantLocation : locationsDB) {
-              if (!locationsSave.contains(deliverableParticipantLocation)) {
-                deliverableParticipantLocationManager
-                  .deleteDeliverableParticipantLocation(deliverableParticipantLocation.getId());
-              }
-            }
-            participant.setRepIndRegion(null);
-          }
-        } else {
-          participant.setRepIndGeographicScope(null);
-          participant.setRepIndRegion(null);
-          this.deleteParticipantLocations(locationsDB);
-        }
         participant.setActive(true);
       } else {
         participant.setEventActivityName(null);
@@ -2499,9 +2391,6 @@ public class DeliverableAction extends BaseAction {
         participant.setEstimateFemales(null);
         participant.setDontKnowFemale(null);
         participant.setRepIndTypeParticipant(null);
-        participant.setRepIndGeographicScope(null);
-        participant.setRepIndRegion(null);
-        this.deleteParticipantLocations(locationsDB);
       }
 
       deliverableParticipantManager.saveDeliverableParticipant(participant);
@@ -3040,6 +2929,45 @@ public class DeliverableAction extends BaseAction {
         deliverableInfoDb.setOtherLicense(null);
         deliverableInfoDb.setAllowModifications(null);
       }
+    }
+
+    List<DeliverableLocation> countries =
+      deliverableLocationManager.getDeliverableLocationbyPhase(deliverable.getId(), this.getActualPhase().getId());
+
+    // Save Locations
+    if (deliverable.getDeliverableInfo().getGeographicScope() != null
+      && deliverable.getDeliverableInfo().getGeographicScope().getId() != -1) {
+
+      deliverableInfoDb.setGeographicScope(deliverable.getDeliverableInfo().getGeographicScope());
+      RepIndGeographicScope repIndGeographicScope =
+        repIndGeographicScopeManager.getRepIndGeographicScopeById(deliverableInfoDb.getGeographicScope().getId());
+
+      // Global
+      if (repIndGeographicScope.getId().equals(this.getReportingIndGeographicScopeGlobal())) {
+
+        deliverableInfoDb.setRegion(null);
+        this.deleteDeliverableLocations(countries);
+
+      } else
+      // Regional
+      if (repIndGeographicScope.getId().equals(this.getReportingIndGeographicScopeRegional())) {
+
+        if (deliverable.getDeliverableInfo().getRegion() != null
+          && deliverable.getDeliverableInfo().getRegion().getId() != -1) {
+          deliverableInfoDb.setRegion(deliverable.getDeliverableInfo().getRegion());
+        } else {
+          deliverableInfoDb.setRegion(null);
+        }
+        this.deleteDeliverableLocations(countries);
+
+      } else {
+        // Multi-national || National || Sub-national
+        deliverableInfoDb.setRegion(null);
+      }
+    } else {
+      deliverableInfoDb.setGeographicScope(null);
+      deliverableInfoDb.setRegion(null);
+      this.deleteDeliverableLocations(countries);
     }
 
     deliverableInfoDb.setModificationJustification(this.getJustification());

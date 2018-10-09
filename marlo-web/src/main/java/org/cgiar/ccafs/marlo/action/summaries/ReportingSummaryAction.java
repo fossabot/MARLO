@@ -46,7 +46,6 @@ import org.cgiar.ccafs.marlo.data.model.DeliverableIntellectualAssetPantentTypeE
 import org.cgiar.ccafs.marlo.data.model.DeliverableIntellectualAssetTypeEnum;
 import org.cgiar.ccafs.marlo.data.model.DeliverableMetadataElement;
 import org.cgiar.ccafs.marlo.data.model.DeliverableParticipant;
-import org.cgiar.ccafs.marlo.data.model.DeliverableParticipantLocation;
 import org.cgiar.ccafs.marlo.data.model.DeliverablePartnership;
 import org.cgiar.ccafs.marlo.data.model.DeliverablePartnershipTypeEnum;
 import org.cgiar.ccafs.marlo.data.model.DeliverablePublicationMetadata;
@@ -727,12 +726,6 @@ public class ReportingSummaryAction extends BaseSummariesAction implements Summa
       this.getText("involveParticipants.females"));
     masterReport.getParameterValues().put("i8nDeliverablesRParticipantType",
       this.getText("involveParticipants.participantsType"));
-    masterReport.getParameterValues().put("i8nDeliverablesRParticipantGeographicScope",
-      this.getText("involveParticipants.eventScope"));
-    masterReport.getParameterValues().put("i8nDeliverablesRParticipantRegional",
-      this.getText("involveParticipants.region"));
-    masterReport.getParameterValues().put("i8nDeliverablesRParticipantCountries",
-      this.getText("involveParticipants.countries"));
 
     masterReport.getParameterValues().put("i8nDeliverablesRMetadataSubtitle",
       this.getText("project.deliverable.dissemination.metadataSubtitle"));
@@ -1750,10 +1743,9 @@ public class ReportingSummaryAction extends BaseSummariesAction implements Summa
         "restricted_access", "isRestricted", "restricted_date", "isLastTwoRestricted", "deliv_license_modifications",
         "show_deliv_license_modifications", "volume", "issue", "pages", "journal", "journal_indicators", "acknowledge",
         "fl_contrib", "show_publication", "showCompilance", "deliv_description", "hasIntellectualAsset", "isPantent",
-        "isPvp", "hasParticipants", "isAcademicDegree", "isRegional", "isNational", "hasParticipantsText",
-        "participantEvent", "participantActivityType", "participantAcademicDegree", "participantTotalParticipants",
-        "participantFemales", "participantType", "participantGeographicScope", "participantRegional",
-        "participantCountries", "hasIntellectualAssetText", "intellectualAssetApplicants", "intellectualAssetType",
+        "isPvp", "hasParticipants", "isAcademicDegree", "hasParticipantsText", "participantEvent",
+        "participantActivityType", "participantAcademicDegree", "participantTotalParticipants", "participantFemales",
+        "participantType", "hasIntellectualAssetText", "intellectualAssetApplicants", "intellectualAssetType",
         "intellectualAssetTitle", "intellectualAssetFillingType", "intellectualAssetPantentStatus",
         "intellectualAssetPatentType", "intellectualAssetPvpVarietyName", "intellectualAssetPvpStatus",
         "intellectualAssetPvpCountry", "intellectualAssetPvpApplicationNumber", "intellectualAssetPvpBreederCrop",
@@ -1767,10 +1759,10 @@ public class ReportingSummaryAction extends BaseSummariesAction implements Summa
         String.class, Boolean.class, String.class, Boolean.class, String.class, Boolean.class, String.class,
         String.class, String.class, String.class, String.class, String.class, String.class, Boolean.class,
         Boolean.class, String.class, Boolean.class, Boolean.class, Boolean.class, Boolean.class, Boolean.class,
-        Boolean.class, Boolean.class, String.class, String.class, String.class, String.class, String.class,
         String.class, String.class, String.class, String.class, String.class, String.class, String.class, String.class,
         String.class, String.class, String.class, String.class, String.class, String.class, String.class, String.class,
-        String.class, String.class, String.class, String.class, String.class, String.class, String.class},
+        String.class, String.class, String.class, String.class, String.class, String.class, String.class, String.class,
+        String.class},
       0);
     SimpleDateFormat formatter = new SimpleDateFormat("MMM yyyy");
     if (!project.getDeliverables().isEmpty()) {
@@ -2171,11 +2163,10 @@ public class ReportingSummaryAction extends BaseSummariesAction implements Summa
         }
 
         // Participants
-        Boolean hasParticipants = false, isAcademicDegree = false, isRegional = false, isNational = false;
+        Boolean hasParticipants = false, isAcademicDegree = false;
         String hasParticipantsText = null, participantEvent = null, participantActivityType = null,
           participantAcademicDegree = null, participantTotalParticipants = null, participantFemales = null,
-          participantType = null, participantGeographicScope = null, participantRegional = null,
-          participantCountries = null;
+          participantType = null;
 
         List<DeliverableParticipant> deliverableParticipants = deliverable.getDeliverableParticipants().stream()
           .filter(c -> c.isActive() && c.getPhase().equals(this.getActualPhase())).collect(Collectors.toList());
@@ -2207,35 +2198,6 @@ public class ReportingSummaryAction extends BaseSummariesAction implements Summa
               if (participant.getRepIndTypeParticipant() != null
                 && participant.getRepIndTypeParticipant().getId() != -1) {
                 participantType = participant.getRepIndTypeParticipant().getName();
-              }
-              if (participant.getRepIndGeographicScope() != null
-                && participant.getRepIndGeographicScope().getId() != -1) {
-                participantGeographicScope = participant.getRepIndGeographicScope().getName();
-                // Regional
-                if (participant.getRepIndGeographicScope().getId()
-                  .equals(this.getReportingIndGeographicScopeRegional())) {
-                  isRegional = true;
-                  if (participant.getRepIndRegion() != null && participant.getRepIndRegion().getId() != -1) {
-                    participantRegional = participant.getRepIndRegion().getName();
-                  }
-                }
-                // National/Sub-national/Multinational
-                if (!participant.getRepIndGeographicScope().getId().equals(this.getReportingIndGeographicScopeGlobal())
-                  && !participant.getRepIndGeographicScope().getId()
-                    .equals(this.getReportingIndGeographicScopeRegional())) {
-                  isNational = true;
-                  List<DeliverableParticipantLocation> locations = participant.getDeliverableParticipantLocations()
-                    .stream().filter(pl -> pl.isActive()).collect(Collectors.toList());
-                  if (locations != null && locations.size() > 0) {
-                    locations
-                      .sort((pl1, pl2) -> pl1.getLocElement().getName().compareTo(pl2.getLocElement().getName()));
-                    Set<String> countries = new HashSet<String>();
-                    for (DeliverableParticipantLocation participantLocation : locations) {
-                      countries.add(participantLocation.getLocElement().getName());
-                    }
-                    participantCountries = String.join(", ", countries);
-                  }
-                }
               }
 
             } else {
@@ -2533,15 +2495,15 @@ public class ReportingSummaryAction extends BaseSummariesAction implements Summa
           qualityAssurance, dataDictionary, tools, showFAIR, F, A, I, R, isDisseminated, disseminated, restrictedAccess,
           isRestricted, restrictedDate, isLastTwoRestricted, delivLicenseModifications, showDelivLicenseModifications,
           volume, issue, pages, journal, journalIndicators, acknowledge, flContrib, showPublication, showCompilance,
-          deliv_description, hasIntellectualAsset, isPantent, isPvp, hasParticipants, isAcademicDegree, isRegional,
-          isNational, hasParticipantsText, participantEvent, participantActivityType, participantAcademicDegree,
-          participantTotalParticipants, participantFemales, participantType, participantGeographicScope,
-          participantRegional, participantCountries, hasIntellectualAssetText, intellectualAssetApplicants,
-          intellectualAssetType, intellectualAssetTitle, intellectualAssetFillingType, intellectualAssetPantentStatus,
-          intellectualAssetPatentType, intellectualAssetPvpVarietyName, intellectualAssetPvpStatus,
-          intellectualAssetPvpCountry, intellectualAssetPvpApplicationNumber, intellectualAssetPvpBreederCrop,
-          intellectualAssetDateFilling, intellectualAssetDateRegistration, intellectualAssetDateExpiry,
-          intellectualAssetAdditionalInformation, intellectualAssetLinkPublished, intellectualAssetCommunication});
+          deliv_description, hasIntellectualAsset, isPantent, isPvp, hasParticipants, isAcademicDegree,
+          hasParticipantsText, participantEvent, participantActivityType, participantAcademicDegree,
+          participantTotalParticipants, participantFemales, participantType, hasIntellectualAssetText,
+          intellectualAssetApplicants, intellectualAssetType, intellectualAssetTitle, intellectualAssetFillingType,
+          intellectualAssetPantentStatus, intellectualAssetPatentType, intellectualAssetPvpVarietyName,
+          intellectualAssetPvpStatus, intellectualAssetPvpCountry, intellectualAssetPvpApplicationNumber,
+          intellectualAssetPvpBreederCrop, intellectualAssetDateFilling, intellectualAssetDateRegistration,
+          intellectualAssetDateExpiry, intellectualAssetAdditionalInformation, intellectualAssetLinkPublished,
+          intellectualAssetCommunication});
       }
     }
     return model;
@@ -4108,8 +4070,9 @@ public class ReportingSummaryAction extends BaseSummariesAction implements Summa
     Set<ProjectExpectedStudy> myStudies = new HashSet<>();
 
     List<ProjectExpectedStudy> projectExpectedStudies = project.getProjectExpectedStudies().stream()
-      .filter(p -> p.isActive() && p.getProjectExpectedStudyInfo(this.getSelectedPhase()) != null && p.getYear() != null
-        && p.getYear().equals(this.getSelectedYear()))
+      .filter(p -> p.isActive() && p.getProjectExpectedStudyInfo(this.getSelectedPhase()) != null
+        && p.getProjectExpectedStudyInfo(this.getSelectedPhase()).getYear() != null
+        && p.getProjectExpectedStudyInfo(this.getSelectedPhase()).getYear().equals(this.getSelectedYear()))
       .collect(Collectors.toList());
     if (projectExpectedStudies != null && !projectExpectedStudies.isEmpty()) {
       myStudies.addAll(projectExpectedStudies);
@@ -4117,9 +4080,10 @@ public class ReportingSummaryAction extends BaseSummariesAction implements Summa
     // Shared Studies
     List<ExpectedStudyProject> sharedStudies = project.getExpectedStudyProjects().stream()
       .filter(c -> c.isActive() && c.getPhase() != null && c.getPhase().equals(this.getActualPhase())
-        && c.getProjectExpectedStudy().getYear() != null
-        && c.getProjectExpectedStudy().getYear() == this.getCurrentCycleYear()
-        && c.getProjectExpectedStudy().getProjectExpectedStudyInfo(this.getActualPhase()) != null)
+        && c.getProjectExpectedStudy().getProjectExpectedStudyInfo(this.getActualPhase()) != null
+        && c.getProjectExpectedStudy().getProjectExpectedStudyInfo(this.getActualPhase()).getYear() != null
+        && c.getProjectExpectedStudy().getProjectExpectedStudyInfo(this.getActualPhase()).getYear() == this
+          .getCurrentCycleYear())
       .collect(Collectors.toList());
 
     if (sharedStudies != null && !sharedStudies.isEmpty()) {
@@ -4149,8 +4113,8 @@ public class ReportingSummaryAction extends BaseSummariesAction implements Summa
         // Id
         id = projectExpectedStudy.getId();
         // Year
-        if (projectExpectedStudy.getYear() != null) {
-          year = projectExpectedStudy.getYear();
+        if (projectExpectedStudy.getProjectExpectedStudyInfo().getYear() != null) {
+          year = projectExpectedStudy.getProjectExpectedStudyInfo().getYear();
         }
         // Title
         if (studyinfo.getTitle() != null && !studyinfo.getTitle().trim().isEmpty()) {

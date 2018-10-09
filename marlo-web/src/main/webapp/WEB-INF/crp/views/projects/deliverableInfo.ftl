@@ -178,11 +178,17 @@
   [/#if]
 </div>
 
+[#-- Geographic Scope  --]
+<h3 class="headTitle">Geographic Scope</h3>
+<div class="simpleBox">
+  [@deliverableMacros.deliverableGeographicScope /]
+</div>
+
+[#-- Cross-cutting dimensions --]
 <h3 class="headTitle">[@s.text name="deliverable.crossCuttingDimensionsTitle" /] </h3>
 <div class="simpleBox">
   [@deliverableMacros.deliverableCrossCuttingMacro /]
 </div>
-
 
 [#-- Partners --] 
 <h3 class="headTitle">[@s.text name="Partners contributing to this deliverable" /]</h3>  

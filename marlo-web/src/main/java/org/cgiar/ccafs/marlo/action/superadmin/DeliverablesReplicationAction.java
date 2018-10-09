@@ -22,9 +22,9 @@ import org.cgiar.ccafs.marlo.data.manager.DeliverableDisseminationManager;
 import org.cgiar.ccafs.marlo.data.manager.DeliverableFundingSourceManager;
 import org.cgiar.ccafs.marlo.data.manager.DeliverableInfoManager;
 import org.cgiar.ccafs.marlo.data.manager.DeliverableIntellectualAssetManager;
+import org.cgiar.ccafs.marlo.data.manager.DeliverableLocationManager;
 import org.cgiar.ccafs.marlo.data.manager.DeliverableManager;
 import org.cgiar.ccafs.marlo.data.manager.DeliverableMetadataElementManager;
-import org.cgiar.ccafs.marlo.data.manager.DeliverableParticipantLocationManager;
 import org.cgiar.ccafs.marlo.data.manager.DeliverableParticipantManager;
 import org.cgiar.ccafs.marlo.data.manager.DeliverablePartnershipManager;
 import org.cgiar.ccafs.marlo.data.manager.DeliverablePublicationMetadataManager;
@@ -37,9 +37,9 @@ import org.cgiar.ccafs.marlo.data.model.DeliverableCrp;
 import org.cgiar.ccafs.marlo.data.model.DeliverableDissemination;
 import org.cgiar.ccafs.marlo.data.model.DeliverableFundingSource;
 import org.cgiar.ccafs.marlo.data.model.DeliverableIntellectualAsset;
+import org.cgiar.ccafs.marlo.data.model.DeliverableLocation;
 import org.cgiar.ccafs.marlo.data.model.DeliverableMetadataElement;
 import org.cgiar.ccafs.marlo.data.model.DeliverableParticipant;
-import org.cgiar.ccafs.marlo.data.model.DeliverableParticipantLocation;
 import org.cgiar.ccafs.marlo.data.model.DeliverablePartnership;
 import org.cgiar.ccafs.marlo.data.model.DeliverablePartnershipTypeEnum;
 import org.cgiar.ccafs.marlo.data.model.DeliverablePublicationMetadata;
@@ -86,8 +86,8 @@ public class DeliverablesReplicationAction extends BaseAction {
   private DeliverableUserManager deliverableUserManager;
   private DeliverableIntellectualAssetManager deliverableIntellectualAssetManager;
   private DeliverableParticipantManager deliverableParticipantManager;
-  private DeliverableParticipantLocationManager deliverableParticipantLocationManager;
   private DeliverableInfoManager deliverableInfoManager;
+  private DeliverableLocationManager deliverableLocationManager;
 
   // Variables
   private String deliverablesbyPhaseList;
@@ -107,9 +107,8 @@ public class DeliverablesReplicationAction extends BaseAction {
     DeliverablePublicationMetadataManager deliverablePublicationMetadataManager,
     DeliverableUserManager deliverableUserManager,
     DeliverableIntellectualAssetManager deliverableIntellectualAssetManager,
-    DeliverableParticipantManager deliverableParticipantManager,
-    DeliverableParticipantLocationManager deliverableParticipantLocationManager,
-    DeliverableInfoManager deliverableInfoManager) {
+    DeliverableParticipantManager deliverableParticipantManager, DeliverableInfoManager deliverableInfoManager,
+    DeliverableLocationManager deliverableLocationManager) {
     super(config);
     this.phaseManager = phaseManager;
     this.deliverableFundingSourceManager = deliverableFundingSourceManager;
@@ -124,8 +123,8 @@ public class DeliverablesReplicationAction extends BaseAction {
     this.deliverableUserManager = deliverableUserManager;
     this.deliverableIntellectualAssetManager = deliverableIntellectualAssetManager;
     this.deliverableParticipantManager = deliverableParticipantManager;
-    this.deliverableParticipantLocationManager = deliverableParticipantLocationManager;
     this.deliverableInfoManager = deliverableInfoManager;
+    this.deliverableLocationManager = deliverableLocationManager;
   }
 
 
@@ -204,6 +203,7 @@ public class DeliverablesReplicationAction extends BaseAction {
             relationsName.add(APConstants.PROJECT_DELIVERABLE_INFO);
             relationsName.add(APConstants.PROJECT_DELIVERABLE_FUNDING_RELATION);
             relationsName.add(APConstants.PROJECT_DELIVERABLE_GENDER_LEVELS);
+            relationsName.add(APConstants.PROJECT_DELIVERABLE_LOCATIONS);
             if (this.isReportingActive() || (this.isPlanningActive() && phase.getUpkeep())) {
               relationsName.add(APConstants.PROJECT_DELIVERABLE_QUALITY_CHECK);
               relationsName.add(APConstants.PROJECT_DELIVERABLE_METADATA_ELEMENT);
@@ -214,7 +214,6 @@ public class DeliverablesReplicationAction extends BaseAction {
               relationsName.add(APConstants.PROJECT_DELIVERABLE_USERS);
               relationsName.add(APConstants.PROJECT_DELIVERABLES_INTELLECTUAL_RELATION);
               relationsName.add(APConstants.PROJECT_DELIVERABLES_PARTICIPANT_RELATION);
-              relationsName.add(APConstants.PROJECT_DELIVERABLES_PARTICIPANT_LOCATION_RELATION);
             }
 
             // Save Deliverable Funding sources
@@ -243,6 +242,15 @@ public class DeliverablesReplicationAction extends BaseAction {
                 if (deliverablePartnershipOther.getProjectPartner() != null) {
                   deliverablePartnershipManager.saveDeliverablePartnership(deliverablePartnershipOther);
                 }
+              }
+            }
+
+            // Save Countries list
+            List<DeliverableLocation> countries = deliverableLocationManager
+              .getDeliverableLocationbyPhase(deliverable.getId(), this.getActualPhase().getId());
+            if (countries != null && countries.size() > 0) {
+              for (DeliverableLocation deliverableLocation : countries) {
+                deliverableLocationManager.saveDeliverableLocation(deliverableLocation);
               }
             }
 
@@ -328,15 +336,6 @@ public class DeliverablesReplicationAction extends BaseAction {
                     + " and phase: " + phase.getId());
                 }
                 deliverableParticipantManager.saveDeliverableParticipant(deliverableParticipants.get(0));
-                // Locations
-                List<DeliverableParticipantLocation> deliverableParticipantLocations = deliverableParticipants.get(0)
-                  .getDeliverableParticipantLocations().stream().collect(Collectors.toList());
-                if (deliverableParticipantLocations != null && !deliverableParticipantLocations.isEmpty()) {
-                  for (DeliverableParticipantLocation deliverableParticipantLocation : deliverableParticipantLocations) {
-                    deliverableParticipantLocationManager
-                      .saveDeliverableParticipantLocation(deliverableParticipantLocation);
-                  }
-                }
               }
 
             }
