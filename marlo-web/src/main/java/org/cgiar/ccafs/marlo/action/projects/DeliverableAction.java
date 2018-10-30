@@ -19,12 +19,14 @@ import org.cgiar.ccafs.marlo.action.BaseAction;
 import org.cgiar.ccafs.marlo.config.APConstants;
 import org.cgiar.ccafs.marlo.data.manager.AuditLogManager;
 import org.cgiar.ccafs.marlo.data.manager.CrossCuttingScoringManager;
+import org.cgiar.ccafs.marlo.data.manager.CrpClusterKeyOutputManager;
 import org.cgiar.ccafs.marlo.data.manager.CrpProgramManager;
 import org.cgiar.ccafs.marlo.data.manager.DeliverableCrpManager;
 import org.cgiar.ccafs.marlo.data.manager.DeliverableDataSharingFileManager;
 import org.cgiar.ccafs.marlo.data.manager.DeliverableDisseminationManager;
 import org.cgiar.ccafs.marlo.data.manager.DeliverableFundingSourceManager;
 import org.cgiar.ccafs.marlo.data.manager.DeliverableGenderLevelManager;
+import org.cgiar.ccafs.marlo.data.manager.DeliverableGeographicRegionManager;
 import org.cgiar.ccafs.marlo.data.manager.DeliverableInfoManager;
 import org.cgiar.ccafs.marlo.data.manager.DeliverableIntellectualAssetManager;
 import org.cgiar.ccafs.marlo.data.manager.DeliverableLocationManager;
@@ -66,6 +68,7 @@ import org.cgiar.ccafs.marlo.data.model.DeliverableDissemination;
 import org.cgiar.ccafs.marlo.data.model.DeliverableFile;
 import org.cgiar.ccafs.marlo.data.model.DeliverableFundingSource;
 import org.cgiar.ccafs.marlo.data.model.DeliverableGenderLevel;
+import org.cgiar.ccafs.marlo.data.model.DeliverableGeographicRegion;
 import org.cgiar.ccafs.marlo.data.model.DeliverableInfo;
 import org.cgiar.ccafs.marlo.data.model.DeliverableIntellectualAsset;
 import org.cgiar.ccafs.marlo.data.model.DeliverableIntellectualAssetTypeEnum;
@@ -86,6 +89,7 @@ import org.cgiar.ccafs.marlo.data.model.Institution;
 import org.cgiar.ccafs.marlo.data.model.LicensesTypeEnum;
 import org.cgiar.ccafs.marlo.data.model.LocElement;
 import org.cgiar.ccafs.marlo.data.model.PartnerDivision;
+import org.cgiar.ccafs.marlo.data.model.Phase;
 import org.cgiar.ccafs.marlo.data.model.ProgramType;
 import org.cgiar.ccafs.marlo.data.model.Project;
 import org.cgiar.ccafs.marlo.data.model.ProjectBudget;
@@ -97,7 +101,6 @@ import org.cgiar.ccafs.marlo.data.model.ProjectStatusEnum;
 import org.cgiar.ccafs.marlo.data.model.RepIndFillingType;
 import org.cgiar.ccafs.marlo.data.model.RepIndGeographicScope;
 import org.cgiar.ccafs.marlo.data.model.RepIndPatentStatus;
-import org.cgiar.ccafs.marlo.data.model.RepIndRegion;
 import org.cgiar.ccafs.marlo.data.model.RepIndTypeActivity;
 import org.cgiar.ccafs.marlo.data.model.RepIndTypeParticipant;
 import org.cgiar.ccafs.marlo.data.model.RepositoryChannel;
@@ -143,11 +146,14 @@ public class DeliverableAction extends BaseAction {
 
 
   private static final long serialVersionUID = -4474372683580321612L;
+
+
   private final Logger logger = LoggerFactory.getLogger(DeliverableAction.class);
 
   // Managers
   private AuditLogManager auditLogManager;
   private GlobalUnitManager crpManager;
+
   private DeliverableDataSharingFileManager deliverableDataSharingFileManager;
   private DeliverablePublicationMetadataManager deliverablePublicationMetadataManager;
   private DeliverableFundingSourceManager deliverableFundingSourceManager;
@@ -184,10 +190,11 @@ public class DeliverableAction extends BaseAction {
   private RepIndFillingTypeManager repIndFillingTypeManager;
   private RepIndPatentStatusManager repIndPatentStatusManager;
   private DeliverableLocationManager deliverableLocationManager;
-
+  private CrpClusterKeyOutputManager crpClusterKeyOutputManager;
   // Parameters
   private List<DeliverableQualityAnswer> answers;
   private List<RepositoryChannel> repositoryChannels;
+
   private ArrayList<GlobalUnit> crps;
   private ArrayList<CrpProgram> programs;
   private Deliverable deliverable;
@@ -216,12 +223,12 @@ public class DeliverableAction extends BaseAction {
   private List<RepIndTypeActivity> repIndTypeActivities;
   private List<RepIndTypeParticipant> repIndTypeParticipants;
   private List<RepIndGeographicScope> repIndGeographicScopes;
-  private List<RepIndRegion> repIndRegions;
+  private List<LocElement> repIndRegions;
   private List<LocElement> countries;
   private List<RepIndFillingType> repIndFillingTypes;
   private List<RepIndPatentStatus> repIndPatentStatuses;
   private Map<String, String> statuses;
-
+  private DeliverableGeographicRegionManager deliverableGeographicRegionManager;
 
   @Inject
   public DeliverableAction(APConfig config, DeliverableTypeManager deliverableTypeManager,
@@ -245,7 +252,9 @@ public class DeliverableAction extends BaseAction {
     RepIndGeographicScopeManager repIndGeographicScopeManager, RepIndRegionManager repIndRegionManager,
     LocElementManager locElementManager, DeliverableParticipantManager deliverableParticipantManager,
     RepIndFillingTypeManager repIndFillingTypeManager, RepIndPatentStatusManager repIndPatentStatusManager,
-    DeliverableLocationManager deliverableLocationManager) {
+    DeliverableLocationManager deliverableLocationManager,
+    DeliverableGeographicRegionManager deliverableGeographicRegionManager,
+    CrpClusterKeyOutputManager crpClusterKeyOutputManager) {
     super(config);
     this.deliverableManager = deliverableManager;
     this.deliverableTypeManager = deliverableTypeManager;
@@ -286,8 +295,9 @@ public class DeliverableAction extends BaseAction {
     this.repIndFillingTypeManager = repIndFillingTypeManager;
     this.repIndPatentStatusManager = repIndPatentStatusManager;
     this.deliverableLocationManager = deliverableLocationManager;
+    this.deliverableGeographicRegionManager = deliverableGeographicRegionManager;
+    this.crpClusterKeyOutputManager = crpClusterKeyOutputManager;
   }
-
 
   @Override
   public String cancel() {
@@ -504,6 +514,7 @@ public class DeliverableAction extends BaseAction {
     }
   }
 
+
   public List<DeliverableQualityAnswer> getAnswers() {
     return answers;
   }
@@ -528,6 +539,7 @@ public class DeliverableAction extends BaseAction {
     return countries;
   }
 
+
   public List<CrossCuttingScoring> getCrossCuttingDimensions() {
     return crossCuttingDimensions;
   }
@@ -540,21 +552,20 @@ public class DeliverableAction extends BaseAction {
     return crps;
   }
 
-
   public Deliverable getDeliverable() {
     return deliverable;
   }
-
 
   public long getDeliverableID() {
     return deliverableID;
   }
 
+
   public DeliverablePartnership getDeliverablePartnership(long projectPersonID) {
 
     if (deliverable.getOtherPartners() != null) {
-      List<DeliverablePartnership> deliverablePartnerships = deliverable
-        .getOtherPartners().stream().filter(d -> d.isActive() && d.getProjectPartnerPerson() != null
+      List<DeliverablePartnership> deliverablePartnerships = deliverable.getOtherPartners()
+        .stream().filter(d -> d.isActive() && d.getProjectPartnerPerson() != null
           && d.getProjectPartnerPerson().getId() != null && d.getProjectPartnerPerson().getId() == projectPersonID)
         .collect(Collectors.toList());
 
@@ -618,14 +629,15 @@ public class DeliverableAction extends BaseAction {
     return deliverableSubTypes;
   }
 
-
   public List<DeliverableType> getDeliverableTypeParent() {
     return deliverableTypeParent;
   }
 
+
   public String getDeliverableUrl(String fileType) {
     return config.getDownloadURL() + "/" + this.getDeliverableUrlPath(fileType).replace('\\', '/');
   }
+
 
   public String getDeliverableUrlPath(String fileType) {
     return config.getProjectsBaseFolder(this.getCrpSession()) + File.separator + deliverable.getId() + File.separator
@@ -636,11 +648,9 @@ public class DeliverableAction extends BaseAction {
     return divisions;
   }
 
-
   public List<FundingSource> getFundingSources() {
     return fundingSources;
   }
-
 
   public List<GenderType> getGenderLevels() {
     return genderLevels;
@@ -685,6 +695,7 @@ public class DeliverableAction extends BaseAction {
     return partnerPersons;
   }
 
+
   private ProjectPartner getPartnerResponsible() {
     ProjectPartner projectPartner = null;
 
@@ -696,6 +707,7 @@ public class DeliverableAction extends BaseAction {
     }
     return projectPartner;
   }
+
 
   public List<ProjectPartner> getPartners() {
     return partners;
@@ -715,7 +727,6 @@ public class DeliverableAction extends BaseAction {
     }
   }
 
-
   public ArrayList<CrpProgram> getPrograms() {
     return programs;
   }
@@ -723,6 +734,7 @@ public class DeliverableAction extends BaseAction {
   public Project getProject() {
     return project;
   }
+
 
   public long getProjectID() {
     return projectID;
@@ -736,22 +748,21 @@ public class DeliverableAction extends BaseAction {
     return projectPrograms;
   }
 
-
   public List<RepIndFillingType> getRepIndFillingTypes() {
     return repIndFillingTypes;
   }
 
-
   public List<RepIndGeographicScope> getRepIndGeographicScopes() {
     return repIndGeographicScopes;
   }
+
 
   public List<RepIndPatentStatus> getRepIndPatentStatuses() {
     return repIndPatentStatuses;
   }
 
 
-  public List<RepIndRegion> getRepIndRegions() {
+  public List<LocElement> getRepIndRegions() {
     return repIndRegions;
   }
 
@@ -759,14 +770,15 @@ public class DeliverableAction extends BaseAction {
     return repIndTypeActivities;
   }
 
+
   public List<RepIndTypeParticipant> getRepIndTypeParticipants() {
     return repIndTypeParticipants;
   }
 
-
   public List<RepositoryChannel> getRepositoryChannels() {
     return repositoryChannels;
   }
+
 
   public List<ProjectPartner> getSelectedPartners() {
 
@@ -817,7 +829,6 @@ public class DeliverableAction extends BaseAction {
     return projectPartnerPersonIds;
 
   }
-
 
   public Map<String, String> getStatus() {
     return status;
@@ -892,6 +903,7 @@ public class DeliverableAction extends BaseAction {
     }
 
   }
+
 
   public void parnershipNewData() {
     if (deliverable.getOtherPartners() != null) {
@@ -1061,15 +1073,6 @@ public class DeliverableAction extends BaseAction {
         this.setTransaction("-1");
       }
 
-      if (deliverable.getDeliverableQualityChecks() != null) {
-        List<DeliverableQualityCheck> checks = new ArrayList<>(deliverable.getDeliverableQualityChecks().stream()
-          .filter(qc -> qc.isActive() && qc.getPhase() != null && qc.getPhase().equals(this.getActualPhase()))
-          .collect(Collectors.toList()));
-        if (!checks.isEmpty()) {
-          deliverable.setQualityCheck(checks.get(0));
-        }
-      }
-
     } else {
       deliverable = deliverableManager.getDeliverableById(deliverableID);
     }
@@ -1199,6 +1202,14 @@ public class DeliverableAction extends BaseAction {
           }
         }
 
+        // Deliverable Geographic Regions List Autosave
+        if (deliverable.getDeliverableRegions() != null) {
+          for (DeliverableGeographicRegion deliverableGeographicRegion : deliverable.getDeliverableRegions()) {
+            deliverableGeographicRegion
+              .setLocElement(locElementManager.getLocElementById(deliverableGeographicRegion.getLocElement().getId()));
+          }
+        }
+
         this.setDraft(true);
       } else {
         deliverable.getDeliverableInfo(this.getActualPhase());
@@ -1259,6 +1270,15 @@ public class DeliverableAction extends BaseAction {
               }
             }
           }
+        }
+
+        // Expected Study Geographic Regions List
+        if (deliverable.getDeliverableGeographicRegions() != null
+          && !deliverable.getDeliverableGeographicRegions().isEmpty()) {
+          deliverable.setDeliverableRegions(new ArrayList<>(deliverableGeographicRegionManager
+            .getDeliverableGeographicRegionbyPhase(deliverable.getId(), this.getActualPhase().getId()).stream()
+            .filter(le -> le.isActive() && le.getLocElement().getLocElementType().getId() == 1)
+            .collect(Collectors.toList())));
         }
 
         deliverable.setFundingSources(deliverable.getDeliverableFundingSources().stream()
@@ -1411,8 +1431,9 @@ public class DeliverableAction extends BaseAction {
 
       this.setRepIndGeographicScopes(repIndGeographicScopeManager.findAll().stream()
         .sorted((g1, g2) -> g1.getName().compareTo(g2.getName())).collect(Collectors.toList()));
-      this.setRepIndRegions(repIndRegionManager.findAll().stream()
-        .sorted((r1, r2) -> r1.getName().compareTo(r2.getName())).collect(Collectors.toList()));
+      repIndRegions = locElementManager.findAll().stream()
+        .filter(c -> c.getLocElementType().getId().intValue() == 1 && c.isActive() && c.getIsoNumeric() != null)
+        .collect(Collectors.toList());
       this.setCountries(locElementManager.findAll().stream()
         .filter(c -> c.isActive() && c.getLocElementType().getId() == 2).collect(Collectors.toList()));
 
@@ -1734,6 +1755,10 @@ public class DeliverableAction extends BaseAction {
           deliverable.getGenderLevels().clear();
         }
 
+        if (deliverable.getDeliverableGeographicRegions() != null) {
+          deliverable.getDeliverableGeographicRegions().clear();
+        }
+
         deliverable.setQualityCheck(null);
         deliverable.getDeliverableInfo(this.getActualPhase()).setCrpClusterKeyOutput(null);
 
@@ -1796,7 +1821,6 @@ public class DeliverableAction extends BaseAction {
       }
     }
   }
-
 
   private DeliverablePartnership responsiblePartnerAutoSave() {
     try {
@@ -1869,12 +1893,15 @@ public class DeliverableAction extends BaseAction {
       this.removeOthersDeliverablePartnerships(deliverableManagedState);
       this.updateOtherDeliverablePartnerships();
 
+      this.saveDeliverableRegions(deliverableDB, this.getActualPhase(), deliverableManagedState);
+
+
       // Gender levels is not longer used.
       this.saveDeliverableGenderLevels(deliverableManagedState);
       this.deleteDeliverableGenderLevels(deliverableManagedState);
 
       // Save Countries list
-      this.saveDeliverableCountries();
+      this.saveDeliverableCountries(deliverableManagedState);
 
       // Reporting and upkeep
       if (this.isReportingActive() || (this.isPlanningActive() && this.getActualPhase().getUpkeep())) {
@@ -2035,7 +2062,8 @@ public class DeliverableAction extends BaseAction {
     }
   }
 
-  private void saveDeliverableCountries() {
+
+  private void saveDeliverableCountries(Deliverable deliverableManagedState) {
 
     if (deliverable.getCountriesIds() != null || !deliverable.getCountriesIds().isEmpty()) {
 
@@ -2050,6 +2078,7 @@ public class DeliverableAction extends BaseAction {
         countriesSave.add(deliverableLocation);
         if (!countries.contains(deliverableLocation)) {
           deliverableLocationManager.saveDeliverableLocation(deliverableLocation);
+          deliverableManagedState.getDeliverableLocations().add(deliverableLocation);
         }
       }
 
@@ -2094,6 +2123,49 @@ public class DeliverableAction extends BaseAction {
         }
       }
     }
+  }
+
+  public void saveDeliverableRegions(Deliverable deliverable, Phase phase, Deliverable deliverableManagedState) {
+
+    // Search and deleted form Information
+    if (deliverable.getDeliverableGeographicRegions() != null
+      && deliverable.getDeliverableGeographicRegions().size() > 0) {
+
+      List<DeliverableGeographicRegion> regionPrev =
+        deliverableGeographicRegionManager.getDeliverableGeographicRegionbyPhase(deliverable.getId(), phase.getId())
+          .stream().filter(le -> le.isActive() && le.getLocElement().getLocElementType().getId() == 1)
+          .collect(Collectors.toList());
+      //
+      // new ArrayList<>(projectExpectedStudy.getProjectExpectedStudyRegions().stream()
+      // .filter(nu -> nu.isActive() && nu.getPhase().getId() == phase.getId()).collect(Collectors.toList()));
+
+      for (DeliverableGeographicRegion deliverableRegion : regionPrev) {
+        if (deliverable.getDeliverableGeographicRegions() == null
+          || !deliverable.getDeliverableGeographicRegions().contains(deliverableRegion)) {
+          deliverableGeographicRegionManager.deleteDeliverableGeographicRegion(deliverableRegion.getId());
+        }
+      }
+    }
+
+    // Save form Information
+    if (deliverable.getDeliverableRegions() != null) {
+      for (DeliverableGeographicRegion deliverableRegion : deliverable.getDeliverableRegions()) {
+        if (deliverableRegion.getId() == null && deliverableRegion.getLocElement() != null) {
+          DeliverableGeographicRegion deliverableRegionSave = new DeliverableGeographicRegion();
+          deliverableRegionSave.setDeliverable(deliverable);
+          deliverableRegionSave.setPhase(phase);
+
+          LocElement locElement = locElementManager.getLocElementById(deliverableRegion.getLocElement().getId());
+
+          deliverableRegionSave.setLocElement(locElement);
+
+          deliverableGeographicRegionManager.saveDeliverableGeographicRegion(deliverableRegionSave);
+          // This is to add regions to generate correct auditlog.
+          deliverableManagedState.getDeliverableGeographicRegions().add(deliverableRegionSave);
+        }
+      }
+    }
+
   }
 
   public void saveDissemination() {
@@ -2778,13 +2850,15 @@ public class DeliverableAction extends BaseAction {
     this.repIndPatentStatuses = repIndPatentStatuses;
   }
 
-  public void setRepIndRegions(List<RepIndRegion> repIndRegions) {
+
+  public void setRepIndRegions(List<LocElement> repIndRegions) {
     this.repIndRegions = repIndRegions;
   }
 
   public void setRepIndTypeActivities(List<RepIndTypeActivity> repIndTypeActivities) {
     this.repIndTypeActivities = repIndTypeActivities;
   }
+
 
   public void setRepIndTypeParticipants(List<RepIndTypeParticipant> repIndTypeParticipants) {
     this.repIndTypeParticipants = repIndTypeParticipants;
@@ -2809,7 +2883,6 @@ public class DeliverableAction extends BaseAction {
   public void setTransaction(String transaction) {
     this.transaction = transaction;
   }
-
 
   /**
    * Save and update list of deliverables funding sources for all phases
@@ -2839,10 +2912,13 @@ public class DeliverableAction extends BaseAction {
           deliverableFundingSource.setDeliverable(deliverableManager.getDeliverableById(deliverableID));
           deliverableFundingSource.setPhase(this.getActualPhase());
           deliverableFundingSourceManager.saveDeliverableFundingSource(deliverableFundingSource);
+          // This add projectFocus to generate correct auditlog.
+          deliverablePrew.getDeliverableFundingSources().add(deliverableFundingSource);
         }
       }
     }
   }
+
 
   /**
    * deliverableDb is in a managed state, deliverable is in a detached state.
@@ -2936,8 +3012,8 @@ public class DeliverableAction extends BaseAction {
       || deliverable.getDeliverableInfo().getCrpClusterKeyOutput().getId().longValue() == -1) {
       deliverableInfoDb.setCrpClusterKeyOutput(null);
     } else {
-      deliverableInfoDb
-        .setCrpClusterKeyOutput(deliverable.getDeliverableInfo(this.getActualPhase()).getCrpClusterKeyOutput());
+      deliverableInfoDb.setCrpClusterKeyOutput(crpClusterKeyOutputManager.getCrpClusterKeyOutputById(
+        deliverable.getDeliverableInfo(this.getActualPhase()).getCrpClusterKeyOutput().getId()));
     }
 
     deliverableInfoDb
@@ -2983,9 +3059,10 @@ public class DeliverableAction extends BaseAction {
       && deliverable.getDeliverableInfo().getGeographicScope().getId() != null
       && deliverable.getDeliverableInfo().getGeographicScope().getId() != -1) {
 
-      deliverableInfoDb.setGeographicScope(deliverable.getDeliverableInfo().getGeographicScope());
       RepIndGeographicScope repIndGeographicScope =
         repIndGeographicScopeManager.getRepIndGeographicScopeById(deliverableInfoDb.getGeographicScope().getId());
+
+      deliverableInfoDb.setGeographicScope(repIndGeographicScope);
 
       // Global
       if (repIndGeographicScope.getId().equals(this.getReportingIndGeographicScopeGlobal())) {
@@ -3021,7 +3098,6 @@ public class DeliverableAction extends BaseAction {
     return deliverableBase;
   }
 
-
   /**
    * This is for updating the list of Other Deliverable Partnerships.
    */
@@ -3043,13 +3119,17 @@ public class DeliverableAction extends BaseAction {
           } else {
             DeliverablePartnership partnershipResponsibleDB =
               deliverablePartnershipManager.getDeliverablePartnershipById(deliverablePartnershipOther.getId());
-            if (deliverablePartnershipOther.getProjectPartner().getId()
-              .equals(partnershipResponsibleDB.getProjectPartner().getId())) {
-              this.checkChangesAndUpdateDeliverablePartnership(partnershipResponsibleDB, deliverablePartnershipOther);
-            } else {
-              deliverablePartnershipManager.deleteDeliverablePartnership(partnershipResponsibleDB.getId());
-              this.createAndSaveNewDeliverablePartnership(deliverablePartnershipOther,
-                DeliverablePartnershipTypeEnum.OTHER.getValue());
+            // If partnershipResponsibleDB was not previously deleted
+            if (partnershipResponsibleDB != null) {
+              if (deliverablePartnershipOther.getProjectPartner().getId()
+                .equals(partnershipResponsibleDB.getProjectPartner().getId())) {
+                this.checkChangesAndUpdateDeliverablePartnership(partnershipResponsibleDB, deliverablePartnershipOther);
+              } else {
+                deliverablePartnershipManager.deleteDeliverablePartnership(partnershipResponsibleDB.getId());
+                this.createAndSaveNewDeliverablePartnership(deliverablePartnershipOther,
+                  DeliverablePartnershipTypeEnum.OTHER.getValue());
+              }
+
             }
           }
         }

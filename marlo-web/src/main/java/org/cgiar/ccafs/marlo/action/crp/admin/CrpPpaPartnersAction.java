@@ -353,12 +353,12 @@ public class CrpPpaPartnersAction extends BaseAction {
 
       // Send UserManual.pdf
       String contentType = "application/pdf";
-      String fileName = "Introduction_To_MARLO_v2.3.pdf";
+      String fileName = "Introduction_To_MARLO_v2.4.pdf";
       byte[] buffer = null;
       InputStream inputStream = null;
 
       try {
-        inputStream = this.getClass().getResourceAsStream("/manual/Introduction_To_MARLO_v2.3.pdf");
+        inputStream = this.getClass().getResourceAsStream("/manual/Introduction_To_MARLO_v2.4.pdf");
         buffer = readFully(inputStream);
       } catch (FileNotFoundException e) {
         e.printStackTrace();
@@ -662,9 +662,9 @@ public class CrpPpaPartnersAction extends BaseAction {
                   if (liaisonInstitution != null) {
                     liaisonUserManager.saveLiaisonUser(liaisonUserSave);
                     // If is new user active it
-                    if (!liaisonUser.getUser().isActive()) {
-                      this.notifyNewUserCreated(liaisonUser.getUser());
-                    }
+
+                    this.notifyNewUserCreated(liaisonUser.getUser());
+
                     this.addCrpUserIfNotExist(liaisonUser.getUser());
                     // add userRole
                     if (cpRole != null) {
