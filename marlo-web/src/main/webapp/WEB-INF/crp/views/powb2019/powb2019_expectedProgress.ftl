@@ -17,7 +17,7 @@
 [#include "/WEB-INF/global/pages/header.ftl" /]
 [#include "/WEB-INF/global/pages/main-menu.ftl" /]
 
-[#assign customName= "powbSynthesis.expectedProgress" /]
+[#assign customName= "powbSynthesis" /]
 [#assign customLabel= "powbSynthesis.${currentStage}" /]
 
 
@@ -46,9 +46,8 @@
             [#-- Provide a short narrative of expected highlights of the CRP/PTF in the coming year --]
             <div class="form-group">
               [#if PMU][@utilities.tag label="powb.docBadge" tooltip="powb.docBadge.tooltip"/][/#if]
-              [@customForm.textArea name="${customName}.narrative" i18nkey="${customLabel}.narrative" help="${customLabel}.narrative.help" helpIcon=false required=true className="limitWords-${calculateLimitWords(2000)}" editable=editable allowTextEditor=true   /]
+              [@customForm.textArea name="${customName}.expectedProgressNarrative" i18nkey="${customLabel}.narrative" help="${customLabel}.narrative.help" helpIcon=false required=true className="limitWords-${calculateLimitWords(2000)}" editable=editable allowTextEditor=true   /]            
             </div>
-            
             [#if PMU]
             <div class="form-group">
               [@tableFlagshipSynthesis tableName="narrativeFlagshipsTable" list=tocList columns=["narrative"] /]
@@ -132,6 +131,7 @@
 [/#macro]
 
 [#macro tableA2Milestones  list=[] allowPopups=false id="" includeAllColumns=true  ]
+  [#local milestoneIndex = 0 ]
   <div class="">[#-- <div class="table-responsive"> --]
     <table id="table2A-POWB2019" class="table table-bordered">
       <thead>
@@ -208,8 +208,12 @@
                 [/#if]
                 [#-- Include in POWB --]
                 [#if flagship && !includeAllColumns]
-                  [#local isMilestoneChecked = ((!powbSynthesis.expectedProgress.milestonesIds?seq_contains(m.id))!true) /]
-                  <td class="text-center"> [@customForm.checkmark id="milestoneCheck-${(m.id)!''}" name="${customName}.milestonesValue" value="${(m.id)!''}" checked=isMilestoneChecked editable=editable centered=true/] </td> 
+                  <td class="text-center">
+                    [#local milestoneName = "powbSynthesis.milestones[${milestoneIndex}]" ]
+                    <input type="hidden" name="${milestoneName}.id" value="${m.id}"/>
+                    [@customForm.checkmark id="m-${(m.id)!''}" name="${milestoneName}.isPowb" checked=(m.isPowb)!false editable=editable centered=true/] 
+                    [#local milestoneIndex = milestoneIndex + 1 ]
+                  </td>
                 [/#if]
               </tr>
             [/#list]
