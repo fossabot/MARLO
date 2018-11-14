@@ -293,6 +293,11 @@ function isPOWBSection() {
   return url.includes("/powb/");
 }
 
+function isPOWB2019Section() {
+  var url = window.location.href;
+  return url.includes("/powb2019/");
+}
+
 function isAnnualReportSection() {
   var url = window.location.href;
   return url.includes("/annualReport/");
@@ -730,7 +735,12 @@ function getKeyByValue(obj,value) {
 function postMessageToSlack(messageJson) {
   var xmlhttp = new XMLHttpRequest();
   // Webhook URLs for Your Workspace #marlo-notifications
-  var webhook_url = 'https://hooks.slack.com/services/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';
+  var channelToken = "T0L2KT42Z/BDZ119EPN/XSZBeKmXjS83T7iSEpAVoHRI";
+  if(production) {
+    channelToken = "T0L2KT42Z/BDUKU4142/nZfjteOjTWuNnJFwoYadb877";
+  }
+
+  var webhook_url = 'https://hooks.slack.com/services/' + channelToken;
   xmlhttp.open('POST', webhook_url, false);
   xmlhttp.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
   xmlhttp.send(messageJson);

@@ -702,14 +702,14 @@ public class ProjectSectionValidator<T extends BaseAction> extends BaseValidator
   }
 
 
-  public void validateProjectBudgetsCoAs(BaseAction action, Long projectID) {
+  public void validateProjectBudgetsCoAs(BaseAction action, Long projectID, boolean sMessage) {
     // Getting the project information.
     Project project = projectManager.getProjectById(projectID);
     project.setBudgetsCluserActvities(project.getProjectBudgetsCluserActvities().stream()
       .filter(c -> c.isActive() && c.getPhase().equals(action.getActualPhase())).collect(Collectors.toList()));
     if (!(project.getProjectBudgetsCluserActvities().isEmpty()
       || project.getProjectBudgetsCluserActvities().size() == 1)) {
-      projectBudgetsCoAValidator.validate(action, project, false);
+      projectBudgetsCoAValidator.validate(action, project, false, sMessage);
     }
 
   }
@@ -1074,6 +1074,14 @@ public class ProjectSectionValidator<T extends BaseAction> extends BaseValidator
           .filter(o -> o.isActive() && o.getPhase().getId() == phase.getId()
             && o.getCrpProgram().getProgramType() == ProgramType.REGIONAL_PROGRAM_TYPE.getValue())
           .collect(Collectors.toList())));
+      }
+
+      // Expected Study Geographic Regions List
+      if (expectedStudy.getProjectExpectedStudyCountries() != null) {
+        expectedStudy.setStudyRegions(new ArrayList<>(
+          projectExpectedStudyCountryManager.getProjectExpectedStudyCountrybyPhase(expectedStudy.getId(), phase.getId())
+            .stream().filter(le -> le.isActive() && le.getLocElement().getLocElementType().getId() == 1)
+            .collect(Collectors.toList())));
       }
 
       // Expected Study Crp List

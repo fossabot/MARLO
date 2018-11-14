@@ -8,7 +8,7 @@
   },
   { 'title': '2.  Expected Key Results',  'show': true,
     'items': [
-    { 'slug': 'expectedProgress',       'name': 'powb.menu.expectedOutcomes',       'action': 'expectedProgress',       'active': true, 'development': true },
+    { 'slug': 'expectedProgress',       'name': 'powb.menu.expectedOutcomes',       'action': 'progressOutcomes',       'active': true, 'development': true },
     { 'slug': 'plannedStudies',         'name': 'powb.menu.plannedStudies',         'action': 'plannedStudies',         'active': true },
     { 'slug': 'plannedCollaborations',  'name': 'powb.menu.plannedCollaborations',  'action': 'plannedCollaborations',  'active': true, 'development': true }
     ]
@@ -18,7 +18,7 @@
     { 'slug': 'plannedBudget',          'name': 'powb.menu.plannedBudget',          'action': 'plannedBudget',          'active': true, 'development': true }
     ]
   },
-  { 'title': '4. CCAFS Specific',        'show': true,
+  { 'title': '4. CCAFS Specific',        'show':  action.hasSpecificities(action.powbProgramChangeModule()),
     'items': [
     { 'slug': 'programChanges',          'name': 'powb.menu.programChanges',          'action': 'programChanges',       'active': true, 'development': true }
     ]
@@ -26,9 +26,17 @@
 ]/]
 
 
-[#assign submission = (action.isPowbSynthesisSubmitted(powbSynthesisID))!false /]
-[#assign canSubmit = (action.hasPersmissionSubmitPowb(powbSynthesisID))!false /]
-[#assign completed = (action.isCompletePowbSynthesis(powbSynthesisID))!false /]
+
+[#attempt]
+  [#assign submission = (action.isPowbSynthesisSubmitted(powbSynthesisID))!false /]
+  [#assign canSubmit = (action.hasPersmissionSubmitPowb(powbSynthesisID))!false /]
+  [#assign completed = (action.isCompletePowbSynthesis2019(powbSynthesisID))!false /]
+[#recover]
+  [#assign submission = false /]
+  [#assign canSubmit = false /]
+  [#assign completed = false /]
+[/#attempt]
+
 [#assign canUnSubmit = false /]
 
 [#assign sectionsForChecking = [] /]
@@ -134,6 +142,6 @@
 [#include "/WEB-INF/global/macros/discardChangesPopup.ftl"]
 
 [#-- Project Submit JS --]
-[#assign customJS = customJS  + [  "${baseUrlMedia}/js/powb/powbSubmit.js?20180307", "${baseUrl}/global/js/autoSave.js", "${baseUrl}/global/js/fieldsValidation.js" ]
+[#assign customJS = customJS  + [  "${baseUrlMedia}/js/powb2019/powb2019Submit.js", "${baseUrl}/global/js/autoSave.js", "${baseUrl}/global/js/fieldsValidation.js" ]
 /]
 
