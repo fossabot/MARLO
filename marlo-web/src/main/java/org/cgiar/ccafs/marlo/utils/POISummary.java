@@ -52,7 +52,7 @@ public class POISummary {
 
   // LOG
   private static final Logger LOG = LoggerFactory.getLogger(POISummary.class);
-  private final static String FONT_TYPE = "Calibri Light";
+  private static String FONT_TYPE = "Calibri Light";
   private final static String TITLE_FONT_COLOR = "3366CC";
   private final static String TEXT_FONT_COLOR = "000000";
   private static Integer TABLE_TEXT_FONT_SIZE = 10;
@@ -64,6 +64,8 @@ public class POISummary {
   List<Integer> startsPosList = new ArrayList<Integer>();
   List<Integer> finalPosList = new ArrayList<Integer>();
   List<String> tagsAddList = new ArrayList<String>();
+  List<String> urlList = new ArrayList<String>();
+  List<String> referenceList = new ArrayList<String>();
 
   private void addExpressionsToList() {
     expressionsList.add("<b>");
@@ -89,7 +91,6 @@ public class POISummary {
     expressionsListClose.add("</a>");
   }
 
-
   public void addLineSeparator(XWPFParagraph h1) {
     XWPFRun h1Run = h1.createRun();
     h1.setBorderBottom(Borders.SINGLE);
@@ -110,12 +111,13 @@ public class POISummary {
   }
 
   public void convertHTMLTags(XWPFDocument document, String text) {
+    text = text.replace("<p>", "");
+    int textLength = 0;
     this.addExpressionsToList();
-    boolean isLink = false;
     String url = "";
-    int posInit = 0;
-    int posFinal = 0;
-    int postLastLink = 0;
+    int posFinal = 0, hrefTagsCount = 0;
+    String startText = text;
+    textLength = startText.length();
     String expressionListActual = "", textIndicatorLink = "";
 
     /*
@@ -133,52 +135,27 @@ public class POISummary {
            */
           if ((text.charAt(j) == expressionListActual.charAt(0))
             && text.charAt(j + 1) == expressionListActual.charAt(1)) {
-            posInit = j;
 
-            startsPosList.add(posInit);
+            startsPosList.add(j);
             tagsAddList.add(expressionsList.get(i));
+
+            /*
+             * Getting close tag
+             */
+            posFinal = text.indexOf(expressionsListClose.get(i), j);
+            finalPosList.add(posFinal);
 
             /*
              * Detect start of a href tags
              */
-            if (text.charAt(j + 3) == 'h' && text.charAt(j) == 'r') {
+            if (expressionListActual.equals("<a")) {
 
-              isLink = true;
+              hrefTagsCount++;
+              textIndicatorLink = text.substring(text.indexOf(">", j) + 1, posFinal);
+              url = text.substring(text.indexOf("=", j) + 2, text.indexOf(">", j) - 2);
 
-              /*
-               * search for the close url part
-               */
-              int k = j;
-              do {
-                if (text.charAt(k) == '>') {
-                  postLastLink = k + 1;
-                }
-                k++;
-              } while (postLastLink == 0);
-            }
-          }
-        }
-
-        /*
-         * Getting close tags
-         */
-
-        for (int k = 0; k < text.length(); k++) {
-
-          // If detect close tag
-          if (text.charAt(k) == expressionsListClose.get(i).charAt(0)
-            && text.charAt(k + 1) == expressionsListClose.get(i).charAt(1)
-            && text.charAt(k + 2) == expressionsListClose.get(i).charAt(2)) {
-            posFinal = k - expressionsListClose.get(i).length();
-            finalPosList.add(posFinal);
-
-            if (isLink == true && expressionListActual.contains("<a")) {
-              textIndicatorLink = text.substring(postLastLink, posFinal);
-              System.out.println("postLastLink " + postLastLink + " pos final " + posFinal);
-
-              // The url substring should start after identifying the href tag and finish before closing the quotation
-              // marks
-              url = text.substring(posInit + 4, postLastLink - 2);
+              urlList.add(url);
+              referenceList.add(textIndicatorLink);
             }
           }
         }
@@ -194,6 +171,9 @@ public class POISummary {
     String stringTemp = "";
     XWPFRun paragraphRun;
     XWPFParagraph paragraph = null;
+    String url1 = "";
+    String textIndicatorLink1 = "";
+    int k = 0;
 
     for (i = 0; i < text.length(); i++) {
 
@@ -202,14 +182,31 @@ public class POISummary {
           if (startsPosList.get(j) == i) {
             finalPosition = finalPosList.get(j);
             expression = tagsAddList.get(j);
+
+            if (expression.equals("<a")) {
+              url1 = urlList.get(k);
+              textIndicatorLink1 = referenceList.get(k);
+              if (k <= hrefTagsCount) {
+                k++;
+              }
+            }
           }
         }
 
         if (i > 0) {
           stringTemp = text.substring(startPosition, i);
-          paragraph = document.createParagraph();
+
+          try {
+            paragraphRun = paragraph.createRun();
+          } catch (Exception e) {
+            paragraph = document.createParagraph();
+            paragraphRun = paragraph.createRun();
+          }
+
           paragraph.setAlignment(ParagraphAlignment.BOTH);
           paragraphRun = paragraph.createRun();
+          stringTemp = stringTemp.replaceAll("&nbsp;", " ");
+          stringTemp = stringTemp.replaceAll(">", "");
           this.addParagraphTextBreak(paragraphRun, stringTemp);
 
           paragraphRun.setColor(TEXT_FONT_COLOR);
@@ -219,7 +216,7 @@ public class POISummary {
           paragraphRun.setUnderline(UnderlinePatterns.NONE);
           paragraphRun.setItalic(false);
         }
-        startPosition = i + expression.length();
+        startPosition = i + expression.length() + 1;
 
         /*
          * Create paragraph with last position after the start of html tag until the close of this
@@ -230,11 +227,16 @@ public class POISummary {
           stringTemp = text;
         }
 
-        paragraph = document.createParagraph();
-        paragraphRun = paragraph.createRun();
+        try {
+          paragraphRun = paragraph.createRun();
+        } catch (Exception e) {
+          paragraph = document.createParagraph();
+          paragraphRun = paragraph.createRun();
+        }
 
-        if (isLink == false) {
+        if (expressionListActual.contains("<a") == false) {
           paragraph.setAlignment(ParagraphAlignment.BOTH);
+          stringTemp = this.replaceHTMLTags(stringTemp);
 
           this.addParagraphTextBreak(paragraphRun, stringTemp);
 
@@ -243,7 +245,9 @@ public class POISummary {
           paragraphRun.setFontSize(11);
         }
 
-        // Apply the style to the paragraph depending on the identified expression
+        /*
+         * Apply the style to the paragraph depending on the identified expression
+         */
         switch (expression) {
           /*
            * Open tags detection
@@ -269,9 +273,9 @@ public class POISummary {
           case "<p>":
             break;
           case "<a":
-            System.out.println("url " + url);
-            this.textHyperlink(url, text, paragraph);
+            this.textHyperlink(url1, textIndicatorLink1, paragraph);
             break;
+
           /*
            * Close tags detection
            */
@@ -302,19 +306,26 @@ public class POISummary {
             paragraphRun.setUnderline(UnderlinePatterns.NONE);
             paragraphRun.setItalic(false);
         }
-        startPosition = finalPosition + expression.length() + 4;
+        startPosition = finalPosition + expression.length() + 1;
         expression = "";
         i = finalPosition;
       }
     }
 
-    if (finalPosition < text.length()) {
-      System.out.println("last  text length " + text.length() + " finalpos " + finalPosition);
-      stringTemp = text.substring(finalPosition, text.length());
-      paragraph = document.createParagraph();
-      paragraph.setAlignment(ParagraphAlignment.BOTH);
-      paragraphRun = paragraph.createRun();
-      this.addParagraphTextBreak(paragraphRun, stringTemp);
+    if (finalPosition < textLength) {
+      int length = startText.length();
+
+      startText = startText.substring(finalPosition + expression.length(), length);
+
+      try {
+        paragraphRun = paragraph.createRun();
+      } catch (Exception e) {
+        paragraph = document.createParagraph();
+        paragraphRun = paragraph.createRun();
+      }
+
+      startText = this.replaceHTMLTags(" " + startText);
+      this.addParagraphTextBreak(paragraphRun, startText);
 
       paragraphRun.setColor(TEXT_FONT_COLOR);
       paragraphRun.setFontFamily(FONT_TYPE);
@@ -324,7 +335,6 @@ public class POISummary {
       paragraphRun.setItalic(false);
     }
   }
-
 
   public void createTOC(XWPFDocument document) {
     // Create table of contents
@@ -342,6 +352,7 @@ public class POISummary {
       }
     }
   }
+
 
   /**
    * Footer title
@@ -399,7 +410,6 @@ public class POISummary {
     policy.createHeader(XWPFHeaderFooterPolicy.DEFAULT, parsHeader);
   }
 
-
   public void pageRightHeader(XWPFDocument document, String text) throws IOException {
     CTSectPr sectPr = document.getDocument().getBody().addNewSectPr();
     XWPFHeaderFooterPolicy policy = new XWPFHeaderFooterPolicy(document, sectPr);
@@ -415,6 +425,18 @@ public class POISummary {
     XWPFParagraph[] parsHeader = new XWPFParagraph[1];
     parsHeader[0] = headerParagraph;
     policy.createHeader(XWPFHeaderFooterPolicy.DEFAULT, parsHeader);
+  }
+
+
+  public String replaceHTMLTags(String html) {
+    try {
+      html = html.replaceAll("\\<.*?>", "");
+      html = html.replaceAll("&nbsp;", "");
+      html = html.replaceAll("&amp;", "");
+    } catch (Exception e) {
+      throw e;
+    }
+    return html;
   }
 
   public void tableA1AnnualReportStyle(XWPFTable table) {
@@ -441,7 +463,7 @@ public class POISummary {
     for (int x = 0; x < table.getNumberOfRows(); x++) {
       if (x > 0) {
         XWPFTableRow row = table.getRow(x);
-        for (int y = 0; y < 6; y++) {
+        for (int y = 0; y < 10; y++) {
           XWPFTableCell cell = row.getCell(y);
 
           if (cell.getCTTc() == null) {
@@ -688,10 +710,10 @@ public class POISummary {
       }
     }
 
-    for (int x = 0; x < 2; x++) {
+    for (int x = 0; x < 3; x++) {
       if (x >= 0) {
         XWPFTableRow row1 = table.getRow(x);
-        for (int y = 0; y < 7; y++) {
+        for (int y = 0; y < 6; y++) {
           XWPFTableCell cell = row1.getCell(y);
 
           if (cell.getCTTc() == null) {
@@ -701,7 +723,7 @@ public class POISummary {
           if (cell.getCTTc().getTcPr() == null) {
             cell.getCTTc().addNewTcPr();
           }
-          if (x == 1 && !(cell.getText().trim().length() > 0)) {
+          if (x == 2 && !(cell.getText().trim().length() > 0)) {
             break;
           }
           if (cell.getText().trim().length() > 0) {
@@ -890,11 +912,6 @@ public class POISummary {
     }
   }
 
-  public void text(String text) {
-    int i = 0;
-    String a = text.charAt(i) + text.charAt(i + 2) + text.charAt(i + 3) + "";
-  }
-
 
   /**
    * Head 1 Title
@@ -1059,7 +1076,32 @@ public class POISummary {
     Boolean highlightFirstColumn, String tableType) {
     if (tableType.contains("Powb")) {
       TABLE_TEXT_FONT_SIZE = 11;
+      FONT_TYPE = "Calibri";
     } else {
+      TABLE_TEXT_FONT_SIZE = 10;
+    }
+
+    if (tableType.equals("tableC2PowbPLT")) {
+      TABLE_TEXT_FONT_SIZE = 11;
+    } else if (tableType.equals("tableC2PowbCRP")) {
+      TABLE_TEXT_FONT_SIZE = 10;
+    }
+
+    if (tableType.equals("tableEPowbPLT")) {
+      TABLE_TEXT_FONT_SIZE = 11;
+    } else if (tableType.equals("tableEPowbCRP")) {
+      TABLE_TEXT_FONT_SIZE = 10;
+    }
+
+    if (tableType.equals("tableA2PowbPLT")) {
+      TABLE_TEXT_FONT_SIZE = 11;
+    } else if (tableType.equals("tableA2PowbCRP")) {
+      TABLE_TEXT_FONT_SIZE = 10;
+    }
+
+    if (tableType.equals("tableBPowbPLT")) {
+      TABLE_TEXT_FONT_SIZE = 11;
+    } else if (tableType.equals("tableBPowbCRP")) {
       TABLE_TEXT_FONT_SIZE = 10;
     }
 
@@ -1075,16 +1117,17 @@ public class POISummary {
       } else {
         tableRowHeader = table.createRow();
       }
+
       for (POIField poiParameter : poiParameters) {
 
         // Condition for table b cell color in fields 5 and 6 in annual report
         if (tableType.equals("tableBAnnualReport") && (record == 4 || record == 5)) {
           TABLE_HEADER_FONT_COLOR = "DEEAF6";
           // Condition for table 2a
-        } else if (tableType.equals("tableA2Powb")) {
-          TABLE_HEADER_FONT_COLOR = "FFFFFF";
-        } else {
+        } else if (tableType.contains("Powb")) {
           TABLE_HEADER_FONT_COLOR = "FFF2CC";
+        } else {
+          TABLE_HEADER_FONT_COLOR = "FFFFFF";
         }
 
         if (headerIndex == 0) {
@@ -1147,10 +1190,10 @@ public class POISummary {
       // Condition for table b cell color in fields 5 and 6
       if (tableType.equals("tableBAnnualReport") && (record == 4 || record == 5)) {
         TABLE_HEADER_FONT_COLOR = "DEEAF6";
-      } else if (tableType.equals("tableA2Powb")) {
-        TABLE_HEADER_FONT_COLOR = "FFFFFF";
+      } else if (tableType.contains("tableA2Powb")) {
+        TABLE_HEADER_FONT_COLOR = "D9EAD3";
       } else {
-        TABLE_HEADER_FONT_COLOR = "FFF2CC";
+        TABLE_HEADER_FONT_COLOR = "FFFFFF";
       }
 
       XWPFTableRow dataRow = table.createRow();
@@ -1180,18 +1223,6 @@ public class POISummary {
             TABLE_HEADER_FONT_COLOR = "FFF2CC";
           }
 
-          if (tableType.equals("tableA2Powb")) {
-            if (count >= 1) {
-              dataRow.getCell(record).setColor("FFF2CC");
-            }
-            if (count >= 21) {
-              dataRow.getCell(record).setColor("D9EAD3");
-            }
-            if (count >= 27) {
-              dataRow.getCell(record).setColor("FFFFFF");
-            }
-          }
-
           // highlight and bold first and SecondColumn for table D1
           if (tableType.equals("tableD1AnnualReport") && (record == 0 || record == 1) && count < 9) {
             dataRow.getCell(record).setColor("DEEAF6");
@@ -1199,6 +1230,9 @@ public class POISummary {
           } else if (tableType.equals("tableD1AnnualReport") && count >= 9 && (record == 0 || record == 1)) {
             dataRow.getCell(record).setColor("E2EFD9");
             paragraphRun.setBold(true);
+
+          } else if (tableType.contains("tableA2Powb") && record < 6) {
+            dataRow.getCell(record).setColor("D9EAD3");
 
           } else {
             if (highlightFirstColumn && record == 0) {
@@ -1216,12 +1250,9 @@ public class POISummary {
               }
             }
           }
-
-
         }
         record++;
       }
-
     }
 
     switch (tableType) {
@@ -1243,7 +1274,7 @@ public class POISummary {
 
       // Annual report tables
       case "tableAAnnualReport":
-        this.tableBAnnualReportStyle(table);
+        this.tableEPowbStyle(table);
         break;
       case "tableA1AnnualReport":
         this.tableA1AnnualReportStyle(table);
@@ -1285,19 +1316,35 @@ public class POISummary {
         break;
 
       // powb 2019 template tables
-      case "tableA2Powb":
+      case "tableA2PowbPLT":
         count = 0;
-        this.tableA2PowbStyle(table);
+        this.tableEPowbStyle(table);
         break;
-      case "tableB2Powb":
+      case "tableA2PowbCRP":
+        count = 0;
+        this.tableEPowbStyle(table);
+        break;
+      case "tableBPowbPLT":
         count = 0;
         // this.tableB2PowbStyle(table);
         break;
-      case "tableC2Powb":
+      case "tableBPowbCRP":
+        count = 0;
+        // this.tableB2PowbStyle(table);
+        break;
+      case "tableC2PowbPLT":
         count = 0;
         // this.tableC2PowbStyle(table);
         break;
-      case "tableEPowb":
+      case "tableC2PowbCRP":
+        count = 0;
+        // this.tableC2PowbStyle(table);
+        break;
+      case "tableEPowbPLT":
+        count = 0;
+        this.tableEPowbStyle(table);
+        break;
+      case "tableEPowbCRP":
         count = 0;
         this.tableEPowbStyle(table);
         break;
@@ -1305,7 +1352,7 @@ public class POISummary {
     if (tableType.contains("AnnualReport")) {
       table.getCTTbl().addNewTblPr().addNewTblW().setW(BigInteger.valueOf(13350));
     } else if (tableType.contains("Powb")) {
-      table.getCTTbl().addNewTblPr().addNewTblW().setW(BigInteger.valueOf(13410));
+      table.getCTTbl().addNewTblPr().addNewTblW().setW(BigInteger.valueOf(13700));
     } else {
       table.getCTTbl().addNewTblPr().addNewTblW().setW(BigInteger.valueOf(12000));
     }

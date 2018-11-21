@@ -1,5 +1,8 @@
 $(document).ready(function() {
 
+  // Activate Popup
+  popups();
+
   var $partnershipsTable = $('table.partnershipsTable_');
 
   var table = $partnershipsTable.DataTable({
@@ -53,6 +56,15 @@ function attachEvents() {
   // Remove a program collaboration
   $('.removeProgramCollaboration').on('click', removeProgramCollaboration);
 
+  $('.cTypeRadio').on('change', selectCollaborationType);
+
+}
+
+function selectCollaborationType() {
+  var optionSelected = this.value;
+  var $parent = $(this).parents('.flagshipCollaboration');
+  $parent.find('.collaboratorType').hide();
+  $parent.find('.collaboratorType-' + optionSelected).slideDown();
 }
 
 function addProgramCollaboration() {
@@ -105,7 +117,7 @@ function updateIndexes() {
 }
 
 function formatSelect2Result(item) {
-  if(item.loading) {
+  if(item.loading || (item.text == "-1")) {
     return item.text;
   }
   var $item = $('#globalUnit-' + item.id).clone();

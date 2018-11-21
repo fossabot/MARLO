@@ -2,13 +2,11 @@
 [#assign title = "POWB Synthesis" /]
 [#assign currentSectionString = "powb-${actionName?replace('/','-')}-${liaisonInstitutionID}" /]
 [#assign pageLibs = [ "select2", "flat-flags", "datatables.net", "datatables.net-bs" ] /]
-[#assign customJS = [ "${baseUrlMedia}/js/powb2019/powb2019_plannedCollaboration.js" ] /]
+[#assign customJS = [ "${baseUrlMedia}/js/powb2019/powb2019_plannedCollaboration.js?20181119" ] /]
 [#assign customCSS = [ "${baseUrlMedia}/css/powb/powbGlobal.css" ] /]
 [#assign currentSection = "synthesis" /]
 [#assign currentStage = "plannedCollaborations" /]
 
-
-[#assign concurrenceEnabled = false /]
 
 [#assign breadCrumb = [
   {"label":"${currentSection}", "nameSpace":"", "action":""},
@@ -63,12 +61,25 @@
                 [#list powbSynthesis.powbCollaborationGlobalUnitsList as collaboration]
                   [@flagshipCollaborationMacro element=collaboration name="powbSynthesis.powbCollaborationGlobalUnitsList" index=collaboration_index  isEditable=editable/]
                 [/#list]
+              [#else]
+                [#if !editable] <i>No Collaborations added</i> [/#if]
                [/#if]
               </div>
               [#if canEdit && editable]
               <div class="text-right">
                 <div class="addProgramCollaboration bigAddButton text-center"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> [@s.text name="form.buttons.addProgramCollaborationOrNonCgiar"/]</div>
               </div> 
+              [/#if]
+              
+              [#-- Request institution adition --]
+              [#if editable]
+              <br />
+              <p id="addPartnerText" class="helpMessage">
+                [@s.text name="global.addInstitutionMessage" /]
+                <a class="popup" href="[@s.url namespace="/projects" action='${crpSession}/partnerSave' ][@s.param name='powbSynthesisID']${(powbSynthesis.id)!}[/@s.param][#include "/WEB-INF/global/pages/urlGlobalParams.ftl" /][/@s.url]">
+                  [@s.text name="projectPartners.addPartnerMessage.second" /]
+                </a>
+              </p> 
               [/#if]
               
               [#-- Hidden: Global Unit list for Select2 widget --]
@@ -111,19 +122,24 @@
     [#-- Hidden inputs --]
     <input type="hidden" name="${customName}.id" value="${(element.id)!}"/> 
     <br />
-
-    <div class="form-group row"> 
-      [#-- CRP/Platform --] 
-      <div class="col-md-4">
-        [@customForm.select name="${customName}.globalUnit.id" label="" keyFieldName="id"  displayFieldName="acronymValid" i18nkey="powbSynthesis.programCollaboration.globalUnit" listName="globalUnits"  required=true  className="globalUnitSelect" editable=isEditable/]
-      </div>
-      <div class="col-md-1 text-center">
-        <i>- Or -</i>
-      </div>
-      [#-- Institution --]
-      <div class="col-md-7">
-        [@customForm.select name="${customName}.institution.id" label="" keyFieldName="id"  displayFieldName="composedName" i18nkey="powbSynthesis.programCollaboration.institution" listName="institutions"  required=true  className="institutionsSelect" editable=isEditable/]
-      </div>
+    
+    <div class="form-group">
+      <label>[@s.text name="powbSynthesis.programCollaboration.collaboratorType" /]:[@customForm.req required=editable  /]</label><br />
+      [#list collaboratorTypes as cType]
+        [@customForm.radioFlat id="${customName}-cType-${cType_index}" name="${customName}.collaboratorType" label="${(cType.getName())!}" value="${(cType.id)!}" checked=((element.collaboratorType == cType.id?number)!false) editable=editable cssClass="cTypeRadio" cssClassLabel=""/]
+      [/#list]
+      
+      [#local isCollaboratorTypeSelected = (element.collaboratorType??)!false]
+      [#if !editable && !isCollaboratorTypeSelected][@s.text name="form.values.fieldEmpty"/][/#if]
+    </div>
+    
+    [#-- CRP/Platform --] 
+    <div class="form-group collaboratorType collaboratorType-1" style="display:${((element.collaboratorType == 1)!false)?string("block", "none")}"> 
+      [@customForm.select name="${customName}.globalUnit.id" label="" keyFieldName="id"  displayFieldName="acronymValid" i18nkey="powbSynthesis.programCollaboration.globalUnit" listName="globalUnits"  required=true  className="globalUnitSelect" editable=isEditable/]
+    </div>
+    [#-- Institution --]
+    <div class="form-group collaboratorType collaboratorType-2" style="display:${((element.collaboratorType == 2)!false)?string("block", "none")}">
+      [@customForm.select name="${customName}.institution.id" label="" keyFieldName="id"  displayFieldName="composedName" i18nkey="powbSynthesis.programCollaboration.institution" listName="institutions"  required=true  className="institutionsSelect" editable=isEditable/]
     </div>
     
     [#-- Brief Description --] 
@@ -153,9 +169,11 @@
           [#assign collaborations = collaborations + [coll] ]
           <tr>
             <td><span class="programTag" style="border-color:${(coll.powbSynthesis.liaisonInstitution.crpProgram.color)!'#fff'}" title="${coll.powbSynthesis.liaisonInstitution.crpProgram.composedName}">${coll.powbSynthesis.liaisonInstitution.crpProgram.acronym}</span></td>
-            <td class="col-md-3"> 
-              <strong>${(coll.globalUnit.acronym)!}</strong><br />
-              <i>${(coll.globalUnit.globalUnitType.name)!}</i>
+            <td class="col-md-3">
+              [#-- CGIAR Entity --]
+              [#if coll.globalUnit??]${(coll.globalUnit.composedName)!} <br /> <i>(${(coll.globalUnit.globalUnitType.name)!})</i>[/#if]
+              [#-- Non-CGIAR Institution --]
+              [#if coll.institution??]${coll.institution.composedName} <br /> <i>(${coll.institution.institutionType.name})</i> [/#if]
             </td>
             <td class="col-md-8">
               ${(coll.brief?replace('\n', '<br>'))!} 

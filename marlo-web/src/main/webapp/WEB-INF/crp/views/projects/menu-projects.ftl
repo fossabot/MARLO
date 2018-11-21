@@ -150,8 +150,9 @@
     <div id="progressbar-${projectID}" class="progressbar" style="display:none"></div>
   [/#if]
   
+  [#assign enableUnsubmitButton = true ]
   [#-- Submit button --]
-  [#if canEdit]
+  [#if enableUnsubmitButton && canEdit]
     [#assign showSubmit=(canSubmit && !submission && completed)]
     <a id="submitProject-${projectID}" class="projectSubmitButton" style="display:${showSubmit?string('block','none')}" href="[@s.url action="${crpSession}/submit"][@s.param name='projectID']${projectID}[/@s.param][#include "/WEB-INF/global/pages/urlGlobalParams.ftl" /][/@s.url]" >
       [@s.text name="form.buttons.submit" /]
@@ -159,7 +160,7 @@
   [/#if]
   
   [#-- Unsubmit button --]
-  [#if (canUnSubmit && submission) && canEditPhase && !crpClosed ]
+  [#if enableUnsubmitButton && (canUnSubmit && submission) && canEditPhase && !crpClosed ]
     <a id="submitProject-${projectID}" class="projectUnSubmitButton" href="[@s.url action="${crpSession}/unsubmit"][@s.param name='projectID']${projectID}[/@s.param][#include "/WEB-INF/global/pages/urlGlobalParams.ftl" /][/@s.url]" >
       [@s.text name="form.buttons.unsubmit" /]
     </a>
