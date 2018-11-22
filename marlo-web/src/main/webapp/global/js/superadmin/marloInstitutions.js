@@ -221,7 +221,8 @@ function findSameness() {
     $.ajax({
         url: baseURL + '/searchInstitutionsName.do',
         data: {
-          institutionName: institutionName
+          institutionName: institutionName,
+          requestID:  $(e).find('[name="requestID"]').val()
         },
         beforeSend: function() {
           $(e).find('.loading').fadeIn();
@@ -232,7 +233,8 @@ function findSameness() {
             $(e).find('.sameness').show();
 
             $.each(data.institutions, function(i,partner) {
-              var $li = $('<li title="' + partner.composedName + '">' + partner.composedName + '</li>');
+              var ppaText = partner.isPPA? '<small><span class="label label-warning">PPA</span></small>':'';
+              var $li = $('<li title="' + partner.composedName + '">' + partner.composedName + ' '+ ppaText + '</li>');
               $(e).find('.sameness ul').append($li);
               // Text Difference
               /*
