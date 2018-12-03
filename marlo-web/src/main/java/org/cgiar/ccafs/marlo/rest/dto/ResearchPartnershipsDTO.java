@@ -13,43 +13,34 @@
  * along with MARLO. If not, see <http://www.gnu.org/licenses/>.
  *****************************************************************/
 
-package org.cgiar.ccafs.marlo.data.model;
+package org.cgiar.ccafs.marlo.rest.dto;
 
-/**
- * @author Andrés Valencia - CIAT/CCAFS
- */
-public enum PowbCollaboratorTypeEnum {
+import javax.validation.constraints.NotNull;
 
-  CRPPlatform("1", "CGIAR internal"), NonCgiar("2", "Non-CGIAR Collaborator");
+import io.swagger.annotations.ApiModelProperty;
 
+public class ResearchPartnershipsDTO {
+
+  @ApiModelProperty(notes = "The Generated Research Partnership ID")
+  @NotNull
+  private Long id;
+
+
+  @ApiModelProperty(notes = "Research Partnership name")
+  @NotNull
   private String name;
 
-  private String id;
 
-  private PowbCollaboratorTypeEnum(String id, String name) {
-    this.id = id;
-    this.name = name;
+  @ApiModelProperty(notes = "Research Partnership definition")
+  private String definition;
+
+
+  public String getDefinition() {
+    return definition;
   }
 
 
-  /**
-   * Look for the PowbCollaboratorTypeEnum with id
-   * 
-   * @param id the id to search
-   * @return Object PowbCollaboratorTypeEnum if no exist null
-   */
-  public static PowbCollaboratorTypeEnum getValue(int id) {
-    PowbCollaboratorTypeEnum[] lst = PowbCollaboratorTypeEnum.values();
-    for (PowbCollaboratorTypeEnum powbCollaboratorTypeEnum : lst) {
-      if (powbCollaboratorTypeEnum.getId().equals(String.valueOf(id))) {
-        return powbCollaboratorTypeEnum;
-      }
-    }
-    return null;
-  }
-
-
-  public String getId() {
+  public Long getId() {
     return id;
   }
 
@@ -59,9 +50,16 @@ public enum PowbCollaboratorTypeEnum {
   }
 
 
-  public void setId(String id) {
+  public void setDefinition(String definition) {
+    this.definition = definition;
+  }
+
+  public void setId(Long id) {
     this.id = id;
   }
 
+  public void setName(String name) {
+    this.name = name;
+  }
 
 }

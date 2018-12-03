@@ -692,7 +692,8 @@ public class CapacityDevelopmentDetailAction extends BaseAction {
 
 
       capdevTypes = new ArrayList<>(capdevTypeService.findAll().stream()
-        .filter(le -> le.getCategory().equals("" + capdev.getCategory())).collect(Collectors.toList()));
+        .filter(le -> le.getCategory().equals("" + capdev.getCategory()) && le.isActive())
+        .collect(Collectors.toList()));
       Collections.sort(capdevTypes, (c1, c2) -> c1.getName().compareTo(c2.getName()));
 
 
@@ -836,6 +837,37 @@ public class CapacityDevelopmentDetailAction extends BaseAction {
       capdevDB.setCtFirstName(capdev.getCtFirstName());
       capdevDB.setCtLastName(capdev.getCtLastName());
       capdevDB.setCtEmail(capdev.getCtEmail());
+
+      if (capdev.getFocused() == null) {
+        capdevDB.setFocused(false);
+      } else {
+        capdevDB.setFocused(capdev.getFocused());
+      }
+
+      if (capdev.getEstimate() == null) {
+        capdevDB.setEstimate(false);
+      } else {
+        capdevDB.setEstimate(capdev.getEstimate());
+      }
+
+      if (capdev.getEstimateMen() == null) {
+        capdevDB.setEstimateMen(false);
+      } else {
+        capdevDB.setEstimateMen(capdev.getEstimateMen());
+      }
+
+      if (capdev.getEstimateWomen() == null) {
+        capdevDB.setEstimateWomen(false);
+      } else {
+        capdevDB.setEstimateWomen(capdev.getEstimateWomen());
+      }
+
+      if (capdev.getEstimateOthers() == null) {
+        capdevDB.setEstimateOthers(false);
+      } else {
+        capdevDB.setEstimateOthers(capdev.getEstimateOthers());
+      }
+
       if (uploadFile != null) {
         if (uploadFileContentType.equals("application/vnd.ms-excel")
           || uploadFileContentType.equals("application/vnd.ms-excel.sheet.macroEnabled.12")

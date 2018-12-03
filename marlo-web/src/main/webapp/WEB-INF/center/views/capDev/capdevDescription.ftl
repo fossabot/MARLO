@@ -11,6 +11,7 @@
   "${baseUrl}/global/js/usersManagement.js", 
   "${baseUrlMedia}/js/capDev/capacityDevelopment.js",
   "${baseUrlMedia}/js/capDev/syncParticipants.js",
+  "${baseUrlMedia}/js/capDev/capdevDescription.js",
   "${baseUrl}/global/js/fieldsValidation.js",
   "${baseUrl}/global/js/autoSave.js"
   ] 
@@ -71,10 +72,12 @@
       </div>
       
       [#-- Regions and countries lists  --]
+      [#if ((capdev.category == 2)!false)]
       <h4 class="headTitle newCapdevField">Reach</h4>
       <div class="borderBox">
         [@reachLocation /]
       </div>
+      [/#if]
       
       [#-- Buttons --]
       [#include "/WEB-INF/center/views/capDev/buttons-capdev.ftl" /]
@@ -170,6 +173,13 @@
   </div>
   
   <hr />
+  
+ [#-- Is Focused --]
+ [#if ((capdev.category == 2)!false)]
+   <div class="group individual">
+     <label>Is focused <input type="checkbox" name="capdev.focused" value="true" [#if (capdev.focused)!false ]checked="checked"[/#if]></label>
+   </div>
+ [/#if]
   
  [#-- Research program --]
   <div class="form-group row">   
@@ -283,6 +293,21 @@
       <div class="col-md-2 group individual">
         [@customForm.input name="capdev.numOther" i18nkey="capdev.form.numOther" help="capdev.help.numOther" type="text" className="numOhter" editable=editable/]
       </div>
+     </div>
+     <div class="col-md-12 ">
+      <div class="col-md-4 group individual">
+        <label>Is estimate <input type="checkbox" name="capdev.estimate" value="true" [#if (capdev.estimate)!false ]checked="checked"[/#if]></label>
+      </div>
+      <div class="col-md-3 group individual">
+        <label>Is estimate <input type="checkbox" name="capdev.estimateMen" value="true" [#if (capdev.estimateMen)!false ]checked="checked"[/#if]></label>
+      </div>
+      <div class="col-md-3 group individual">
+        <label>Is estimate <input type="checkbox" name="capdev.estimateWomen" value="true"[#if (capdev.estimateWomen)!false ]checked="checked"[/#if]></label>
+      </div>
+       <div class="col-md-2 group individual">
+        <label>Is estimate <input type="checkbox" name="capdev.estimateOther" value ="true"[#if (capdev.estimateOther)!false ]checked="checked"[/#if]></label>
+      </div>
+
     </div>
   </div>
   <div class="grupsParticipantsForm">

@@ -75,7 +75,22 @@ public class CapacityDevelopment extends MarloAuditableEntity implements java.io
   private Boolean global;
 
   @Expose
+  private Boolean focused;
+
+  @Expose
   private Boolean regional;
+
+  @Expose
+  private Boolean estimate;
+
+  @Expose
+  private Boolean estimateMen;
+
+  @Expose
+  private Boolean estimateWomen;
+
+  @Expose
+  private Boolean estimateOthers;
 
   @Expose
   private String sGlobal;
@@ -187,7 +202,6 @@ public class CapacityDevelopment extends MarloAuditableEntity implements java.io
     return capDevRegions;
   }
 
-
   public Set<CapdevSupportingDocs> getCapdevSupportingDocs() {
     return capdevSupportingDocs;
   }
@@ -208,11 +222,9 @@ public class CapacityDevelopment extends MarloAuditableEntity implements java.io
     return this.category;
   }
 
-
   public GlobalUnit getCrp() {
     return crp;
   }
-
 
   public String getCtEmail() {
     return this.ctEmail;
@@ -233,6 +245,7 @@ public class CapacityDevelopment extends MarloAuditableEntity implements java.io
     return deliverables;
   }
 
+
   public String getDisciplineSuggested() {
     return disciplineSuggested;
   }
@@ -245,6 +258,7 @@ public class CapacityDevelopment extends MarloAuditableEntity implements java.io
   public String getDurationUnit() {
     return durationUnit;
   }
+
 
   public Date getEndDate() {
     return this.endDate;
@@ -260,9 +274,31 @@ public class CapacityDevelopment extends MarloAuditableEntity implements java.io
     return date;
   }
 
+  public Boolean getEstimate() {
+    return estimate;
+  }
+
+  public Boolean getEstimateMen() {
+    return estimateMen;
+  }
+
+  public Boolean getEstimateOthers() {
+    return estimateOthers;
+  }
+
+  public Boolean getEstimateWomen() {
+    return estimateWomen;
+  }
+
+  public Boolean getFocused() {
+    return focused;
+  }
+
+
   public Boolean getGlobal() {
     return global;
   }
+
 
   @Override
   public String getLogDeatil() {
@@ -271,23 +307,24 @@ public class CapacityDevelopment extends MarloAuditableEntity implements java.io
     return sb.toString();
   }
 
+
   public Integer getNumMen() {
     return numMen;
   }
+
 
   public Integer getNumOther() {
     return numOther;
   }
 
+
   public Integer getNumParticipants() {
     return this.numParticipants;
   }
 
-
   public Integer getNumWomen() {
     return numWomen;
   }
-
 
   public String getOtherDiscipline() {
     return otherDiscipline;
@@ -297,15 +334,14 @@ public class CapacityDevelopment extends MarloAuditableEntity implements java.io
     return otherFunding;
   }
 
-
   public String getOtherPartner() {
     return otherPartner;
   }
 
-
   public String getOtherTargetGroup() {
     return otherTargetGroup;
   }
+
 
   public Participant getParticipant() {
     return participant;
@@ -315,7 +351,6 @@ public class CapacityDevelopment extends MarloAuditableEntity implements java.io
   public String getPartnerSuggested() {
     return partnerSuggested;
   }
-
 
   public CenterProject getProject() {
     return this.project;
@@ -330,7 +365,6 @@ public class CapacityDevelopment extends MarloAuditableEntity implements java.io
   public CenterArea getResearchArea() {
     return this.researchArea;
   }
-
 
   public CrpProgram getResearchProgram() {
     return researchProgram;
@@ -417,6 +451,7 @@ public class CapacityDevelopment extends MarloAuditableEntity implements java.io
     this.capdevParticipant = capdevParticipant;
   }
 
+
   public void setCapdevPartners(Set<CapdevPartners> capdevPartners) {
     this.capdevPartners = capdevPartners;
   }
@@ -440,7 +475,6 @@ public class CapacityDevelopment extends MarloAuditableEntity implements java.io
   public void setCapdevTargetgroup(Set<CapdevTargetgroup> capdevTargetgroup) {
     this.capdevTargetgroup = capdevTargetgroup;
   }
-
 
   public void setCapdevTargetGroupList(List<CapdevTargetgroup> capdevTargetGroupList) {
     this.capdevTargetGroupList = capdevTargetGroupList;
@@ -499,6 +533,31 @@ public class CapacityDevelopment extends MarloAuditableEntity implements java.io
 
   public void setEndDate(Date endDate) {
     this.endDate = endDate;
+  }
+
+
+  public void setEstimate(Boolean estimate) {
+    this.estimate = estimate;
+  }
+
+
+  public void setEstimateMen(Boolean estimateMen) {
+    this.estimateMen = estimateMen;
+  }
+
+
+  public void setEstimateOthers(Boolean estimateOthers) {
+    this.estimateOthers = estimateOthers;
+  }
+
+
+  public void setEstimateWomen(Boolean estimateWomen) {
+    this.estimateWomen = estimateWomen;
+  }
+
+
+  public void setFocused(Boolean focused) {
+    this.focused = focused;
   }
 
 
